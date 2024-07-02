@@ -1,0 +1,13 @@
+output/
+.vs/
+.settings/
+*.o
+*.obj
+*.elf
+.vscode
+*.old
+*.user
+*.log
+CMakeSettings.json
+/Debug/
+build/

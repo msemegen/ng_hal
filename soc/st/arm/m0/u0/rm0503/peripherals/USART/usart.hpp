@@ -602,10 +602,16 @@ struct usart
                 }
             }
         }
-        void init(const Clock& clock_a, const Descriptor& descriptor_a);
+        void set_descriptor(const Clock& clock_a, const Descriptor& descriptor_a);
+        Descriptor get_descriptor() const
+        {
+            return {};
+        }
 
         bool enable(Mode mode_a, std::chrono::milliseconds timeout_a);
         bool disable(std::chrono::milliseconds timeout_a);
+
+        std::pair<bool, Mode> is_enabled() const;
 
         template<typename Type_t> Type_t* get_view() const = delete;
     };

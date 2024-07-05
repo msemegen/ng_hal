@@ -8,7 +8,7 @@ constexpr std::uint32_t clock_prescaler_lut[] = { 1u, 2u, 4u, 6u, 8u, 10u, 12u, 
 }
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
-void usart::Peripheral::init(const Clock& clock_a, const Descriptor& descriptor_a)
+void usart::Peripheral::set_descriptor(const Clock& clock_a, const Descriptor& descriptor_a)
 {
     xmcu_assert(0x0 != clock_a.clk_freq_Hz);
 

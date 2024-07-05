@@ -27,79 +27,59 @@ namespace soc::st::arm {
 
 struct systick : private non_constructible
 {
-    enum class Prescaler : std::uint32_t
+    struct Descriptor
     {
-        _1 = SysTick_CTRL_CLKSOURCE_Msk,
-        _8 = 0
+        enum class Prescaler : std::uint32_t
+        {
+            _1 = SysTick_CTRL_CLKSOURCE_Msk,
+            _8 = 0
+        };
+
+        Prescaler prescaler;
+        std::uint32_t reload = 0u;
     };
 
-    template<api::traits traits_s> class Handler
+    template<api::traits traits_t> class Tick_counter
         : private Non_copyable
         , private SysTick_Type
     {
     };
 
-    class Controller
+    class Peripheral
         : private Non_copyable
         , private SysTick_Type
 
     {
     public:
-        template<api::traits traits_t>
-        systick::Handler<traits_t>* enable(std::uint32_t a_reload, Prescaler a_prescaler) = delete;
-        template<api::traits traits_t> systick::Handler<traits_t>*
-        enable(std::uint32_t a_reload, Prescaler a_prescaler, const IRQ_priority priority_a) = delete;
-
-        void disable()
+        void set_descriptor(const Descriptor& descriptor_a)
         {
-            this->LOAD = 0x0u;
-            this->VAL  = 0x0u;
+            xmcu_assert(descriptor_a.reload > 0 && descriptor_a.reload <= 0xFFF'FFFu);
+
             this->CTRL = 0x0u;
+            this->LOAD = descriptor_a.reload;
+            this->VAL = 0x0u;
+            this->CTRL = static_cast<std::uint32_t>(descriptor_a.prescaler);
         }
 
-        bool is_enabled() const
-        {
-            return 0u != this->LOAD;
-        }
+        template<typename Type_t> Type_t* get_view() const = delete;
     };
 
-    static Controller* create()
+    static Peripheral* create()
     {
-        return reinterpret_cast<Controller*>(SysTick_BASE);
+        return reinterpret_cast<Peripheral*>(SysTick_BASE);
     }
 };
-template<> inline systick::Handler<api::traits::sync>*
-systick::Controller::enable<api::traits::sync>(std::uint32_t a_reload, systick::Prescaler a_prescaler)
+
+template<> inline systick::Tick_counter<api::traits::sync>* systick::Peripheral::get_view() const
 {
-    xmcu_assert(a_reload > 0);
-
-    this->CTRL = 0x0u;
-    this->LOAD = a_reload;
-    this->VAL  = 0x0u;
-    this->CTRL = static_cast<std::uint32_t>(a_prescaler);
-
-    return reinterpret_cast<systick::Handler<api::traits::sync>*>(SysTick_BASE);
+    return reinterpret_cast<systick::Tick_counter<api::traits::sync>*>(SysTick_BASE);
 }
-template<> inline systick::Handler<api::traits::async>*
-systick::Controller::enable<api::traits::async>(std::uint32_t a_reload,
-                                                systick::Prescaler a_prescaler,
-                                                const IRQ_priority priority_a)
+template<> inline systick::Tick_counter<api::traits::async>* systick::Peripheral::get_view() const
 {
-    xmcu_assert(a_reload > 0);
-
-    this->CTRL = 0x0u;
-    this->LOAD = a_reload;
-    this->VAL  = 0x0u;
-    this->CTRL = static_cast<std::uint32_t>(a_prescaler) | SysTick_CTRL_ENABLE_Msk;
-
-    NVIC_SetPriority(
-        SysTick_IRQn,
-        NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority_a.preempt_priority, priority_a.sub_priority));
-
-    return reinterpret_cast<systick::Handler<api::traits::async>*>(SysTick_BASE);
+    return reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE);
 }
 
-template<> class systick::Handler<api::traits::sync>
+template<> class systick::Tick_counter<api::traits::sync>
     : private Non_copyable
     , private SysTick_Type
 {
@@ -135,17 +115,17 @@ public:
     }
 };
 
-template<> class systick::Handler<api::traits::async>
+template<> class systick::Tick_counter<api::traits::async>
     : private Non_copyable
     , private SysTick_Type
 {
 public:
 #if 1 == XMCU_ISR_CONTEXT
-    void start(void* p_context_a);
+    void start(const IRQ_priority priority_a, void* p_context_a);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-    void start();
+    void start(const IRQ_priority priority_a);
 #endif
     void stop();
 
@@ -167,11 +147,11 @@ public:
     struct isr : private non_constructible
     {
 #if 1 == XMCU_ISR_CONTEXT
-        void static reload(Systick::Controller<api::traits::async>* p_systick_a, void* p_context_a);
+        void static reload(Systick::Tick_counter<api::traits::async>* p_systick_a, void* p_context_a);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-        void static reload(systick::Handler<api::traits::async>* p_systick_a);
+        void static reload(systick::Tick_counter<api::traits::async>* p_systick_a);
 #endif
     };
 };

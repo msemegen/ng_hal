@@ -3,6 +3,7 @@
 #include <hal/Systick.hpp>
 #include <hal/api.hpp>
 #include <hal/clocks/pclk.hpp>
+#include <hal/oscillators/msi.hpp>
 #include <hal/peripherals/GPIO.hpp>
 #include <hal/peripherals/usart.hpp>
 #include <hal/stdglue.hpp>
@@ -12,11 +13,8 @@
 
 using namespace hal;
 using namespace hal::clocks;
+using namespace hal::oscillators;
 using namespace hal::peripherals;
-
-namespace {
-volatile std::uint64_t systick_count = 0x0u;
-}
 
 template<typename Duration_t> void delay(Duration_t timeout_a)
 {
@@ -28,10 +26,20 @@ int main()
 {
     using namespace std::chrono_literals;
 
-    systick::Controller* p_systick = systick::create();
+    systick::Peripheral* p_systick = systick::create();
 
-    systick::Handler<api::traits::async>* p_async_systick = p_systick->enable<api::traits::async>(
-        4000u - 1u, systick::Prescaler::_1, IRQ_priority { .preempt_priority = 1u, .sub_priority = 1u });
+    msi::set_descriptor({ .trimm = 0x0u, .calibration = 0x0u });
+    msi::run.set_frequency(msi::Run::Frequency::_4_MHz);
+    msi::run.set_active();
+
+    msi::standby.set_frequency(msi::Standby::Frequency::_2_MHz);
+    msi::enable();
+
+    while (false == msi::is_ready()) continue;
+
+    p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = 4000u - 1u });
+
+    auto* p_async_systick = p_systick->get_view<systick::Tick_counter<api::traits::async>>();
 
     if (nullptr != p_async_systick)
     {
@@ -47,7 +55,7 @@ int main()
 
         // led_pad.toggle();
 
-        p_async_systick->start();
+        p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u });
 
         gpio::interface<gpio::A>()->write(gpio::A::Pin::_5, gpio::Level::high);
 
@@ -68,17 +76,17 @@ int main()
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
-        p_usart2->init(usart::Clock { .clk_freq_Hz = SystemCoreClock, .prescaler = usart::Clock::Prescaler::_1 },
-                       usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
-                                           .oversampling = usart::Descriptor::Oversampling::_16,
-                                           .sampling = usart::Descriptor::Sampling::three_sample_bit,
-                                           .mute = usart::Descriptor::Mute::none,
-                                           .auto_baudrate = usart::Descriptor::Auto_baudrate::disable | 115200u,
-                                           .frame { .word_length = usart::Descriptor::Frame::Word_length::_8_bit,
-                                                    .parity = usart::Descriptor::Frame::Parity::none,
-                                                    .stop_bits = usart::Descriptor::Frame::Stop_bits::_1,
-                                                    .msb_first = usart::Descriptor::Frame::MSB_first::disable,
-                                                    .inversion = usart::Descriptor::Frame::Inversion::disable } });
+        p_usart2->set_descriptor(usart::Clock { .clk_freq_Hz = SystemCoreClock, .prescaler = usart::Clock::Prescaler::_1 },
+                                 usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
+                                                     .oversampling = usart::Descriptor::Oversampling::_16,
+                                                     .sampling = usart::Descriptor::Sampling::three_sample_bit,
+                                                     .mute = usart::Descriptor::Mute::none,
+                                                     .auto_baudrate = usart::Descriptor::Auto_baudrate::disable | 115200u,
+                                                     .frame { .word_length = usart::Descriptor::Frame::Word_length::_8_bit,
+                                                              .parity = usart::Descriptor::Frame::Parity::none,
+                                                              .stop_bits = usart::Descriptor::Frame::Stop_bits::_1,
+                                                              .msb_first = usart::Descriptor::Frame::MSB_first::disable,
+                                                              .inversion = usart::Descriptor::Frame::Inversion::disable } });
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
 
@@ -105,36 +113,6 @@ int main()
                 ;
         }
 
-        /*
-         *   set_hw_desc<>
-         *   init(...)
-         *
-         *   enable();
-         *   disable();
-         */
-
-        // p_usart->init();
-        // p_usart1->enable(...);
-
-        // const auto pin = 0x1u << 5u;
-
-        //   USART* p_usart = api::interface<usart::_1<usart::traits::full_duplex<gpio::A::Pin::_3, gpio::A::Pin::_2>,
-        //                                             usart::traits::software_flow_control>>();
-        //
-        //   USART::Controller<api::traits::async>* p_async_usart = p_usart->enable<api::traits::async>();
-
-        // p_async_usart->receive();
-
-        // std::uint32_t retx = 0;
-
-        //{
-        //    ret = ret;
-        //}
-
-        // retx = retx;
-
-        // ll::usart::Port p;
-        // p.cr1.set(ll::usart::Port::CR1::Flag::enable | ll::usart::Port::CR1::Flag::low_power);
 
         while (true)
         {

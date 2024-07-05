@@ -6,6 +6,6 @@
 namespace soc::st::arm {
 struct stdglue : private non_constructible
 {
-    static void set_steady_clock_source(systick::Handler<soc::st::arm::api::traits::async>* p_clock_a);
+    static void set_steady_clock_source(systick::Tick_counter<soc::st::arm::api::traits::async>* p_clock_a);
 };
 } // namespace soc::st::arm

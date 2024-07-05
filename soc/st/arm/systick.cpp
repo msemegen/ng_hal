@@ -28,13 +28,12 @@ extern "C" {
 void SysTick_Handler()
 {
 #if 1 == XMCU_ISR_CONTEXT
-    systick::Handler<api::traits::async>::isr::reload(
-        reinterpret_cast<systick::Handler<api::traits::async>*>(SysTick_BASE), p_context);
+    systick::Handler<api::traits::async>::isr::reload(reinterpret_cast<systick::Handler<api::traits::async>*>(SysTick_BASE), p_context);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-    systick::Handler<api::traits::async>::isr::reload(
-        reinterpret_cast<systick::Handler<api::traits::async>*>(SysTick_BASE));
+    systick::Tick_counter<api::traits::async>::isr::reload(
+        reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE));
 #endif
 }
 }
@@ -44,34 +43,34 @@ namespace soc::st::arm {
 using namespace soc;
 
 #if 1 == XMCU_ISR_CONTEXT
-__WEAK void systick::Handler<api::traits::async>::isr::reload(systick::Handler<traits::async>* p_systick_a, p_context)
-{
-}
+__WEAK void systick::Tick_counter<api::traits::async>::isr::reload(systick::Handler<traits::async>* p_systick_a, p_context) {}
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
 __WEAK void
-systick::Handler<api::traits::async>::isr::reload(systick::Handler<api::traits::async>* p_systick_a)
+systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a)
 {
 }
 #endif
 
 #if 1 == XMCU_ISR_CONTEXT
-void systick::Handler<traits::async>::start(void* p_context_a)
+void systick::Tick_counter<traits::async>::start(const IRQ_priority priority_a, void* p_context_a)
 #endif
 #if 0 == XMCU_ISR_CONTEXT
-    void systick::Handler<api::traits::async>::start()
+    void systick::Tick_counter<api::traits::async>::start(const IRQ_priority priority_a)
 #endif
 {
 #if 1 == XMCU_ISR_CONTEXT
     p_context = p_context_a;
 #endif
-    bit_flag::set(&(this->CTRL), SysTick_CTRL_TICKINT_Msk);
+    NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority_a.preempt_priority, priority_a.sub_priority));
+
+    bit_flag::set(&(this->CTRL), SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
 }
 
-void systick::Handler<api::traits::async>::stop()
+void systick::Tick_counter<api::traits::async>::stop()
 {
-    bit_flag::clear(&(this->CTRL), SysTick_CTRL_TICKINT_Msk);
+    bit_flag::clear(&(this->CTRL), SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
 
 #if 1 == XMCU_ISR_CONTEXT
     p_context = nullptr;

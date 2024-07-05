@@ -17,8 +17,8 @@
 #include <soc/various.hpp>
 
 namespace {
-constexpr std::uint32_t freq_Hz_lut[] = { 100u,     200u,     400u,      800u,      1000000u,  2000000u,
-                                          4000000u, 8000000u, 16000000u, 24000000u, 32000000u, 48000000u };
+constexpr std::uint32_t freq_Hz_lut[] = { 100u,       200u,       400u,        800u,        1'000'000u,  2'000'000u,
+                                          4'000'000u, 8'000'000u, 16'000'000u, 24'000'000u, 32'000'000u, 48'000'000u };
 }
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {
@@ -59,7 +59,7 @@ struct msi : private non_constructible
         {
             xmcu_assert(false == bit_flag::is(RCC->CR, RCC_CR_MSION) || true == bit_flag::is(RCC->CR, RCC_CR_MSIRDY));
 
-            bit_flag::set(&(RCC->CR), static_cast<std::uint32_t>(frequency_a));
+            bit_flag::set(&(RCC->CR), RCC_CR_MSIRANGE, static_cast<std::uint32_t>(frequency_a));
         }
 
         static void set_active()
@@ -92,7 +92,7 @@ struct msi : private non_constructible
         {
             xmcu_assert(true == bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL));
 
-            bit_flag::set(&(RCC->CSR), static_cast<std::uint32_t>(frequency_a));
+            bit_flag::set(&(RCC->CSR), RCC_CSR_MSISTBYRG, static_cast<std::uint32_t>(frequency_a));
         }
 
         static bool is_active()
@@ -106,21 +106,25 @@ struct msi : private non_constructible
         }
     };
 
-    static void init(const Descriptor& descriptor_a)
+    static void set_descriptor(const Descriptor& descriptor_a)
     {
-        bit_flag::set(&(RCC->ICSCR), static_cast<std::uint32_t>(descriptor_a.calibration) & 0xFFu);
-        bit_flag::set(&(RCC->ICSCR), (static_cast<std::uint32_t>(descriptor_a.trimm) << 8) & 0xFF00u);
+        bit_flag::set(&(RCC->ICSCR), 0xFFu, static_cast<std::uint32_t>(descriptor_a.calibration) & 0xFFu);
+        bit_flag::set(&(RCC->ICSCR), 0xFF00u, (static_cast<std::uint32_t>(descriptor_a.trimm) << 8) & 0xFF00u);
+    }
+    static Descriptor get_descriptor()
+    {
+        return {};
     }
 
     static void enable()
     {
-        xmcu_assert(false == bit_flag::is(RCC->CR, RCC_CR_MSION));
+        xmcu_assert(false == is_enabled());
 
         bit_flag::set(&(RCC->CR), RCC_CR_MSION);
     }
     static void disable()
     {
-        xmcu_assert(true == bit_flag::is(RCC->CR, RCC_CR_MSION));
+        xmcu_assert(true == is_enabled());
 
         bit_flag::clear(&(RCC->CR), RCC_CR_MSION);
     }

@@ -28,12 +28,12 @@ int main()
 
     systick::Peripheral* p_systick = systick::create();
 
-    msi::set_descriptor({ .trimm = 0x0u, .calibration = 0x0u });
-    msi::run.set_frequency(msi::Run::Frequency::_4_MHz);
-    msi::run.set_active();
+    //msi::set_descriptor({ .trimm = 0x0u, .calibration = 0x0u });
+    //msi::run.set_frequency(msi::Run::Frequency::_4_MHz);
+    //msi::run.set_active();
 
-    msi::standby.set_frequency(msi::Standby::Frequency::_2_MHz);
-    msi::enable();
+    //msi::standby.set_frequency(msi::Standby::Frequency::_2_MHz);
+    //msi::enable();
 
     while (false == msi::is_ready()) continue;
 

@@ -139,7 +139,7 @@ struct msi : private non_constructible
         return bit_flag::is(RCC->CR, RCC_CR_MSIRDY);
     }
 
-    std::uint32_t get_frequency_Hz()
+    static std::uint32_t get_frequency_Hz()
     {
         if (true == standby.is_active())
         {

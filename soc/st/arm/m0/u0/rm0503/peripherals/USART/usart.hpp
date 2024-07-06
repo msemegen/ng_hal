@@ -267,27 +267,6 @@ struct usart
         tx = USART_CR1_TE,
         rx = USART_CR1_RE
     };
-    struct Clock
-    {
-        enum class Prescaler : std::uint32_t
-        {
-            _1 = 0x0u,
-            _2 = 0x1u,
-            _4 = 0x2u,
-            _6 = 0x3u,
-            _8 = 0x4u,
-            _10 = 0x5u,
-            _12 = 0x6u,
-            _16 = 0x7u,
-            _32 = 0x8u,
-            _64 = 0x9u,
-            _128 = 0xAu,
-            _256 = 0xBu
-        };
-
-        std::uint32_t clk_freq_Hz = 0x0u;
-        Prescaler prescaler = various::get_enum_incorrect_value<Prescaler>();
-    };
     struct Descriptor
     {
         enum class Fifo : std::uint32_t
@@ -318,6 +297,27 @@ struct usart
             _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
         };
 
+        struct Clock
+        {
+            enum class Prescaler : std::uint32_t
+            {
+                _1 = 0x0u,
+                _2 = 0x1u,
+                _4 = 0x2u,
+                _6 = 0x3u,
+                _8 = 0x4u,
+                _10 = 0x5u,
+                _12 = 0x6u,
+                _16 = 0x7u,
+                _32 = 0x8u,
+                _64 = 0x9u,
+                _128 = 0xAu,
+                _256 = 0xBu
+            };
+
+            std::uint32_t clk_freq_Hz = 0x0u;
+            Prescaler prescaler = various::get_enum_incorrect_value<Prescaler>();
+        };
         struct Frame
         {
             enum class Word_length : std::uint32_t
@@ -363,6 +363,7 @@ struct usart
         Mute mute = various::get_enum_incorrect_value<Mute>();
         Auto_baudrate auto_baudrate = various::get_enum_incorrect_value<Auto_baudrate>();
 
+        Clock clock;
         Frame frame;
     };
 
@@ -602,7 +603,7 @@ struct usart
                 }
             }
         }
-        void set_descriptor(const Clock& clock_a, const Descriptor& descriptor_a);
+        void set_descriptor(const Descriptor& descriptor_a);
         Descriptor get_descriptor() const
         {
             return {};

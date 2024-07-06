@@ -8,9 +8,9 @@ constexpr std::uint32_t clock_prescaler_lut[] = { 1u, 2u, 4u, 6u, 8u, 10u, 12u, 
 }
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
-void usart::Peripheral::set_descriptor(const Clock& clock_a, const Descriptor& descriptor_a)
+void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
 {
-    xmcu_assert(0x0 != clock_a.clk_freq_Hz);
+    xmcu_assert(0x0 != descriptor_a.clock.clk_freq_Hz);
 
 #if defined XMCU_ASSERT_PRESENT
     constexpr std::uint32_t brr_min = 0x10u;
@@ -21,16 +21,19 @@ void usart::Peripheral::set_descriptor(const Clock& clock_a, const Descriptor& d
     this->cr2 = 0x0u;
     this->cr3 = 0x0u;
 
-    this->presc = static_cast<std::uint32_t>(clock_a.prescaler);
+    this->presc = static_cast<std::uint32_t>(descriptor_a.clock.prescaler);
 
     if (usart::Descriptor::Auto_baudrate::disable == (usart::Descriptor::Auto_baudrate::disable & descriptor_a.auto_baudrate))
     {
-        const std::uint32_t baudrate = static_cast<std::uint32_t>((static_cast<std::uint64_t>(descriptor_a.auto_baudrate) >> 32u) & 0xFFFFFFFF);
+        const std::uint32_t baudrate =
+            static_cast<std::uint32_t>((static_cast<std::uint64_t>(descriptor_a.auto_baudrate) >> 32u) & 0xFFFFFFFF);
         switch (descriptor_a.oversampling)
         {
             case usart::Descriptor::Oversampling::_8: {
                 std::uint32_t div =
-                    ((((clock_a.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(clock_a.prescaler)]) * 2u) + (baudrate / 2u)) /
+                    ((((descriptor_a.clock.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(descriptor_a.clock.prescaler)]) *
+                       2u) +
+                      (baudrate / 2u)) /
                      baudrate);
 #if defined XMCU_ASSERT_PRESENT
                 xmcu_assert(div >= brr_min && div <= brr_max);
@@ -43,7 +46,8 @@ void usart::Peripheral::set_descriptor(const Clock& clock_a, const Descriptor& d
 
             case usart::Descriptor::Oversampling::_16: {
                 std::uint32_t div =
-                    ((clock_a.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(clock_a.prescaler)] + (baudrate / 2u)) /
+                    ((descriptor_a.clock.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(descriptor_a.clock.prescaler)] +
+                      (baudrate / 2u)) /
                      baudrate);
 #if defined XMCU_ASSERT_PRESENT
                 xmcu_assert(div >= brr_min && div <= brr_max);

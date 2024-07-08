@@ -7,11 +7,11 @@
 #include <stm32u0xx.h>
 
 // std
+#include <cassert>
 #include <chrono>
 #include <cstdint>
 
 // soc
-#include <soc/assert.hpp>
 #include <soc/bit_flag.hpp>
 #include <soc/non_constructible.hpp>
 #include <soc/various.hpp>
@@ -57,7 +57,7 @@ struct msi : private non_constructible
 
         static void set_frequency(Frequency frequency_a)
         {
-            xmcu_assert(false == bit_flag::is(RCC->CR, RCC_CR_MSION) || true == bit_flag::is(RCC->CR, RCC_CR_MSIRDY));
+            assert(false == bit_flag::is(RCC->CR, RCC_CR_MSION) || true == bit_flag::is(RCC->CR, RCC_CR_MSIRDY));
 
             bit_flag::set(&(RCC->CR), RCC_CR_MSIRANGE, static_cast<std::uint32_t>(frequency_a));
         }
@@ -90,7 +90,7 @@ struct msi : private non_constructible
 
         static void set_frequency(Frequency frequency_a)
         {
-            xmcu_assert(true == bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL));
+            assert(true == bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL));
 
             bit_flag::set(&(RCC->CSR), RCC_CSR_MSISTBYRG, static_cast<std::uint32_t>(frequency_a));
         }
@@ -118,13 +118,13 @@ struct msi : private non_constructible
 
     static void enable()
     {
-        xmcu_assert(false == is_enabled());
+        assert(false == is_enabled());
 
         bit_flag::set(&(RCC->CR), RCC_CR_MSION);
     }
     static void disable()
     {
-        xmcu_assert(true == is_enabled());
+        assert(true == is_enabled());
 
         bit_flag::clear(&(RCC->CR), RCC_CR_MSION);
     }

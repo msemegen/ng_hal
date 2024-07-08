@@ -4,6 +4,7 @@
  */
 
 // std
+#include <cassert>
 #include <cstdint>
 
 // soc
@@ -16,7 +17,6 @@
 
 // soc
 #include <soc/Non_copyable.hpp>
-#include <soc/assert.hpp>
 #include <soc/bit_flag.hpp>
 
 // soc/st
@@ -53,7 +53,7 @@ struct systick : private non_constructible
     public:
         void set_descriptor(const Descriptor& descriptor_a)
         {
-            xmcu_assert(descriptor_a.reload > 0 && descriptor_a.reload <= 0xFFF'FFFu);
+            assert(descriptor_a.reload > 0 && descriptor_a.reload <= 0xFFF'FFFu);
 
             this->CTRL = 0x0u;
             this->LOAD = descriptor_a.reload;

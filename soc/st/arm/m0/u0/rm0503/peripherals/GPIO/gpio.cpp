@@ -13,9 +13,9 @@
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
-    xmcu_assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
-    xmcu_assert(various::get_enum_incorrect_value<Speed>() != desc_a.speed);
-    xmcu_assert(various::get_enum_incorrect_value<Type>() != desc_a.type);
+    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
+    assert(various::get_enum_incorrect_value<Speed>() != desc_a.speed);
+    assert(various::get_enum_incorrect_value<Type>() != desc_a.type);
 
     const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
 
@@ -27,7 +27,7 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio:
 
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
-    xmcu_assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
+    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
 
     bit_flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit_flag::clear(&(p_port_a->moder), 0x3u << (pin_a * 2u));
@@ -35,13 +35,16 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio:
 
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
-    xmcu_assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
+    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
 
     bit_flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit_flag::set(&(p_port_a->moder), 0x3u << (pin_a * 2u), 0x3u << (pin_a * 2u));
 }
 
-void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, std::uint8_t function_a, const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
+void gpio::enable_pin(ll::gpio::Port* p_port_a,
+                      std::uint32_t pin_a,
+                      std::uint8_t function_a,
+                      const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
     const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
 

@@ -1,10 +1,12 @@
 #pragma once
 
+// std
+#include <cassert>
+
 // CMSIS
 #include <stm32u0xx.h>
 
 // soc
-#include <soc/assert.hpp>
 #include <soc/bit_flag.hpp>
 #include <soc/non_constructible.hpp>
 
@@ -50,13 +52,13 @@ struct hsi16 : private non_constructible
 
     static void enable()
     {
-        xmcu_assert(false == is_enabled());
+        assert(false == is_enabled());
 
         bit_flag::set(&(RCC->CR), RCC_CR_HSION);
     }
     static void disable()
     {
-        xmcu_assert(true == is_enabled());
+        assert(true == is_enabled());
 
         bit_flag::clear(&(RCC->CR), RCC_CR_HSION);
     }

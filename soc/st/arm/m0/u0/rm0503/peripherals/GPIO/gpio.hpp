@@ -7,12 +7,14 @@
  *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
+// std
+#include <cassert>
+
 // CMSIS
 #include <stm32u0xx.h>
 
 // soc
 #include <soc/Non_copyable.hpp>
-#include <soc/assert.hpp>
 #include <soc/bit.hpp>
 #include <soc/bit_flag.hpp>
 #include <soc/non_constructible.hpp>
@@ -259,7 +261,7 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::analog
                                                                                    const gpio::Descriptor<gpio::Mode::analog>& desc_a,
                                                                                    Pad* p_out_pad_a)
 {
-    xmcu_assert(nullptr != p_out_pad_a);
+    assert(nullptr != p_out_pad_a);
 
     gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
 
@@ -277,7 +279,7 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::in>>(g
                                                                                const gpio::Descriptor<gpio::Mode::in>& desc_a,
                                                                                Pad* p_out_pad_a)
 {
-    xmcu_assert(nullptr != p_out_pad_a);
+    assert(nullptr != p_out_pad_a);
 
     gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
 
@@ -295,7 +297,7 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(
                                                                                 const gpio::Descriptor<gpio::Mode::out>& desc_a,
                                                                                 Pad* p_out_pad_a)
 {
-    xmcu_assert(nullptr != p_out_pad_a);
+    assert(nullptr != p_out_pad_a);
 
     gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
 
@@ -316,7 +318,7 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
                                                                                       Pad* p_out_pad_a)
 {
-    xmcu_assert(nullptr != p_out_pad_a);
+    assert(nullptr != p_out_pad_a);
 
     gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
 

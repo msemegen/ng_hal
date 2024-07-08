@@ -4,11 +4,11 @@
  */
 
 // std
+#include <cassert>
 #include <chrono>
 #include <span>
 
 // soc
-#include <soc/assert.hpp>
 #include <soc/macros.hpp>
 #include <soc/non_constructible.hpp>
 #include <soc/st/arm/api.hpp>
@@ -655,7 +655,7 @@ inline constexpr usart::Descriptor::Mute operator|(usart::Descriptor::Mute mode_
     }
     else
     {
-        xmcu_assert(mode_a == usart::Descriptor::Mute::wake_on_address);
+        assert(mode_a == usart::Descriptor::Mute::wake_on_address);
         return mode_a;
     }
 }
@@ -669,7 +669,7 @@ inline constexpr usart::Descriptor::Auto_baudrate operator|(usart::Descriptor::A
     }
     else
     {
-        xmcu_assert(mode_a == usart::Descriptor::Auto_baudrate::disable);
+        assert(mode_a == usart::Descriptor::Auto_baudrate::disable);
         return mode_a;
     }
 }
@@ -771,7 +771,7 @@ public:
 private:
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a)
     {
-        xmcu_assert(true == bit_flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == bit_flag::is(this->isr, USART_ISR_TEACK));
 
         std::size_t sent = 0;
 
@@ -791,7 +791,7 @@ private:
     }
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a, std::chrono::milliseconds timeout_a)
     {
-        xmcu_assert(true == bit_flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == bit_flag::is(this->isr, USART_ISR_TEACK));
 
         std::size_t sent = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
@@ -813,7 +813,7 @@ private:
 
     template<typename Word_t> std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a) const
     {
-        xmcu_assert(true == bit_flag::is(this->isr, USART_ISR_REACK));
+        assert(true == bit_flag::is(this->isr, USART_ISR_REACK));
 
         std::size_t received = 0;
         while (false == bit_flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error())
@@ -851,7 +851,7 @@ private:
     template<typename Word_t>
     std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a, std::chrono::milliseconds timeout_a) const
     {
-        xmcu_assert(true == bit_flag::is(this->isr, USART_ISR_REACK));
+        assert(true == bit_flag::is(this->isr, USART_ISR_REACK));
 
         std::size_t received = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;

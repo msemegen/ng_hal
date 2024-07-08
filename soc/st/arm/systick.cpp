@@ -9,9 +9,8 @@
 
 // std
 #include <tuple>
+#include <cassert>
 
-// soc
-#include <soc/assert.hpp>
 
 // soc/st
 #include <soc/st/arm/systick.hpp>

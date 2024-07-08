@@ -6,10 +6,10 @@
  */
 
 // std
+#include <cassert>
 #include <chrono>
 
 //
-#include <soc/assert.hpp>
 #include <soc/st/arm/Systick.hpp>
 #include <soc/st/arm/stdglue.hpp>
 

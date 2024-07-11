@@ -24,6 +24,21 @@ volatile std::uint64_t high_ticks = 0x0u;
 
 systick::Tick_counter<api::traits::async>* p_timer = nullptr;
 constexpr std::uint64_t nanosceconds_in_millisecond = 1000000ull;
+
+#ifndef NDEBUG
+stdglue::assert::Halt_handler assert_halt_handler;
+stdglue::assert::Output_handler assert_output_handler;
+#endif
+
+extern "C" {
+void __assert_func(const char*, int, const char*, const char*)
+{
+#ifndef NDEBUG
+#endif
+    while (true) continue;
+}
+}
+
 } // namespace
 
 namespace soc::st::arm {
@@ -44,7 +59,15 @@ void systick::Tick_counter
 }
 #endif
 
-void stdglue::set_steady_clock_source(systick::Tick_counter<api::traits::async>* p_clock_a)
+void stdglue::assert::set_handlers(const Output_handler& output_handler_a, const Halt_handler& halt_handler_a)
+{
+#ifndef NDEBUG
+    assert_halt_handler = halt_handler_a;
+    assert_output_handler = output_handler_a;
+#endif
+}
+
+void stdglue::steady_clock::set_source(systick::Tick_counter<api::traits::async>* p_clock_a)
 {
     p_timer = p_clock_a;
     prescaler = (nanosceconds_in_millisecond / (p_timer->get_reload() + 1u));

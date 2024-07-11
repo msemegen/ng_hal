@@ -25,13 +25,6 @@ template<typename Duration_t> void delay(Duration_t timeout_a)
     while (end >= std::chrono::steady_clock::now()) continue;
 }
 
-extern "C" {
-void __assert_func(const char*, int, const char*, const char*)
-{
-    while (true) continue;
-}
-}
-
 int main()
 {
     using namespace std::chrono_literals;
@@ -56,7 +49,7 @@ int main()
 
     if (nullptr != p_async_systick)
     {
-        stdglue::set_steady_clock_source(p_async_systick);
+        stdglue::steady_clock::set_source(p_async_systick);
 
         gpio::Pad led_pad;
 

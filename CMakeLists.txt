@@ -85,12 +85,12 @@ set(CFLAGS -Wall -Wextra -Wno-strict-aliasing -Werror -Wno-unused-parameter -I. 
 set(CPPFLAGS ${CFLAGS} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_definitions(XMCU_ASSERT_PRESENT)
     set(CFLAGS ${CFLAGS} -Og -g3)
     set(CPPFLAGS ${CPPFLAGS} -Og -g3)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_definitions(NDEBUG)
     set(CFLAGS ${CFLAGS} -Os)
     set(CPPFLAGS ${CPPFLAGS} -Os)
 endif()

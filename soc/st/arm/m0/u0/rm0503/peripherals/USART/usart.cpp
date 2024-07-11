@@ -12,7 +12,7 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
 {
     assert(0x0 != descriptor_a.clock.clk_freq_Hz);
 
-#if defined XMCU_ASSERT_PRESENT
+#ifndef NDEBUG
     constexpr std::uint32_t brr_min = 0x10u;
     constexpr std::uint32_t brr_max = 0xFFFFu;
 #endif
@@ -35,8 +35,8 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
                        2u) +
                       (baudrate / 2u)) /
                      baudrate);
-#if defined XMCU_ASSERT_PRESENT
-                xmcu_assert(div >= brr_min && div <= brr_max);
+#ifndef NDEBUG
+                assert(div >= brr_min && div <= brr_max);
 #endif
                 std::uint16_t brr = static_cast<std::uint16_t>(div & 0xFFF0u);
                 brr |= static_cast<std::uint16_t>((div & 0xFu) >> 1u);
@@ -49,8 +49,8 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
                     ((descriptor_a.clock.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(descriptor_a.clock.prescaler)] +
                       (baudrate / 2u)) /
                      baudrate);
-#if defined XMCU_ASSERT_PRESENT
-                xmcu_assert(div >= brr_min && div <= brr_max);
+#ifndef NDEBUG
+                assert(div >= brr_min && div <= brr_max);
 #endif
                 this->brr = static_cast<std::uint16_t>(div);
             }

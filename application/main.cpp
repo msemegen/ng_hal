@@ -102,8 +102,6 @@ int main()
 
         if (true == usart1_enabled)
         {
-            stdglue::assert::set_context(p_usart2);
-
             gpio::Pad led_pad;
 
             gpio::interface<gpio::A>()->enable(
@@ -112,7 +110,6 @@ int main()
                 &led_pad);
 
             usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
-
             stdglue::assert::set_context(p_usart2_comm);
 
             // echo

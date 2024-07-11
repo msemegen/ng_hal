@@ -75,7 +75,7 @@ add_executable(${ELF_NAME} ${src} ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/De
                               ${CMAKE_CURRENT_LIST_DIR}"/sysmem.c"
                               ${CMAKE_CURRENT_LIST_DIR}"/soc/st/arm/CMSIS/Device/ST/STM32U0xx/Source/Templates/system_stm32u0xx.c"
                               ${CMSIS_STARTUP} 
-                              ${VENDOR_SYSTEM_INIT} "soc/st/arm/systick.cpp" "soc/st/arm/stdglue.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.cpp")
+                              ${VENDOR_SYSTEM_INIT} "soc/st/arm/systick.cpp" "soc/st/arm/stdglue.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/I2C/i2c.cpp")
 
 set(CFLAGS -Wall -Wextra -Wno-strict-aliasing -Werror -Wno-unused-parameter -I. -c -fno-common
            -mcpu=cortex-m0plus -mthumb -nostartfiles -nostdlib -mfloat-abi=softfp -mfpu=fpv4-sp-d16

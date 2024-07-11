@@ -7,6 +7,7 @@
 #include <hal/oscillators/hsi16.hpp>
 #include <hal/oscillators/msi.hpp>
 #include <hal/peripherals/GPIO.hpp>
+#include <hal/peripherals/i2c.hpp>
 #include <hal/peripherals/usart.hpp>
 #include <hal/stdglue.hpp>
 

@@ -42,9 +42,7 @@ struct usart_clock : private soc::non_constructible
     template<typename id_t> static bool is_enabled() = delete;
 };
 
-struct usart
-    : private non_constructible
-    , public usart_base
+struct usart : public usart_base
 
 {
     using clock = usart_clock;
@@ -246,9 +244,7 @@ template<> inline void usart_clock::disable<usart_base::_4>()
 #endif
 } // namespace ll
 
-struct usart
-    : private non_constructible
-    , public usart_base
+struct usart : public usart_base
 {
     using clock = ll::usart_clock;
 

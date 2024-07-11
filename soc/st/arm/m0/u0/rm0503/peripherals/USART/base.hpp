@@ -3,11 +3,12 @@
 /*
  */
 
+// std
+#include <type_traits>
+
 // soc
 #include <soc/non_constructible.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
-#include <type_traits>
-#include <utility>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #if XMCU_SOC_STM32_MODEL == stm32l0u083rct6u
@@ -16,7 +17,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #define XMCU_USART3_PRESENT
 #define XMCU_USART4_PRESENT
 
-struct usart_base
+struct usart_base : protected non_constructible
 {
 #if defined XMCU_USART1_PRESENT
     struct _1
@@ -41,7 +42,7 @@ struct usart_base
 };
 
 namespace detail {
-template<auto... pins_t> struct Allowed_pins
+template<auto... pins_t> struct USART_pins
 {
     static constexpr bool is(auto value_a)
     {
@@ -72,10 +73,10 @@ template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, au
 } // namespace detail
 
 // rx pins
-constexpr detail::Allowed_pins<gpio::A::Pin::_10, gpio::B::Pin::_7> usart_1_rx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_3, gpio::A::Pin::_15> usart_2_rx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_7, gpio::B::Pin::_9, gpio::B::Pin::_11, gpio::C::Pin::_5, gpio::C::Pin::_11> usart_3_rx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_1, gpio::C::Pin::_11> usart_4_rx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_10, gpio::B::Pin::_7> usart_1_rx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_3, gpio::A::Pin::_15> usart_2_rx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_7, gpio::B::Pin::_9, gpio::B::Pin::_11, gpio::C::Pin::_5, gpio::C::Pin::_11> usart_3_rx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_1, gpio::C::Pin::_11> usart_4_rx_pins;
 
 template<typename id_t> constexpr auto get_allowed_rx_pins()
 {
@@ -187,10 +188,10 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::rx
 };
 
 // tx pins
-constexpr detail::Allowed_pins<gpio::A::Pin::_9, gpio::B::Pin::_6> usart_1_tx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_2> usart_2_tx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_5, gpio::B::Pin::_8, gpio::B::Pin::_10, gpio::C::Pin::_4, gpio::C::Pin::_10> usart_3_tx_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_0, gpio::C::Pin::_10> usart_4_tx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_9, gpio::B::Pin::_6> usart_1_tx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_2> usart_2_tx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_5, gpio::B::Pin::_8, gpio::B::Pin::_10, gpio::C::Pin::_4, gpio::C::Pin::_10> usart_3_tx_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_0, gpio::C::Pin::_10> usart_4_tx_pins;
 
 template<typename id_t> constexpr auto get_allowed_tx_pins()
 {
@@ -294,10 +295,10 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::tx
 };
 
 // clock pins
-constexpr detail::Allowed_pins<gpio::A::Pin::_8, gpio::B::Pin::_5> usart_1_ck_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_4> usart_2_ck_pins;
-constexpr detail::Allowed_pins<> usart_3_ck_pins;
-constexpr detail::Allowed_pins<gpio::C::Pin::_3, gpio::C::Pin::_12> usart_4_ck_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_8, gpio::B::Pin::_5> usart_1_ck_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_4> usart_2_ck_pins;
+constexpr detail::USART_pins<> usart_3_ck_pins;
+constexpr detail::USART_pins<gpio::C::Pin::_3, gpio::C::Pin::_12> usart_4_ck_pins;
 
 template<typename id_t> constexpr auto get_allowed_ck_pins()
 {
@@ -341,10 +342,10 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::cl
 };
 
 // hw flow control cts pins
-constexpr detail::Allowed_pins<gpio::A::Pin::_11, gpio::B::Pin::_4> usart_1_cts_pins;
-constexpr detail::Allowed_pins<> usart_2_cts_pins;
-constexpr detail::Allowed_pins<> usart_3_cts_pins;
-constexpr detail::Allowed_pins<gpio::B::Pin::_7> usart_4_cts_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_11, gpio::B::Pin::_4> usart_1_cts_pins;
+constexpr detail::USART_pins<> usart_2_cts_pins;
+constexpr detail::USART_pins<> usart_3_cts_pins;
+constexpr detail::USART_pins<gpio::B::Pin::_7> usart_4_cts_pins;
 
 template<typename id_t> constexpr auto get_allowed_cts_pins()
 {
@@ -379,10 +380,10 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::ct
 };
 
 // hw flow control rts pins
-constexpr detail::Allowed_pins<gpio::A::Pin::_12, gpio::B::Pin::_3> usart_1_rts_pins;
-constexpr detail::Allowed_pins<> usart_2_rts_pins;
-constexpr detail::Allowed_pins<gpio::D::Pin::_2> usart_3_rts_pins;
-constexpr detail::Allowed_pins<gpio::A::Pin::_15> usart_4_rts_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_12, gpio::B::Pin::_3> usart_1_rts_pins;
+constexpr detail::USART_pins<> usart_2_rts_pins;
+constexpr detail::USART_pins<gpio::D::Pin::_2> usart_3_rts_pins;
+constexpr detail::USART_pins<gpio::A::Pin::_15> usart_4_rts_pins;
 
 template<typename id_t> constexpr auto get_allowed_rts_pins()
 {

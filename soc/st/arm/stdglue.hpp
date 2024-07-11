@@ -1,5 +1,9 @@
 #pragma once
 
+// std
+#include <string_view>
+
+// soc
 #include <soc/non_constructible.hpp>
 #include <soc/st/arm/Systick.hpp>
 
@@ -8,15 +12,13 @@ struct stdglue : private non_constructible
 {
     struct assert : private non_constructible
     {
-        struct Output_handler
+        struct handler : private non_constructible
         {
+            static void output(std::string_view message_a, void* p_context_a);
+            static void output(std::int32_t line_a, void* p_context_a);
         };
 
-        struct Halt_handler
-        {
-        };
-
-        void set_handlers(const Output_handler& output_handler_a, const Halt_handler& halt_handler_a);
+        static void set_context(void* p_context_a);
     };
 
     struct steady_clock : private non_constructible

@@ -192,8 +192,8 @@ template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Activ
             break;
     }
 
-    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0);
-    bit_flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0);
+    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 template<> inline void usart_clock::disable<usart_base::_2>()
 {

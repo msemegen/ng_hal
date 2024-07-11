@@ -26,14 +26,16 @@ systick::Tick_counter<api::traits::async>* p_timer = nullptr;
 constexpr std::uint64_t nanosceconds_in_millisecond = 1000000ull;
 
 #ifndef NDEBUG
-stdglue::assert::Halt_handler assert_halt_handler;
-stdglue::assert::Output_handler assert_output_handler;
+void* p_assert_context = nullptr;
 #endif
-
 extern "C" {
-void __assert_func(const char*, int, const char*, const char*)
+void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, const char* p_condition_a)
 {
 #ifndef NDEBUG
+    stdglue::assert::handler::output(p_file_a, p_assert_context);
+
+    __disable_irq();
+
 #endif
     while (true) continue;
 }
@@ -43,7 +45,7 @@ void __assert_func(const char*, int, const char*, const char*)
 
 namespace soc::st::arm {
 #if 1 == XMCU_ISR_CONTEXT
-void Systick::Peripheral<api::traits::async>::handler::reload(Systick::Controller<api::traits::async>* p_systick_a, void* p_context_a)
+void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a, void*)
 {
     systick_count++;
     high_ticks = (systick_count + p_timer->get_reload()) * p_systick_a->get_reload() * prescaler;
@@ -59,11 +61,13 @@ void systick::Tick_counter
 }
 #endif
 
-void stdglue::assert::set_handlers(const Output_handler& output_handler_a, const Halt_handler& halt_handler_a)
+__WEAK void stdglue::assert::handler::output(std::string_view, void*) {}
+__WEAK void stdglue::assert::handler::output(std::int32_t, void*) {}
+
+void stdglue::assert::set_context(void* p_context_a)
 {
 #ifndef NDEBUG
-    assert_halt_handler = halt_handler_a;
-    assert_output_handler = output_handler_a;
+    p_assert_context = p_context_a;
 #endif
 }
 

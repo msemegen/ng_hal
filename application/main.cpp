@@ -25,6 +25,15 @@ template<typename Duration_t> void delay(Duration_t timeout_a)
     while (end >= std::chrono::steady_clock::now()) continue;
 }
 
+#ifndef NDEBUG
+void stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
+{
+    auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
+
+    p_usart->write(message_a);
+}
+#endif
+
 int main()
 {
     using namespace std::chrono_literals;
@@ -49,31 +58,13 @@ int main()
 
     if (nullptr != p_async_systick)
     {
-        stdglue::steady_clock::set_source(p_async_systick);
-
-        gpio::Pad led_pad;
-
-        gpio::clock::enable<gpio::A>();
-        gpio::interface<gpio::A>()->enable(
-            gpio::A::Pin::_5,
-            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
-            &led_pad);
-
         p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u });
-
-        gpio::interface<gpio::A>()->write(gpio::A::Pin::_5, gpio::Level::high);
+        stdglue::steady_clock::set_source(p_async_systick);
 
         usart::Peripheral* p_usart2 = usart::create<usart::_2>();
 
+        gpio::clock::enable<gpio::A>();
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
-        p_usart2->set_traits<
-            usart::_2,
-            usart::traits::full_duplex<gpio::A::Pin::_3,
-                                       gpio::Descriptor<gpio::Mode::alternate> {
-                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::up, .speed = gpio::Speed::low },
-                                       gpio::A::Pin::_2,
-                                       gpio::Descriptor<gpio::Mode::alternate> {
-                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
         p_usart2->set_descriptor(
             usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
@@ -88,11 +79,33 @@ int main()
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
 
+        p_usart2->set_traits<
+            usart::_2,
+            usart::traits::full_duplex<gpio::A::Pin::_3,
+                                       gpio::Descriptor<gpio::Mode::alternate> {
+                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::up, .speed = gpio::Speed::low },
+                                       gpio::A::Pin::_2,
+                                       gpio::Descriptor<gpio::Mode::alternate> {
+                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
+
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
 
         if (true == usart1_enabled)
         {
+            stdglue::assert::set_context(p_usart2);
+
+            //assert(false);
+
+            gpio::Pad led_pad;
+
+            gpio::interface<gpio::A>()->enable(
+                gpio::A::Pin::_5,
+                gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
+                &led_pad);
+
             usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
+
+            stdglue::assert::set_context(p_usart2_comm);
 
             // echo
             while (true)

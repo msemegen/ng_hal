@@ -28,7 +28,7 @@
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
-struct usart_clock : private soc::non_constructible
+struct usart_clock : private non_constructible
 {
     enum class Active_in_low_power
     {
@@ -43,7 +43,6 @@ struct usart_clock : private soc::non_constructible
 };
 
 struct usart : public usart_base
-
 {
     using clock = usart_clock;
 

@@ -12,6 +12,7 @@
 
 // std
 #include <cassert>
+#include <charconv>
 #include <chrono>
 
 using namespace hal;
@@ -31,6 +32,15 @@ void stdglue::assert::handler::output(std::string_view message_a, void* p_contex
     auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
 
     p_usart->write(message_a);
+}
+void stdglue::assert::handler::output(std::int32_t line_a, void* p_context_a)
+{
+    auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
+
+    char buff[7u];
+    std::to_chars(buff, buff + 7u, line_a);
+
+    p_usart->write(std::string_view { buff });
 }
 #endif
 
@@ -94,8 +104,6 @@ int main()
         {
             stdglue::assert::set_context(p_usart2);
 
-            //assert(false);
-
             gpio::Pad led_pad;
 
             gpio::interface<gpio::A>()->enable(
@@ -115,6 +123,8 @@ int main()
                 p_usart2_comm->read(std::span { &c, 1u });
                 p_usart2_comm->write(std::span { &c, 1u });
                 led_pad.toggle();
+
+                assert(c != 't');
             }
 
             while (true)

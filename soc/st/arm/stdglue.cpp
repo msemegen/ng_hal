@@ -32,7 +32,15 @@ extern "C" {
 void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, const char* p_condition_a)
 {
 #ifndef NDEBUG
+    stdglue::assert::handler::output("\r\n", p_assert_context);
     stdglue::assert::handler::output(p_file_a, p_assert_context);
+    stdglue::assert::handler::output("(", p_assert_context);
+    stdglue::assert::handler::output(line_a, p_assert_context);
+    stdglue::assert::handler::output("):", p_assert_context);
+    stdglue::assert::handler::output(p_function_a, p_assert_context);
+    stdglue::assert::handler::output(" -> ", p_assert_context);
+    stdglue::assert::handler::output(p_condition_a, p_assert_context);
+    stdglue::assert::handler::output("\n", p_assert_context);
 
     __disable_irq();
 

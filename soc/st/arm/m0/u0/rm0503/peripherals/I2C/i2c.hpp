@@ -100,14 +100,6 @@ struct i2c : private non_constructible
     class Peripheral : private ll::i2c::Port
     {
     public:
-        template<typename id_t, typename transmission_mode_t> void set_traits()
-        {
-            static_assert(get_allowed_sda_pins<id_t>().is(transmission_mode_t::sda_pin), "incorrect sda pin");
-            static_assert(get_allowed_scl_pins<id_t>().is(transmission_mode_t::scl_pin), "incorrect scl pin");
-
-            detail::sda_pin<id_t, transmission_mode_t::sda_descriptor, transmission_mode_t::sda_pin>::configure();
-            detail::scl_pin<id_t, transmission_mode_t::scl_descriptor, transmission_mode_t::scl_pin>::configure();
-        }
         void set_descriptor(const Descriptor& descriptor_a) {}
 
         bool enable(std::chrono::milliseconds timeout_a);
@@ -119,6 +111,15 @@ struct i2c : private non_constructible
     };
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+
+    template<typename id_t, typename transmission_mode_t> static void set_traits()
+    {
+        static_assert(get_allowed_sda_pins<id_t>().is(transmission_mode_t::sda_pin), "incorrect sda pin");
+        static_assert(get_allowed_scl_pins<id_t>().is(transmission_mode_t::scl_pin), "incorrect scl pin");
+
+        detail::sda_pin<id_t, transmission_mode_t::sda_descriptor, transmission_mode_t::sda_pin>::configure();
+        detail::scl_pin<id_t, transmission_mode_t::scl_descriptor, transmission_mode_t::scl_pin>::configure();
+    }
 };
 
 i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Master& master_a)

@@ -72,13 +72,11 @@ int main()
         p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u });
         stdglue::steady_clock::set_source(p_async_systick);
 
-        usart::Peripheral* p_usart2 = usart::create<usart::_2>();
-
         gpio::clock::enable<gpio::A>();
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
 
         // compile time chceck for pins and basic configuration
-        p_usart2->set_traits<
+        usart::set_traits<
             usart::_2,
             usart::traits::full_duplex<gpio::A::Pin::_3,
                                        gpio::Descriptor<gpio::Mode::alternate> {
@@ -86,6 +84,8 @@ int main()
                                        gpio::A::Pin::_2,
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
+
+        usart::Peripheral* p_usart2 = usart::create<usart::_2>();
 
         // transmission configuration
         p_usart2->set_descriptor(

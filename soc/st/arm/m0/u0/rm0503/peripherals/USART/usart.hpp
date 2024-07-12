@@ -378,7 +378,7 @@ struct usart : public usart_base
             rts
         };
 
-        friend usart::Peripheral;
+        friend usart;
 
     public:
         struct master
@@ -445,159 +445,7 @@ struct usart : public usart_base
 
     class Peripheral : private ll::usart::Port
     {
-    private:
-        template<typename id_t, typename trait_t> void configure_cts_and_rts()
-        {
-            // cts configuration
-            if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
-            {
-                static_assert(get_allowed_cts_pins<id_t>().is(trait_t::a::pin), "incorrect cts pin");
-
-                detail::cts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
-            }
-            if constexpr (trait_t::b::kind == usart::traits::Hardware_flow_control::cts)
-            {
-                static_assert(get_allowed_cts_pins<id_t>().is(trait_t::b::pin), "incorrect cts pin");
-
-                detail::cts_pin<id_t, trait_t::b::pin_descriptor, trait_t::b::pin>::configure();
-            }
-
-            // rts configuration
-            if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::rts)
-            {
-                static_assert(get_allowed_rts_pins<id_t>().is(trait_t::a::pin), "incorrect rts pin");
-
-                detail::rts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
-            }
-            if constexpr (trait_t::b::kind == usart::traits::Hardware_flow_control::rts)
-            {
-                static_assert(get_allowed_rts_pins<id_t>().is(trait_t::b::pin), "incorrect rts pin");
-
-                detail::rts_pin<id_t, trait_t::b::pin_descriptor, trait_t::b::pin>::configure();
-            }
-        }
-        template<typename id_t, typename trait_t> void configure_cts_or_rts()
-        {
-            // cts configuration
-            if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
-            {
-                static_assert(get_allowed_cts_pins<id_t>().is(trait_t::a::pin), "incorrect cts pin");
-
-                detail::cts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
-            }
-            // rts configuration
-            else if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::rts)
-            {
-                static_assert(get_allowed_rts_pins<id_t>().is(trait_t::a::pin), "incorrect rts pin");
-
-                detail::rts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
-            }
-        }
-
     public:
-        template<typename id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
-        void set_traits()
-        {
-            if constexpr (transmission_mode_t::trait_kind == traits::Kind::full_duplex)
-            {
-                static_assert(get_allowed_rx_pins<id_t>().is(transmission_mode_t::rx_pin), "incorrect rx pin");
-                static_assert(get_allowed_tx_pins<id_t>().is(transmission_mode_t::tx_pin), "incorrect tx pin");
-
-                detail::rx_pin<id_t, transmission_mode_t::rx_descriptor, transmission_mode_t::rx_pin>::configure();
-                detail::tx_pin<id_t, transmission_mode_t::tx_descriptor, transmission_mode_t::tx_pin>::configure();
-            }
-            else if constexpr (transmission_mode_t::trait_kind == traits::Kind::half_duplex)
-            {
-                static_assert(get_allowed_tx_pins<id_t>().is(transmission_mode_t::rxtx_pin), "incorrect rx/tx pin");
-
-                detail::tx_pin<id_t, transmission_mode_t::a_descriptor, transmission_mode_t::a_pin>::configure();
-            }
-            else
-            {
-                static_assert(false, "Unknown transmission mode (expected: usart::traits::full_duplex or usart::traits::half_duplex)");
-            }
-
-            if constexpr (false == std::is_same_v<trait_a_t, const void>)
-            {
-                if constexpr (transmission_mode_t::trait_kind == traits::Kind::full_duplex)
-                {
-                    if constexpr (trait_a_t::trait_kind == traits::Kind::synchronous)
-                    {
-                        static_assert(get_allowed_ck_pins<id_t>().is(trait_a_t::pin), "incorrect clock pin");
-                        detail::clk_pin<id_t, trait_a_t::clk_descriptor, trait_a_t::pin>::configure();
-                    }
-
-                    if constexpr (trait_a_t::trait_kind == traits::Kind::hardware_flow_control)
-                    {
-                        if constexpr (false == std::is_same_v<trait_b_t, const void>)
-                        {
-                            static_assert(trait_b_t::trait_kind != traits::Kind::synchronous,
-                                          "usart::traits::hardware_flow_control is not supported with "
-                                          "usart::traits::synchronous");
-                        }
-
-                        if constexpr (false == std::is_same_v<typename trait_a_t::b, const void>)
-                        {
-                            static_assert(trait_a_t::a::kind != trait_a_t::b::kind);
-
-                            configure_cts_and_rts<id_t, trait_a_t>();
-                        }
-                        else
-                        {
-                            configure_cts_or_rts<id_t, trait_a_t>();
-                        }
-                    }
-                }
-                else
-                {
-                    static_assert(false,
-                                  "usart::traits::hardware_flow_control or usart::traits::synchronous not supported "
-                                  "with usart::traits::half_duplex");
-                }
-            }
-
-            if constexpr (false == std::is_same_v<trait_b_t, const void>)
-            {
-                if constexpr (trait_a_t::trait_kind == traits::Kind::synchronous)
-                {
-                    // possible values for trait_b_t are:
-                    if constexpr (trait_b_t::trait_kind == traits::Kind::hardware_flow_control)
-                    {
-                        static_assert(trait_a_t::trait_kind != traits::Kind::synchronous,
-                                      "usart::traits::hardware_flow_control is not supported with usart::traits::synchronous");
-
-                        if constexpr (false == std::is_same_v<typename trait_b_t::b, const void>)
-                        {
-                            static_assert(trait_b_t::a::kind != trait_b_t::b::kind);
-
-                            configure_cts_and_rts<id_t, trait_b_t>();
-                        }
-                        else
-                        {
-                            configure_cts_or_rts<id_t, trait_b_t>();
-                        }
-                    }
-                    else
-                    {
-                        static_assert(false, "synchronous mode already set");
-                    }
-                }
-
-                if constexpr (trait_a_t::trait_kind == traits::Kind::hardware_flow_control)
-                {
-                    // possible values for trait_b_t are:
-                    if constexpr (trait_b_t::trait_kind == traits::Kind::synchronous)
-                    {
-                        static_assert(get_allowed_ck_pins<id_t>().is(trait_b_t::pin), "incorrect clock pin");
-                        detail::clk_pin<id_t, trait_b_t::clk_descriptor, trait_b_t::pin>::configure();
-                    }
-                    else
-                    {
-                        static_assert(false, "hardwawe_flow_control already set");
-                    }
-                }
-            }
-        }
         void set_descriptor(const Descriptor& descriptor_a);
         Descriptor get_descriptor() const
         {
@@ -617,6 +465,159 @@ struct usart : public usart_base
     };
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+
+    template<typename id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
+    static void set_traits()
+    {
+        if constexpr (transmission_mode_t::trait_kind == traits::Kind::full_duplex)
+        {
+            static_assert(get_allowed_rx_pins<id_t>().is(transmission_mode_t::rx_pin), "incorrect rx pin");
+            static_assert(get_allowed_tx_pins<id_t>().is(transmission_mode_t::tx_pin), "incorrect tx pin");
+
+            detail::rx_pin<id_t, transmission_mode_t::rx_descriptor, transmission_mode_t::rx_pin>::configure();
+            detail::tx_pin<id_t, transmission_mode_t::tx_descriptor, transmission_mode_t::tx_pin>::configure();
+        }
+        else if constexpr (transmission_mode_t::trait_kind == traits::Kind::half_duplex)
+        {
+            static_assert(get_allowed_tx_pins<id_t>().is(transmission_mode_t::rxtx_pin), "incorrect rx/tx pin");
+
+            detail::tx_pin<id_t, transmission_mode_t::a_descriptor, transmission_mode_t::a_pin>::configure();
+        }
+        else
+        {
+            static_assert(false, "Unknown transmission mode (expected: usart::traits::full_duplex or usart::traits::half_duplex)");
+        }
+
+        if constexpr (false == std::is_same_v<trait_a_t, const void>)
+        {
+            if constexpr (transmission_mode_t::trait_kind == traits::Kind::full_duplex)
+            {
+                if constexpr (trait_a_t::trait_kind == traits::Kind::synchronous)
+                {
+                    static_assert(get_allowed_ck_pins<id_t>().is(trait_a_t::pin), "incorrect clock pin");
+                    detail::clk_pin<id_t, trait_a_t::clk_descriptor, trait_a_t::pin>::configure();
+                }
+
+                if constexpr (trait_a_t::trait_kind == traits::Kind::hardware_flow_control)
+                {
+                    if constexpr (false == std::is_same_v<trait_b_t, const void>)
+                    {
+                        static_assert(trait_b_t::trait_kind != traits::Kind::synchronous,
+                                      "usart::traits::hardware_flow_control is not supported with "
+                                      "usart::traits::synchronous");
+                    }
+
+                    if constexpr (false == std::is_same_v<typename trait_a_t::b, const void>)
+                    {
+                        static_assert(trait_a_t::a::kind != trait_a_t::b::kind);
+
+                        configure_cts_and_rts<id_t, trait_a_t>();
+                    }
+                    else
+                    {
+                        configure_cts_or_rts<id_t, trait_a_t>();
+                    }
+                }
+            }
+            else
+            {
+                static_assert(false,
+                              "usart::traits::hardware_flow_control or usart::traits::synchronous not supported "
+                              "with usart::traits::half_duplex");
+            }
+        }
+
+        if constexpr (false == std::is_same_v<trait_b_t, const void>)
+        {
+            if constexpr (trait_a_t::trait_kind == traits::Kind::synchronous)
+            {
+                // possible values for trait_b_t are:
+                if constexpr (trait_b_t::trait_kind == traits::Kind::hardware_flow_control)
+                {
+                    static_assert(trait_a_t::trait_kind != traits::Kind::synchronous,
+                                  "usart::traits::hardware_flow_control is not supported with usart::traits::synchronous");
+
+                    if constexpr (false == std::is_same_v<typename trait_b_t::b, const void>)
+                    {
+                        static_assert(trait_b_t::a::kind != trait_b_t::b::kind);
+
+                        configure_cts_and_rts<id_t, trait_b_t>();
+                    }
+                    else
+                    {
+                        configure_cts_or_rts<id_t, trait_b_t>();
+                    }
+                }
+                else
+                {
+                    static_assert(false, "synchronous mode already set");
+                }
+            }
+
+            if constexpr (trait_a_t::trait_kind == traits::Kind::hardware_flow_control)
+            {
+                // possible values for trait_b_t are:
+                if constexpr (trait_b_t::trait_kind == traits::Kind::synchronous)
+                {
+                    static_assert(get_allowed_ck_pins<id_t>().is(trait_b_t::pin), "incorrect clock pin");
+                    detail::clk_pin<id_t, trait_b_t::clk_descriptor, trait_b_t::pin>::configure();
+                }
+                else
+                {
+                    static_assert(false, "hardwawe_flow_control already set");
+                }
+            }
+        }
+    }
+
+private:
+    template<typename id_t, typename trait_t> void configure_cts_and_rts()
+    {
+        // cts configuration
+        if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
+        {
+            static_assert(get_allowed_cts_pins<id_t>().is(trait_t::a::pin), "incorrect cts pin");
+
+            detail::cts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
+        }
+        if constexpr (trait_t::b::kind == usart::traits::Hardware_flow_control::cts)
+        {
+            static_assert(get_allowed_cts_pins<id_t>().is(trait_t::b::pin), "incorrect cts pin");
+
+            detail::cts_pin<id_t, trait_t::b::pin_descriptor, trait_t::b::pin>::configure();
+        }
+
+        // rts configuration
+        if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::rts)
+        {
+            static_assert(get_allowed_rts_pins<id_t>().is(trait_t::a::pin), "incorrect rts pin");
+
+            detail::rts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
+        }
+        if constexpr (trait_t::b::kind == usart::traits::Hardware_flow_control::rts)
+        {
+            static_assert(get_allowed_rts_pins<id_t>().is(trait_t::b::pin), "incorrect rts pin");
+
+            detail::rts_pin<id_t, trait_t::b::pin_descriptor, trait_t::b::pin>::configure();
+        }
+    }
+    template<typename id_t, typename trait_t> void configure_cts_or_rts()
+    {
+        // cts configuration
+        if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
+        {
+            static_assert(get_allowed_cts_pins<id_t>().is(trait_t::a::pin), "incorrect cts pin");
+
+            detail::cts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
+        }
+        // rts configuration
+        else if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::rts)
+        {
+            static_assert(get_allowed_rts_pins<id_t>().is(trait_t::a::pin), "incorrect rts pin");
+
+            detail::rts_pin<id_t, trait_t::a::pin_descriptor, trait_t::a::pin>::configure();
+        }
+    }
 };
 
 inline constexpr usart::Error operator|(usart::Error left_a, usart::Error right_a)

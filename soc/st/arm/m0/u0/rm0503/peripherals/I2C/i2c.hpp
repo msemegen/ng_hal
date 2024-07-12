@@ -62,6 +62,26 @@ struct i2c : private non_constructible
 {
     using clock = ll::i2c_clock;
 
+    struct Descriptor
+    {
+        enum class Mode : std::uint64_t
+        {
+            master = 0x1u,
+            slave = 0x2u
+        };
+
+        struct Master
+        {
+        };
+
+        struct Slave
+        {
+            std::uint8_t address;
+        };
+
+        Mode mode;
+    };
+
     struct traits : private non_constructible
     {
         template<auto sda_pin_t,
@@ -80,10 +100,6 @@ struct i2c : private non_constructible
     class Peripheral : private ll::i2c::Port
     {
     public:
-        struct Descriptor
-        {
-        };
-
         template<typename id_t, typename transmission_mode_t> void set_traits()
         {
             static_assert(get_allowed_sda_pins<id_t>().is(transmission_mode_t::sda_pin), "incorrect sda pin");
@@ -104,4 +120,15 @@ struct i2c : private non_constructible
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
 };
+
+i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Master& master_a)
+{
+    assert(i2c::Descriptor::Mode::master == mode_a);
+    return {};
+}
+i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Slave& slave_a)
+{
+    assert(i2c::Descriptor::Mode::slave == mode_a);
+    return {};
+}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

@@ -107,7 +107,7 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sc
     static void configure()
     {
         assert(gpio::clock::is_enabled<gpio::B>());
-        gpio::interface<gpio::A>()->enable(gpio::B::Pin::_3, 0x3u, descriptor_t);
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_3, 0x3u, descriptor_t);
     }
 };
 template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_3, descriptor_t, gpio::B::Pin::_3>
@@ -115,7 +115,88 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sc
     static void configure()
     {
         assert(gpio::clock::is_enabled<gpio::B>());
-        gpio::interface<gpio::A>()->enable(gpio::B::Pin::_3, 0x4u, descriptor_t);
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_3, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_1, descriptor_t, gpio::B::Pin::_6>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_6, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::B::Pin::_6>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_6, 0x5u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_4, descriptor_t, gpio::B::Pin::_6>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_6, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_1, descriptor_t, gpio::B::Pin::_8>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_8, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::B::Pin::_8>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_8, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::B::Pin::_10>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_10, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_4, descriptor_t, gpio::B::Pin::_10>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_10, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::B::Pin::_13>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::B>()->enable(gpio::B::Pin::_13, 0x4u, descriptor_t);
+    }
+};
+
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_3, descriptor_t, gpio::C::Pin::_0>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::C>());
+        gpio::interface<gpio::C>()->enable(gpio::C::Pin::_0, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_4, descriptor_t, gpio::C::Pin::_0>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::C>());
+        gpio::interface<gpio::C>()->enable(gpio::C::Pin::_0, 0x2u, descriptor_t);
     }
 };
 

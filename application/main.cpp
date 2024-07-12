@@ -101,17 +101,16 @@ int main()
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
 
-        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
-
         gpio::Pad led_pad;
+        gpio::interface<gpio::A>()->enable(
+            gpio::A::Pin::_5,
+            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
+            &led_pad);
+
+        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
 
         if (true == usart1_enabled)
         {
-            gpio::interface<gpio::A>()->enable(
-                gpio::A::Pin::_5,
-                gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
-                &led_pad);
-
             // sync transmission view
             usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
             stdglue::assert::set_context(p_usart2_comm);
@@ -127,20 +126,14 @@ int main()
 
                 assert(c != 't'); // assert test
             }
-
-            while (true)
-                ;
         }
         else
         {
             while (true)
-                ;
-        }
-
-        while (true)
-        {
-            delay(1000ms);
-            led_pad.toggle();
+            {
+                delay(1000ms);
+                led_pad.toggle();
+            }
         }
     }
 

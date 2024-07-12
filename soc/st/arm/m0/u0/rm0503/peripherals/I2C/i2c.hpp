@@ -82,10 +82,16 @@ struct i2c : private non_constructible
     public:
         struct Descriptor
         {
-
         };
 
-        template<typename id_t, typename transmission_mode_t> void set_traits() {}
+        template<typename id_t, typename transmission_mode_t> void set_traits()
+        {
+            static_assert(get_allowed_sda_pins<id_t>().is(transmission_mode_t::sda_pin), "incorrect sda pin");
+            static_assert(get_allowed_scl_pins<id_t>().is(transmission_mode_t::scl_pin), "incorrect scl pin");
+
+            detail::sda_pin<id_t, transmission_mode_t::sda_descriptor, transmission_mode_t::sda_pin>::configure();
+            detail::scl_pin<id_t, transmission_mode_t::scl_descriptor, transmission_mode_t::scl_pin>::configure();
+        }
         void set_descriptor(const Descriptor& descriptor_a) {}
 
         bool enable(std::chrono::milliseconds timeout_a);

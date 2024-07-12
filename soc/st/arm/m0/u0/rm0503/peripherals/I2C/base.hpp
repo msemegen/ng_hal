@@ -69,6 +69,56 @@ constexpr detail::
 constexpr detail::I2C_pins<gpio::A::Pin::_7, gpio::B::Pin::_3, gpio::C::Pin::_0> i2c_3_scl_pins;
 constexpr detail::I2C_pins<gpio::B::Pin::_6, gpio::B::Pin::_10, gpio::C::Pin::_0> i2c_4_scl_pins;
 
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::A::Pin::_7>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::A>());
+        gpio::interface<gpio::A>()->enable(gpio::A::Pin::_7, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_3, descriptor_t, gpio::A::Pin::_7>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::A>());
+        gpio::interface<gpio::A>()->enable(gpio::A::Pin::_7, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_1, descriptor_t, gpio::A::Pin::_9>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::A>());
+        gpio::interface<gpio::A>()->enable(gpio::A::Pin::_9, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::A::Pin::_9>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::A>());
+        gpio::interface<gpio::A>()->enable(gpio::A::Pin::_9, 0x5u, descriptor_t);
+    }
+};
+
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_2, descriptor_t, gpio::B::Pin::_3>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::A>()->enable(gpio::B::Pin::_3, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::scl_pin<i2c_base::_3, descriptor_t, gpio::B::Pin::_3>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::interface<gpio::A>()->enable(gpio::B::Pin::_3, 0x4u, descriptor_t);
+    }
+};
+
 template<typename id_t> constexpr auto get_allowed_scl_pins()
 {
     if constexpr (true == std::is_same_v<i2c_base::_1, id_t>)

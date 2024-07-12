@@ -71,8 +71,8 @@ add_executable(${ELF_NAME} ${src} ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/De
                               ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/Include/pac_armv81.h" 
                               ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/Include/pmu_armv8.h"
                               ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/Include/tz_context.h"
-                              ${CMAKE_CURRENT_LIST_DIR}"/syscalls.c"
-                              ${CMAKE_CURRENT_LIST_DIR}"/sysmem.c"
+                              ${CMAKE_CURRENT_LIST_DIR}"/application/syscalls.c"
+                              ${CMAKE_CURRENT_LIST_DIR}"/application/sysmem.c"
                               ${CMAKE_CURRENT_LIST_DIR}"/soc/st/arm/CMSIS/Device/ST/STM32U0xx/Source/Templates/system_stm32u0xx.c"
                               ${CMSIS_STARTUP} 
                               ${VENDOR_SYSTEM_INIT} "soc/st/arm/systick.cpp" "soc/st/arm/stdglue.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/I2C/i2c.cpp")

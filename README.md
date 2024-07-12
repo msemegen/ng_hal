@@ -1,3 +1,3 @@
 # ng_hal
 
-Next Generation HAL for STM32 in modern C++
+Experimental Next Generation HAL for STM32 in modern C++ - a new features sandbox for https://github.com/xEmbeddedTools/xmcu

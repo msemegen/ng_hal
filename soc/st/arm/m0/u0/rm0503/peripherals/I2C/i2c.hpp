@@ -3,6 +3,9 @@
 /*
  */
 
+// std
+#include <chrono>
+
 // soc
 #include <soc/Non_copyable.hpp>
 #include <soc/macros.hpp>
@@ -76,6 +79,17 @@ struct i2c : private non_constructible
 
     class Peripheral : private ll::i2c::Port
     {
+    public:
+        struct Descriptor
+        {
+
+        };
+
+        template<typename id_t, typename transmission_mode_t> void set_traits() {}
+        void set_descriptor(const Descriptor& descriptor_a) {}
+
+        bool enable(std::chrono::milliseconds timeout_a);
+        bool disable(std::chrono::milliseconds timeout_a);
     };
 
     template<api::traits trait_t> class Transceiver : private non_constructible

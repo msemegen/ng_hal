@@ -77,6 +77,17 @@ int main()
         gpio::clock::enable<gpio::A>();
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
 
+        // compile time chceck for pins and basic configuration
+        p_usart2->set_traits<
+            usart::_2,
+            usart::traits::full_duplex<gpio::A::Pin::_3,
+                                       gpio::Descriptor<gpio::Mode::alternate> {
+                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::up, .speed = gpio::Speed::low },
+                                       gpio::A::Pin::_2,
+                                       gpio::Descriptor<gpio::Mode::alternate> {
+                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
+
+        // transmission configuration
         p_usart2->set_descriptor(
             usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
                                 .oversampling = usart::Descriptor::Oversampling::_16,
@@ -90,26 +101,18 @@ int main()
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
 
-        p_usart2->set_traits<
-            usart::_2,
-            usart::traits::full_duplex<gpio::A::Pin::_3,
-                                       gpio::Descriptor<gpio::Mode::alternate> {
-                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::up, .speed = gpio::Speed::low },
-                                       gpio::A::Pin::_2,
-                                       gpio::Descriptor<gpio::Mode::alternate> {
-                                           .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
-
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
+
+        gpio::Pad led_pad;
 
         if (true == usart1_enabled)
         {
-            gpio::Pad led_pad;
-
             gpio::interface<gpio::A>()->enable(
                 gpio::A::Pin::_5,
                 gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
                 &led_pad);
 
+            // sync transmission view
             usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
             stdglue::assert::set_context(p_usart2_comm);
 
@@ -122,7 +125,7 @@ int main()
                 p_usart2_comm->write(std::span { &c, 1u });
                 led_pad.toggle();
 
-                assert(c != 't');
+                assert(c != 't'); // assert test
             }
 
             while (true)
@@ -137,7 +140,7 @@ int main()
         while (true)
         {
             delay(1000ms);
-            // led_pad.toggle();
+            led_pad.toggle();
         }
     }
 

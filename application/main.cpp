@@ -73,9 +73,9 @@ int main()
         stdglue::steady_clock::set_source(p_async_systick);
 
         gpio::clock::enable<gpio::A>();
-        usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
 
         // compile time chceck for pins and basic configuration
+        usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
         usart::set_traits<
             usart::_2,
             usart::traits::full_duplex<gpio::A::Pin::_3,
@@ -84,6 +84,16 @@ int main()
                                        gpio::A::Pin::_2,
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
+
+        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Active_in_low_power::disable);
+        i2c::set_traits<
+            i2c::_1,
+            i2c::traits::half_duplex<gpio::A::Pin::_10,
+                                     gpio::Descriptor<gpio::Mode::alternate> {
+                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
+                                     gpio::A::Pin::_9,
+                                     gpio::Descriptor<gpio::Mode::alternate> {
+                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
         usart::Peripheral* p_usart2 = usart::create<usart::_2>();
 

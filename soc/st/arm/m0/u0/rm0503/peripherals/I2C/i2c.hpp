@@ -10,6 +10,9 @@
 #include <soc/Non_copyable.hpp>
 #include <soc/macros.hpp>
 #include <soc/st/arm/api.hpp>
+#include <soc/st/arm/m0/u0/rm0503/clocks/pclk.hpp>
+#include <soc/st/arm/m0/u0/rm0503/clocks/sysclk.hpp>
+#include <soc/st/arm/m0/u0/rm0503/oscillators/hsi16.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/I2C/base.hpp>
 
 // clang-format off
@@ -32,6 +35,60 @@ struct i2c_clock : private non_constructible
 
     template<typename id_t> static bool is_enabled() = delete;
 };
+
+#if defined XMCU_I2C1_PRESENT
+template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+        case Active_in_low_power::enable:
+            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+    }
+
+    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
+    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
+template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+        case Active_in_low_power::enable:
+            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+    }
+
+    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
+    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
+template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+        case Active_in_low_power::enable:
+            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            break;
+    }
+
+    bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
+    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
+#endif
+#if defined XMCU_I2C2_PRESENT
+#endif
+#if defined XMCU_I2C3_PRESENT
+#endif
+#if defined XMCU_I2C4_PRESENT
+#endif
 
 struct i2c : public i2c_base
 {
@@ -58,7 +115,7 @@ struct i2c : public i2c_base
 };
 } // namespace ll
 
-struct i2c : private non_constructible
+struct i2c : public i2c_base
 {
     using clock = ll::i2c_clock;
 

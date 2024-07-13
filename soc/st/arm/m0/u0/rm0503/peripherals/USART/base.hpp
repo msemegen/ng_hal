@@ -1,13 +1,18 @@
 #pragma once
 
 /*
+ *	Name: base.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
-
 // std
 #include <type_traits>
 
+// xmcu
+#include <xmcu/non_constructible.hpp>
+
 // soc
-#include <soc/non_constructible.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
@@ -17,7 +22,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #define XMCU_USART3_PRESENT
 #define XMCU_USART4_PRESENT
 
-struct usart_base : protected non_constructible
+struct usart_base : protected xmcu::non_constructible
 {
 #if defined XMCU_USART1_PRESENT
     struct _1
@@ -50,23 +55,23 @@ template<auto... pins_t> struct USART_pins
     }
 };
 
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rx_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rx_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct tx_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct tx_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct clk_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct clk_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct cts_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct cts_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rts_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rts_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };

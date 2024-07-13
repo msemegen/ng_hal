@@ -1,14 +1,20 @@
 #pragma once
 
 /*
+ *	Name: i2c.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
 // std
 #include <chrono>
 
+// xmcu
+#include <xmcu/Non_copyable.hpp>
+#include <xmcu/macros.hpp>
+
 // soc
-#include <soc/Non_copyable.hpp>
-#include <soc/macros.hpp>
 #include <soc/st/arm/api.hpp>
 #include <soc/st/arm/m0/u0/rm0503/clocks/pclk.hpp>
 #include <soc/st/arm/m0/u0/rm0503/clocks/sysclk.hpp>
@@ -22,7 +28,7 @@
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
-struct i2c_clock : private non_constructible
+struct i2c_clock : private xmcu::non_constructible
 {
     enum class Active_in_low_power
     {
@@ -42,45 +48,45 @@ template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Activ
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
-    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
+    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
-    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
+    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
-    bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
+    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
@@ -94,7 +100,7 @@ struct i2c : public i2c_base
 {
     using clock = i2c_clock;
 
-    struct Port : private Non_copyable
+    struct Port : private xmcu::Non_copyable
     {
         volatile std::uint32_t cr1;     /*!< I2C Control register 1,            Address offset: 0x00 */
         volatile std::uint32_t cr2;     /*!< I2C Control register 2,            Address offset: 0x04 */
@@ -139,7 +145,7 @@ struct i2c : public i2c_base
         Mode mode;
     };
 
-    struct traits : private non_constructible
+    struct traits : private xmcu::non_constructible
     {
         template<auto sda_pin_t,
                  gpio::Descriptor<gpio::Mode::alternate> sda_descriptor_t,

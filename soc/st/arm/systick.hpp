@@ -1,31 +1,45 @@
 #pragma once
 
 /*
+ *	Name: systick.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
-
 // std
 #include <cassert>
 #include <cstdint>
 
-// soc
-#include <soc/macros.hpp>
-
 // clang-format off
+// xmcu
+#include <xmcu/macros.hpp>
 // CMSIS
 #include DECORATE_INCLUDE_PATH(CMSIS_SOC_FILE)
 // clang-format on
 
-// soc
-#include <soc/Non_copyable.hpp>
-#include <soc/bit_flag.hpp>
+// xmcu
+#include <xmcu/Non_copyable.hpp>
+#include <xmcu/bit_flag.hpp>
+#include <xmcu/non_constructible.hpp>
 
-// soc/st
+// soc
 #include <soc/st/arm/IRQ_priority.hpp>
 #include <soc/st/arm/api.hpp>
 
 namespace soc::st::arm {
-
-struct systick : private non_constructible
+namespace ll {
+struct systick : private xmcu::non_constructible
+{
+    struct Port
+    {
+        volatile std::uint32_t ctrl;        /*!< Offset: 0x000 (R/W)  SysTick Control and Status Register */
+        volatile std::uint32_t load;        /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register */
+        volatile std::uint32_t val;         /*!< Offset: 0x008 (R/W)  SysTick Current Value Register */
+        volatile const std::uint32_t calib; /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
+    };
+};
+} // namespace ll
+struct systick : private xmcu::non_constructible
 {
     struct Descriptor
     {
@@ -40,14 +54,14 @@ struct systick : private non_constructible
     };
 
     template<api::traits traits_t> class Tick_counter
-        : private Non_copyable
-        , private SysTick_Type
+        : private xmcu::non_constructible
+        , private ll::systick::Port
     {
     };
 
     class Peripheral
-        : private Non_copyable
-        , private SysTick_Type
+        : private xmcu::Non_copyable
+        , private ll::systick::Port
 
     {
     public:
@@ -55,10 +69,10 @@ struct systick : private non_constructible
         {
             assert(descriptor_a.reload > 0 && descriptor_a.reload <= 0xFFF'FFFu);
 
-            this->CTRL = 0x0u;
-            this->LOAD = descriptor_a.reload;
-            this->VAL = 0x0u;
-            this->CTRL = static_cast<std::uint32_t>(descriptor_a.prescaler);
+            this->ctrl = 0x0u;
+            this->load = descriptor_a.reload;
+            this->val = 0x0u;
+            this->ctrl = static_cast<std::uint32_t>(descriptor_a.prescaler);
         }
 
         template<typename Type_t> Type_t* get_view() const = delete;
@@ -80,44 +94,44 @@ template<> inline systick::Tick_counter<api::traits::async>* systick::Peripheral
 }
 
 template<> class systick::Tick_counter<api::traits::sync>
-    : private Non_copyable
-    , private SysTick_Type
+    : private xmcu::Non_copyable
+    , private ll::systick::Port
 {
 public:
     void start()
     {
-        bit_flag::set(&(this->CTRL), SysTick_CTRL_ENABLE_Msk);
+        xmcu::bit_flag::set(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
     }
 
     void stop()
     {
-        bit_flag::clear(&(this->CTRL), SysTick_CTRL_ENABLE_Msk);
+        xmcu::bit_flag::clear(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
     }
 
     void wait_for_reload() const
     {
-        while (false == bit_flag::is(this->CTRL, SysTick_CTRL_COUNTFLAG_Msk)) continue;
+        while (false == xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_COUNTFLAG_Msk)) continue;
     }
 
     std::uint32_t get_reload() const
     {
-        return this->LOAD;
+        return this->load;
     }
 
     std::uint32_t get_value() const
     {
-        return this->VAL;
+        return this->val;
     }
 
     bool is_started() const
     {
-        return bit_flag::is(this->CTRL, SysTick_CTRL_ENABLE_Msk);
+        return xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
     }
 };
 
 template<> class systick::Tick_counter<api::traits::async>
-    : private Non_copyable
-    , private SysTick_Type
+    : private xmcu::Non_copyable
+    , private ll::systick::Port
 {
 public:
 #if 1 == XMCU_ISR_CONTEXT
@@ -131,17 +145,17 @@ public:
 
     std::uint32_t get_reload() const
     {
-        return this->LOAD;
+        return this->load;
     }
 
     std::uint32_t get_value() const
     {
-        return this->VAL;
+        return this->val;
     }
 
     bool is_started() const
     {
-        return bit_flag::is(this->CTRL, SysTick_CTRL_ENABLE_Msk);
+        return xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
     }
 
     struct isr : private non_constructible

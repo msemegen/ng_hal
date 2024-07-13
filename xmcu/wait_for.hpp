@@ -1,14 +1,21 @@
 #pragma once
 
+/*
+ *	Name: wait_for.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 // std
 #include <chrono>
 
-// soc
-#include <soc/bit.hpp>
-#include <soc/bit_flag.hpp>
-#include <soc/non_constructible.hpp>
+// xmcu
+#include <xmcu/bit.hpp>
+#include <xmcu/bit_flag.hpp>
+#include <xmcu/non_constructible.hpp>
 
-namespace soc {
+namespace xmcu {
 struct wait_for : private non_constructible
 {
     static void all_bits_are_set(volatile const std::uint32_t& register_a, std::uint32_t mask_a)
@@ -87,4 +94,4 @@ struct wait_for : private non_constructible
         return status;
     }
 };
-} // namespace soc
+} // namespace xmcu

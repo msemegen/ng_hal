@@ -1,14 +1,21 @@
 #pragma once
 
+/*
+ *	Name: hsi16.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 // std
 #include <cassert>
 
 // CMSIS
 #include <stm32u0xx.h>
 
-// soc
-#include <soc/bit_flag.hpp>
-#include <soc/non_constructible.hpp>
+// xmcu
+#include <xmcu/bit_flag.hpp>
+#include <xmcu/non_constructible.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {
 namespace ll {
@@ -18,7 +25,7 @@ struct hsi16
 };
 } // namespace ll
 
-struct hsi16 : private non_constructible
+struct hsi16 : private xmcu::non_constructible
 {
     struct Descriptor
     {
@@ -42,8 +49,8 @@ struct hsi16 : private non_constructible
 
     static void set_descriptor(const Descriptor& descriptor_a)
     {
-        bit_flag::set(&(RCC->CR), RCC_CR_HSIASFS, static_cast<std::uint32_t>(descriptor_a.start_from_stop));
-        bit_flag::set(&(RCC->CR), RCC_CR_HSIKERON, static_cast<std::uint32_t>(descriptor_a.power));
+        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSIASFS, static_cast<std::uint32_t>(descriptor_a.start_from_stop));
+        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSIKERON, static_cast<std::uint32_t>(descriptor_a.power));
     }
     static Descriptor get_descriptor()
     {
@@ -54,23 +61,23 @@ struct hsi16 : private non_constructible
     {
         assert(false == is_enabled());
 
-        bit_flag::set(&(RCC->CR), RCC_CR_HSION);
+        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSION);
     }
     static void disable()
     {
         assert(true == is_enabled());
 
-        bit_flag::clear(&(RCC->CR), RCC_CR_HSION);
+        xmcu::bit_flag::clear(&(RCC->CR), RCC_CR_HSION);
     }
 
     static bool is_ready()
     {
-        return bit_flag::is(RCC->CR, RCC_CR_HSIRDY);
+        return xmcu::bit_flag::is(RCC->CR, RCC_CR_HSIRDY);
     }
 
     static bool is_enabled()
     {
-        return bit_flag::is(RCC->CR, RCC_CR_HSION);
+        return xmcu::bit_flag::is(RCC->CR, RCC_CR_HSION);
     }
 
     static std::uint32_t get_frequency_Hz()

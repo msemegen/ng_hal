@@ -1,15 +1,19 @@
 #pragma once
 
 /*
+ *	Name: bit.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
 // std
 #include <cstdint>
 
-// hkm
-#include <soc/non_constructible.hpp>
+// xmcu
+#include <xmcu/non_constructible.hpp>
 
-namespace soc {
+namespace xmcu {
 class bit : private non_constructible
 {
 public:

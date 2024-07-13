@@ -13,22 +13,20 @@
 // CMSIS
 #include <stm32u0xx.h>
 
+// xmcu
+#include <xmcu/Non_copyable.hpp>
+#include <xmcu/bit.hpp>
+#include <xmcu/bit_flag.hpp>
+#include <xmcu/non_constructible.hpp>
+#include <xmcu/various.hpp>
+
 // soc
-#include <soc/Non_copyable.hpp>
-#include <soc/bit.hpp>
-#include <soc/bit_flag.hpp>
-#include <soc/non_constructible.hpp>
-#include <soc/various.hpp>
-
-// soc/st
 #include <soc/st/arm/api.hpp>
-
-// GPIO
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/base.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
-struct gpio_clock : private soc::non_constructible
+struct gpio_clock : private xmcu::non_constructible
 {
     template<typename Type> static void enable() = delete;
     template<typename Type> static void disable() = delete;
@@ -36,9 +34,7 @@ struct gpio_clock : private soc::non_constructible
     template<typename Type> static bool is_enabled() = delete;
 };
 
-struct gpio
-    : public gpio_base
-    , private non_constructible
+struct gpio : public gpio_base
 {
 #if defined XMCU_GPIOA_PRESENT
     using A = a;
@@ -58,7 +54,7 @@ struct gpio
 
     using clock = gpio_clock;
 
-    struct Port : private Non_copyable
+    struct Port : private xmcu::Non_copyable
     {
         volatile std::uint32_t moder;   /*!< GPIO port mode register,               Address offset: 0x00      */
         volatile std::uint32_t otyper;  /*!< GPIO port output type register,        Address offset: 0x04      */
@@ -77,9 +73,7 @@ struct gpio
 } // namespace ll
 
 #if !defined XMCU_LL_ONLY
-struct gpio
-    : public gpio_base
-    , private non_constructible
+struct gpio : public gpio_base
 {
     enum class Mode : std::uint32_t
     {
@@ -114,11 +108,11 @@ struct gpio
 
     using clock = ll::gpio_clock;
 
-    template<Mode mode> struct Descriptor : private soc::non_constructible
+    template<Mode mode> struct Descriptor : private xmcu::non_constructible
     {
     };
 
-    class Pad : private soc::Non_copyable
+    class Pad : private xmcu::Non_copyable
     {
     public:
         Level read() const
@@ -143,7 +137,7 @@ struct gpio
 
     template<typename Pin_t> class Port
         : private ll::gpio::Port
-        , private non_constructible
+        , private xmcu::non_constructible
     {
     public:
         using Pin = Pin_t;
@@ -202,7 +196,7 @@ private:
 
     static bool read(const ll::gpio::Port* p_port_a, std::uint32_t pin_a)
     {
-        return bit::is(p_port_a->idr, pin_a);
+        return xmcu::bit::is(p_port_a->idr, pin_a);
     }
     static void write(ll::gpio::Port* p_port_a, std::uint32_t pin_a, std::uint32_t level_a)
     {
@@ -211,7 +205,7 @@ private:
     }
     static void toggle(ll::gpio::Port* p_port_a, std::uint32_t pin_a)
     {
-        bit::toggle(&(p_port_a->odr), pin_a);
+        xmcu::bit::toggle(&(p_port_a->odr), pin_a);
     }
 };
 
@@ -239,15 +233,15 @@ template<> struct gpio::Descriptor<gpio::Mode::alternate>
 #if defined XMCU_GPIOA_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::A>()
 {
-    bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::A>()
 {
-    bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::A>()
 {
-    return bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
+    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
 }
 
 template<> template<>
@@ -330,15 +324,15 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOB_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::B>()
 {
-    bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::B>()
 {
-    bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::B>()
 {
-    return bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
+    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
 }
 
 template<> template<>
@@ -406,15 +400,15 @@ inline void gpio::Port<gpio::B::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOC_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::C>()
 {
-    bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::C>()
 {
-    bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::C>()
 {
-    return bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
+    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
 }
 
 template<> template<>
@@ -482,15 +476,15 @@ inline void gpio::Port<gpio::C::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOD_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::D>()
 {
-    bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::D>()
 {
-    bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::D>()
 {
-    return bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
+    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
 }
 
 template<> template<>

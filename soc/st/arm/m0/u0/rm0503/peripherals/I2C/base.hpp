@@ -1,13 +1,19 @@
 #pragma once
 
 /*
+ *	Name: i2c.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
 // std
 #include <type_traits>
 
+// xmcu
+#include <xmcu/non_constructible.hpp>
+
 // soc
-#include <soc/non_constructible.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
@@ -18,7 +24,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #define XMCU_I2C3_PRESENT
 #define XMCU_I2C4_PRESENT
 
-struct i2c_base : protected non_constructible
+struct i2c_base : protected xmcu::non_constructible
 {
 #if defined XMCU_I2C1_PRESENT
     struct _1
@@ -51,11 +57,11 @@ template<auto... pins_t> struct I2C_pins
     }
 };
 
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct scl_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct scl_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct sda_pin : private non_constructible
+template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct sda_pin : private xmcu::non_constructible
 {
     static void configure() = delete;
 };

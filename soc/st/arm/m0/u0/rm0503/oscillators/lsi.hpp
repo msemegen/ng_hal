@@ -1,15 +1,22 @@
 #pragma once
 
+/*
+ *	Name: lsi.hpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
+// std
+#include <cassert>
+#include <cstdint>
+
 // CMSIS
 #include <stm32u0xx.h>
 
-// std
-#include <cstdint>
-#include <cassert>
-
-// soc
-#include <soc/bit_flag.hpp>
-#include <soc/non_constructible.hpp>
+// xmcu
+#include <xmcu/bit_flag.hpp>
+#include <xmcu/non_constructible.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {
 namespace ll {
@@ -18,7 +25,7 @@ struct lsi
 };
 } // namespace ll
 
-struct lsi : private non_constructible
+struct lsi : private xmcu::non_constructible
 {
     struct Descriptor
     {
@@ -35,24 +42,24 @@ struct lsi : private non_constructible
     {
         assert(false == is_enabled());
 
-        bit_flag::set(&(RCC->CSR), RCC_CSR_LSIPREDIV, static_cast<std::uint32_t>(descriptor_a.prescaler));
+        xmcu::bit_flag::set(&(RCC->CSR), RCC_CSR_LSIPREDIV, static_cast<std::uint32_t>(descriptor_a.prescaler));
     }
 
     static void enable()
     {
         assert(false == is_enabled());
 
-        bit_flag::set(&(RCC->CSR), RCC_CSR_LSION);
+        xmcu::bit_flag::set(&(RCC->CSR), RCC_CSR_LSION);
     }
 
     static bool is_enabled()
     {
-        return bit_flag::is(RCC->CSR, RCC_CSR_LSION);
+        return xmcu::bit_flag::is(RCC->CSR, RCC_CSR_LSION);
     }
 
     static bool is_ready()
     {
-        return bit_flag::is(RCC->CSR, RCC_CSR_LSIRDY);
+        return xmcu::bit_flag::is(RCC->CSR, RCC_CSR_LSIRDY);
     }
 
     static std::uint32_t get_frequency_Hz()

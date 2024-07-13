@@ -7,13 +7,14 @@
  *   Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
-// xmcu
 // clang-format off
-#include <soc/macros.hpp>
+// xmcu
+#include <xmcu/macros.hpp>
+//soc
 #include DECORATE_INCLUDE_PATH(soc/XMCU_SOC_VENDOR/XMCU_SOC_ARCH/XMCU_SOC_ARCH_CORE_FAMILY/XMCU_SOC_VENDOR_FAMILY/XMCU_SOC_VENDOR_FAMILY_RM/clocks/hclk.hpp)
 // clang-format on
 
-namespace hal::clocks {
+namespace xmcu::hal::clocks {
 #if !defined XMCU_LL_ONLY
 using hclk =
     soc::XMCU_SOC_VENDOR::XMCU_SOC_ARCH::XMCU_SOC_ARCH_CORE_FAMILY::XMCU_SOC_VENDOR_FAMILY::XMCU_SOC_VENDOR_FAMILY_RM::clocks::hclk;
@@ -26,4 +27,4 @@ inline
 using hclk =
     soc::XMCU_SOC_VENDOR::XMCU_SOC_ARCH::XMCU_SOC_ARCH_CORE_FAMILY::XMCU_SOC_VENDOR_FAMILY::XMCU_SOC_VENDOR_FAMILY_RM::clocks::ll::hclk;
 } // namespace ll
-} // namespace hal::clocks
+} // namespace xmcu::hal::clocks

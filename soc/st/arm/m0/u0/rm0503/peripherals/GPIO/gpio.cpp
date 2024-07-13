@@ -11,12 +11,10 @@
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
+using namespace xmcu;
+
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
-    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
-    assert(various::get_enum_incorrect_value<Speed>() != desc_a.speed);
-    assert(various::get_enum_incorrect_value<Type>() != desc_a.type);
-
     const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
 
     bit_flag::set(&(p_port_a->ospeedr), clear_flag_2bit, static_cast<std::uint32_t>(desc_a.speed) << (pin_a * 2u));
@@ -27,16 +25,12 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio:
 
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
-    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
-
     bit_flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit_flag::clear(&(p_port_a->moder), 0x3u << (pin_a * 2u));
 }
 
 void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
-    assert(various::get_enum_incorrect_value<Pull>() != desc_a.pull);
-
     bit_flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit_flag::set(&(p_port_a->moder), 0x3u << (pin_a * 2u), 0x3u << (pin_a * 2u));
 }
@@ -61,7 +55,5 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a,
 
     p_port_a->afr[af_register_index] = af_register;
 }
-
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
-
 #endif

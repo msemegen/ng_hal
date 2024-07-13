@@ -1,25 +1,25 @@
 // hal
-#include <hal/IRQ_priority.hpp>
-#include <hal/Systick.hpp>
-#include <hal/api.hpp>
-#include <hal/clocks/pclk.hpp>
-#include <hal/clocks/sysclk.hpp>
-#include <hal/oscillators/hsi16.hpp>
-#include <hal/oscillators/msi.hpp>
-#include <hal/peripherals/GPIO.hpp>
-#include <hal/peripherals/i2c.hpp>
-#include <hal/peripherals/usart.hpp>
-#include <hal/stdglue.hpp>
+#include <xmcu/hal/IRQ_priority.hpp>
+#include <xmcu/hal/Systick.hpp>
+#include <xmcu/hal/api.hpp>
+#include <xmcu/hal/clocks/pclk.hpp>
+#include <xmcu/hal/clocks/sysclk.hpp>
+#include <xmcu/hal/oscillators/hsi16.hpp>
+#include <xmcu/hal/oscillators/msi.hpp>
+#include <xmcu/hal/peripherals/GPIO.hpp>
+#include <xmcu/hal/peripherals/i2c.hpp>
+#include <xmcu/hal/peripherals/usart.hpp>
+#include <xmcu/hal/stdglue.hpp>
 
 // std
 #include <cassert>
 #include <charconv>
 #include <chrono>
 
-using namespace hal;
-using namespace hal::clocks;
-using namespace hal::oscillators;
-using namespace hal::peripherals;
+using namespace xmcu::hal;
+using namespace xmcu::hal::clocks;
+using namespace xmcu::hal::oscillators;
+using namespace xmcu::hal::peripherals;
 
 template<typename Duration_t> void delay(Duration_t timeout_a)
 {

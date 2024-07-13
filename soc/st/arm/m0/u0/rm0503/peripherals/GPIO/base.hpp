@@ -10,6 +10,9 @@
 // std
 #include <cstdint>
 
+// xmcu
+#include <xmcu/non_constructible.hpp>
+
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #if XMCU_SOC_STM32_MODEL == stm32l0u083rct6u
 #define XMCU_GPIOA_PRESENT
@@ -17,7 +20,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #define XMCU_GPIOC_PRESENT
 #define XMCU_GPIOD_PRESENT
 
-struct gpio_base
+struct gpio_base : private xmcu::non_constructible
 {
 protected:
     enum class a : std::uint8_t

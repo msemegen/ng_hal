@@ -4,11 +4,11 @@
 #include <string_view>
 
 // soc
-#include <soc/non_constructible.hpp>
+#include <xmcu/non_constructible.hpp>
 #include <soc/st/arm/Systick.hpp>
 
 namespace soc::st::arm {
-struct stdglue : private non_constructible
+struct stdglue : private xmcu::non_constructible
 {
     struct assert : private non_constructible
     {

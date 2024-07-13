@@ -19,7 +19,7 @@
 
 // xmcu
 #include <xmcu/Non_copyable.hpp>
-#include <xmcu/bit_flag.hpp>
+#include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 
 // soc
@@ -100,17 +100,17 @@ template<> class systick::Tick_counter<api::traits::sync>
 public:
     void start()
     {
-        xmcu::bit_flag::set(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
+        xmcu::bit::flag::set(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
     }
 
     void stop()
     {
-        xmcu::bit_flag::clear(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
+        xmcu::bit::flag::clear(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
     }
 
     void wait_for_reload() const
     {
-        while (false == xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_COUNTFLAG_Msk)) continue;
+        while (false == xmcu::bit::flag::is(this->ctrl, SysTick_CTRL_COUNTFLAG_Msk)) continue;
     }
 
     std::uint32_t get_reload() const
@@ -125,7 +125,7 @@ public:
 
     bool is_started() const
     {
-        return xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
+        return xmcu::bit::flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
     }
 };
 
@@ -155,7 +155,7 @@ public:
 
     bool is_started() const
     {
-        return xmcu::bit_flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
+        return xmcu::bit::flag::is(this->ctrl, SysTick_CTRL_ENABLE_Msk);
     }
 
     struct isr : private non_constructible

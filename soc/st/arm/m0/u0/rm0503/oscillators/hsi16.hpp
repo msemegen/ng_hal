@@ -14,7 +14,7 @@
 #include <stm32u0xx.h>
 
 // xmcu
-#include <xmcu/bit_flag.hpp>
+#include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {
@@ -49,8 +49,8 @@ struct hsi16 : private xmcu::non_constructible
 
     static void set_descriptor(const Descriptor& descriptor_a)
     {
-        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSIASFS, static_cast<std::uint32_t>(descriptor_a.start_from_stop));
-        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSIKERON, static_cast<std::uint32_t>(descriptor_a.power));
+        xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSIASFS, static_cast<std::uint32_t>(descriptor_a.start_from_stop));
+        xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSIKERON, static_cast<std::uint32_t>(descriptor_a.power));
     }
     static Descriptor get_descriptor()
     {
@@ -61,23 +61,23 @@ struct hsi16 : private xmcu::non_constructible
     {
         assert(false == is_enabled());
 
-        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_HSION);
+        xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSION);
     }
     static void disable()
     {
         assert(true == is_enabled());
 
-        xmcu::bit_flag::clear(&(RCC->CR), RCC_CR_HSION);
+        xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSION);
     }
 
     static bool is_ready()
     {
-        return xmcu::bit_flag::is(RCC->CR, RCC_CR_HSIRDY);
+        return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSIRDY);
     }
 
     static bool is_enabled()
     {
-        return xmcu::bit_flag::is(RCC->CR, RCC_CR_HSION);
+        return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSION);
     }
 
     static std::uint32_t get_frequency_Hz()

@@ -16,7 +16,7 @@
 #include <stm32u0xx.h>
 
 // xmcu
-#include <xmcu/bit_flag.hpp>
+#include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 #include <xmcu/various.hpp>
 
@@ -61,24 +61,24 @@ struct msi : private xmcu::non_constructible
 
         static void set_frequency(Frequency frequency_a)
         {
-            assert(false == xmcu::bit_flag::is(RCC->CR, RCC_CR_MSION) || true == xmcu::bit_flag::is(RCC->CR, RCC_CR_MSIRDY));
+            assert(false == xmcu::bit::flag::is(RCC->CR, RCC_CR_MSION) || true == xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRDY));
 
-            xmcu::bit_flag::set(&(RCC->CR), RCC_CR_MSIRANGE, static_cast<std::uint32_t>(frequency_a));
+            xmcu::bit::flag::set(&(RCC->CR), RCC_CR_MSIRANGE, static_cast<std::uint32_t>(frequency_a));
         }
 
         static void set_active()
         {
-            xmcu::bit_flag::set(&(RCC->CR), RCC_CR_MSIRGSEL);
+            xmcu::bit::flag::set(&(RCC->CR), RCC_CR_MSIRGSEL);
         }
 
         static bool is_active()
         {
-            return xmcu::bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL);
+            return xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRGSEL);
         }
 
         static Frequency get_frequency()
         {
-            return static_cast<Frequency>(xmcu::bit_flag::get(RCC->CR, RCC_CR_MSIRANGE));
+            return static_cast<Frequency>(xmcu::bit::flag::get(RCC->CR, RCC_CR_MSIRANGE));
         }
     };
 
@@ -94,26 +94,26 @@ struct msi : private xmcu::non_constructible
 
         static void set_frequency(Frequency frequency_a)
         {
-            assert(true == xmcu::bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL));
+            assert(true == xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRGSEL));
 
-            xmcu::bit_flag::set(&(RCC->CSR), RCC_CSR_MSISTBYRG, static_cast<std::uint32_t>(frequency_a));
+            xmcu::bit::flag::set(&(RCC->CSR), RCC_CSR_MSISTBYRG, static_cast<std::uint32_t>(frequency_a));
         }
 
         static bool is_active()
         {
-            return false == xmcu::bit_flag::is(RCC->CR, RCC_CR_MSIRGSEL);
+            return false == xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRGSEL);
         }
 
         static Frequency get_frequency()
         {
-            return static_cast<Frequency>(xmcu::bit_flag::get(RCC->CSR, RCC_CSR_MSISTBYRG));
+            return static_cast<Frequency>(xmcu::bit::flag::get(RCC->CSR, RCC_CSR_MSISTBYRG));
         }
     };
 
     static void set_descriptor(const Descriptor& descriptor_a)
     {
-        xmcu::bit_flag::set(&(RCC->ICSCR), 0xFFu, static_cast<std::uint32_t>(descriptor_a.calibration) & 0xFFu);
-        xmcu::bit_flag::set(&(RCC->ICSCR), 0xFF00u, (static_cast<std::uint32_t>(descriptor_a.trimm) << 8) & 0xFF00u);
+        xmcu::bit::flag::set(&(RCC->ICSCR), 0xFFu, static_cast<std::uint32_t>(descriptor_a.calibration) & 0xFFu);
+        xmcu::bit::flag::set(&(RCC->ICSCR), 0xFF00u, (static_cast<std::uint32_t>(descriptor_a.trimm) << 8) & 0xFF00u);
     }
     static Descriptor get_descriptor()
     {
@@ -124,34 +124,34 @@ struct msi : private xmcu::non_constructible
     {
         assert(false == is_enabled());
 
-        xmcu::bit_flag::set(&(RCC->CR), RCC_CR_MSION);
+        xmcu::bit::flag::set(&(RCC->CR), RCC_CR_MSION);
     }
     static void disable()
     {
         assert(true == is_enabled());
 
-        xmcu::bit_flag::clear(&(RCC->CR), RCC_CR_MSION);
+        xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_MSION);
     }
 
     static bool is_enabled()
     {
-        return xmcu::bit_flag::is(RCC->CR, RCC_CR_MSION);
+        return xmcu::bit::flag::is(RCC->CR, RCC_CR_MSION);
     }
 
     static bool is_ready()
     {
-        return xmcu::bit_flag::is(RCC->CR, RCC_CR_MSIRDY);
+        return xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRDY);
     }
 
     static std::uint32_t get_frequency_Hz()
     {
         if (false == standby.is_active())
         {
-            return freq_Hz_lut[xmcu::bit_flag::get(RCC->CR, RCC_CR_MSIRANGE) >> RCC_CR_MSIRANGE_Pos];
+            return freq_Hz_lut[xmcu::bit::flag::get(RCC->CR, RCC_CR_MSIRANGE) >> RCC_CR_MSIRANGE_Pos];
         }
         else
         {
-            return freq_Hz_lut[xmcu::bit_flag::get(RCC->CSR, RCC_CSR_MSISTBYRG) >> RCC_CSR_MSISTBYRG_Pos];
+            return freq_Hz_lut[xmcu::bit::flag::get(RCC->CSR, RCC_CSR_MSISTBYRG) >> RCC_CSR_MSISTBYRG_Pos];
         }
     }
 

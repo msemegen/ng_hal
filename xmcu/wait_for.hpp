@@ -12,7 +12,6 @@
 
 // xmcu
 #include <xmcu/bit.hpp>
-#include <xmcu/bit_flag.hpp>
 #include <xmcu/non_constructible.hpp>
 
 namespace xmcu {
@@ -20,7 +19,7 @@ struct wait_for : private non_constructible
 {
     static void all_bits_are_set(volatile const std::uint32_t& register_a, std::uint32_t mask_a)
     {
-        while (false == bit_flag::is(register_a, mask_a))
+        while (false == bit::flag::is(register_a, mask_a))
             ;
     }
 
@@ -32,7 +31,7 @@ struct wait_for : private non_constructible
 
     static void all_bits_are_cleared(volatile const std::uint32_t& register_a, std::uint32_t mask_a)
     {
-        while (false == bit_flag::is(~register_a, mask_a))
+        while (false == bit::flag::is(~register_a, mask_a))
             ;
     }
 
@@ -49,7 +48,7 @@ struct wait_for : private non_constructible
 
         while (std::chrono::steady_clock::now() < timeout && false == status)
         {
-            status = bit_flag::is(register_a, mask_a);
+            status = bit::flag::is(register_a, mask_a);
         }
 
         return status;
@@ -75,7 +74,7 @@ struct wait_for : private non_constructible
 
         while (std::chrono::steady_clock::now() < timeout && false == status)
         {
-            status = bit_flag::is(~register_a, mask_a);
+            status = bit::flag::is(~register_a, mask_a);
         }
 
         return status;

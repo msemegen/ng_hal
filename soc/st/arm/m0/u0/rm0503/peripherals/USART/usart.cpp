@@ -1,3 +1,10 @@
+/*
+ *	Name: usart.cpp
+ *
+ *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 #if XMCU_SOC_ARCH_CORE_FAMILY == m0 && XMCU_SOC_VENDOR_FAMILY == stm32u0 && XMCU_SOC_VENDOR_FAMILY_RM == rm0503
 
 // soc
@@ -60,21 +67,21 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
         }
     }
 
-    bit_flag::set(&(this->cr1),
-                  static_cast<std::uint32_t>(descriptor_a.fifo) | static_cast<std::uint32_t>(descriptor_a.oversampling) |
-                      static_cast<std::uint32_t>(descriptor_a.mute) | static_cast<std::uint32_t>(descriptor_a.frame.parity) |
-                      static_cast<std::uint32_t>(descriptor_a.frame.word_length));
-    bit_flag::set(&(this->cr2),
-                  (static_cast<std::uint32_t>(descriptor_a.mute) & 0xFF) | static_cast<std::uint32_t>(descriptor_a.auto_baudrate) |
-                      static_cast<std::uint32_t>(descriptor_a.frame.stop_bits) | static_cast<std::uint32_t>(descriptor_a.frame.msb_first) |
-                      static_cast<std::uint32_t>(descriptor_a.frame.inversion));
-    bit_flag::set(&(this->cr3), static_cast<std::uint32_t>(descriptor_a.sampling));
+    bit::flag::set(&(this->cr1),
+                   static_cast<std::uint32_t>(descriptor_a.fifo) | static_cast<std::uint32_t>(descriptor_a.oversampling) |
+                       static_cast<std::uint32_t>(descriptor_a.mute) | static_cast<std::uint32_t>(descriptor_a.frame.parity) |
+                       static_cast<std::uint32_t>(descriptor_a.frame.word_length));
+    bit::flag::set(&(this->cr2),
+                   (static_cast<std::uint32_t>(descriptor_a.mute) & 0xFF) | static_cast<std::uint32_t>(descriptor_a.auto_baudrate) |
+                       static_cast<std::uint32_t>(descriptor_a.frame.stop_bits) | static_cast<std::uint32_t>(descriptor_a.frame.msb_first) |
+                       static_cast<std::uint32_t>(descriptor_a.frame.inversion));
+    bit::flag::set(&(this->cr3), static_cast<std::uint32_t>(descriptor_a.sampling));
 }
 
 bool usart::Peripheral::enable(Mode mode_a, std::chrono::milliseconds timeout_a)
 {
-    bit_flag::set(&(this->cr1), static_cast<std::uint32_t>(mode_a) | USART_CR1_UE);
-    bit_flag::set(&(this->icr), USART_ICR_TCCF | USART_ICR_IDLECF);
+    bit::flag::set(&(this->cr1), static_cast<std::uint32_t>(mode_a) | USART_CR1_UE);
+    bit::flag::set(&(this->icr), USART_ICR_TCCF | USART_ICR_IDLECF);
 
     return wait_for::all_bits_are_set(this->isr,
                                       (usart::Mode::rx == (mode_a & usart::Mode::rx) ? USART_ISR_REACK : 0x0u) |
@@ -83,7 +90,7 @@ bool usart::Peripheral::enable(Mode mode_a, std::chrono::milliseconds timeout_a)
 }
 bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
 {
-    bit_flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE);
+    bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE);
     return wait_for::all_bits_are_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
 }
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

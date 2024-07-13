@@ -48,45 +48,45 @@ template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Activ
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
 
-    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
 #endif
 #if defined XMCU_I2C2_PRESENT

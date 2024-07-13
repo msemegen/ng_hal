@@ -73,66 +73,66 @@ template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(A
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_1);
-    xmcu::bit_flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
 template<> inline void usart_clock::enable<usart_base::_1, oscillators::lse>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
-    xmcu::bit_flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
 template<> inline void usart_clock::enable<usart_base::_1, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
 
-    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
-    xmcu::bit_flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
+    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
 template<> inline void usart_clock::enable<usart_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0);
-    xmcu::bit_flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0);
+    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
 template<> inline void usart_clock::disable<usart_base::_1>()
 {
-    xmcu::bit_flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
-    xmcu::bit_flag::clear(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+    xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
+    xmcu::bit::flag::clear(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
 #endif
 #if defined XMCU_USART2_PRESENT
@@ -141,66 +141,66 @@ template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(A
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_1);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
 
-    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0);
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 template<> inline void usart_clock::disable<usart_base::_2>()
 {
-    xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-    xmcu::bit_flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
-    xmcu::bit_flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
 #endif
 #if defined XMCU_USART3_PRESENT
@@ -209,19 +209,19 @@ template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Active_
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
 }
 template<> inline void usart_clock::disable<usart_base::_3>()
 {
-    xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
-    xmcu::bit_flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
 }
 #endif
 #if defined XMCU_USART4_PRESENT
@@ -230,19 +230,19 @@ template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Active_
     switch (lp_a)
     {
         case Active_in_low_power::disable:
-            xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
             break;
         case Active_in_low_power::enable:
-            xmcu::bit_flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
             break;
     }
 
-    xmcu::bit_flag::set(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
 }
 template<> inline void usart_clock::disable<usart_base::_4>()
 {
-    xmcu::bit_flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
-    xmcu::bit_flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
 }
 #endif
 } // namespace ll
@@ -771,13 +771,13 @@ public:
 private:
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a)
     {
-        assert(true == xmcu::bit_flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_TEACK));
 
         std::size_t sent = 0;
 
         while (sent < data_a.size())
         {
-            if (true == xmcu::bit_flag::is(this->isr, USART_ISR_TXE_TXFNF))
+            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_TXE_TXFNF))
             {
                 this->tdr = data_a[sent];
                 sent++;
@@ -785,20 +785,20 @@ private:
         }
 
         xmcu::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
-        xmcu::bit_flag::set(&(this->icr), USART_ICR_TCCF);
+        xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;
     }
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a, std::chrono::milliseconds timeout_a)
     {
-        assert(true == xmcu::bit_flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_TEACK));
 
         std::size_t sent = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
 
         while (sent < data_a.size() && std::chrono::steady_clock::now() <= timeout)
         {
-            if (true == xmcu::bit_flag::is(this->isr, USART_ISR_TXE_TXFNF))
+            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_TXE_TXFNF))
             {
                 this->tdr = data_a[sent];
                 sent++;
@@ -806,23 +806,24 @@ private:
         }
 
         xmcu::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
-        xmcu::bit_flag::set(&(this->icr), USART_ICR_TCCF);
+        xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;
     }
 
     template<typename Word_t> std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a) const
     {
-        assert(true == xmcu::bit_flag::is(this->isr, USART_ISR_REACK));
+        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_REACK));
 
         std::size_t received = 0;
-        while (false == xmcu::bit_flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error())
+        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error())
         {
-            if (true == xmcu::bit_flag::is(this->isr, USART_ISR_RXNE_RXFNE))
+            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
             {
-                if (true == xmcu::bit_flag::is(this->isr, USART_ISR_CMF) && true == xmcu::bit_flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
+                if (true == xmcu::bit::flag::is(this->isr, USART_ISR_CMF) &&
+                    true == xmcu::bit::flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
                 {
-                    xmcu::bit_flag::set(&(this->icr), USART_ICR_CMCF);
+                    xmcu::bit::flag::set(&(this->icr), USART_ICR_CMCF);
                 }
 
                 if (received < out_a.size())
@@ -831,17 +832,17 @@ private:
                 }
                 else
                 {
-                    xmcu::bit_flag::set(&(this->rqr), USART_RQR_RXFRQ);
+                    xmcu::bit::flag::set(&(this->rqr), USART_RQR_RXFRQ);
                 }
             }
         }
 
-        xmcu::bit_flag::set(&(this->icr), USART_ICR_IDLECF);
+        xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
 
         if (true == this->is_rx_error())
         {
             const Error errors = this->get_rx_error();
-            xmcu::bit_flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+            xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
 
             return { received, errors };
         }
@@ -851,20 +852,20 @@ private:
     template<typename Word_t>
     std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a, std::chrono::milliseconds timeout_a) const
     {
-        assert(true == xmcu::bit_flag::is(this->isr, USART_ISR_REACK));
+        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_REACK));
 
         std::size_t received = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
 
-        while (false == xmcu::bit_flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error() &&
+        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error() &&
                std::chrono::steady_clock::now() <= timeout)
         {
-            if (true == xmcu::bit_flag::is(this->isr, USART_ISR_RXNE_RXFNE))
+            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
             {
-                if (true == xmcu::bit_flag::is(this->isr, USART_ISR_CMF) &&
-                    true == xmcu::bit_flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
+                if (true == xmcu::bit::flag::is(this->isr, USART_ISR_CMF) &&
+                    true == xmcu::bit::flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
                 {
-                    xmcu::bit_flag::set(&(this->icr), USART_ICR_CMCF);
+                    xmcu::bit::flag::set(&(this->icr), USART_ICR_CMCF);
                 }
 
                 if (received < out_a.size())
@@ -873,17 +874,17 @@ private:
                 }
                 else
                 {
-                    xmcu::bit_flag::set(&(this->rqr), USART_RQR_RXFRQ);
+                    xmcu::bit::flag::set(&(this->rqr), USART_RQR_RXFRQ);
                 }
             }
         }
 
-        xmcu::bit_flag::set(&(this->icr), USART_ICR_IDLECF);
+        xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
 
         if (true == this->is_rx_error())
         {
             const Error errors = this->get_rx_error();
-            xmcu::bit_flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+            xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
 
             return { received, errors };
         }
@@ -900,19 +901,19 @@ private:
     {
         Error error = Error::none;
 
-        if (true == xmcu::bit_flag::is(this->isr, USART_ISR_FE))
+        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_FE))
         {
             error |= Error::framing;
         }
-        if (true == xmcu::bit_flag::is(this->isr, USART_ISR_NE))
+        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_NE))
         {
             error |= Error::noise;
         }
-        if (true == xmcu::bit_flag::is(this->isr, USART_ISR_ORE))
+        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_ORE))
         {
             error |= Error::overrun;
         }
-        if (true == xmcu::bit_flag::is(this->isr, USART_ISR_PE))
+        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_PE))
         {
             error |= Error::parity;
         }

@@ -11,7 +11,7 @@
 #include <cassert>
 
 // xmcu
-#include <xmcu/bit_flag.hpp>
+#include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 
 // soc
@@ -36,20 +36,20 @@ struct sysclk : private xmcu::non_constructible
 
 template<> inline void sysclk::set_source<soc::st::arm::m0::u0::rm0503::oscillators::hsi16>()
 {
-    xmcu::bit_flag::set(&(RCC->CFGR), RCC_CFGR_SW, RCC_CFGR_SW_0);
+    xmcu::bit::flag::set(&(RCC->CFGR), RCC_CFGR_SW, RCC_CFGR_SW_0);
 }
 template<> inline bool sysclk::is_source<soc::st::arm::m0::u0::rm0503::oscillators::hsi16>()
 {
-    return xmcu::bit_flag::is(RCC->CFGR, RCC_CFGR_SWS_0);
+    return xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_0);
 }
 
 template<> inline void sysclk::set_source<soc::st::arm::m0::u0::rm0503::oscillators::msi>()
 {
-    xmcu::bit_flag::clear(&(RCC->CFGR), RCC_CFGR_SW);
+    xmcu::bit::flag::clear(&(RCC->CFGR), RCC_CFGR_SW);
 }
 template<> inline bool sysclk::is_source<soc::st::arm::m0::u0::rm0503::oscillators::msi>()
 {
-    return 0x0u == xmcu::bit_flag::get(RCC->CFGR, RCC_CFGR_SWS);
+    return 0x0u == xmcu::bit::flag::get(RCC->CFGR, RCC_CFGR_SWS);
 }
 
 inline std::uint32_t sysclk::get_frequency_Hz()

@@ -16,7 +16,6 @@
 // xmcu
 #include <xmcu/Non_copyable.hpp>
 #include <xmcu/bit.hpp>
-#include <xmcu/bit_flag.hpp>
 #include <xmcu/non_constructible.hpp>
 #include <xmcu/various.hpp>
 
@@ -233,15 +232,15 @@ template<> struct gpio::Descriptor<gpio::Mode::alternate>
 #if defined XMCU_GPIOA_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::A>()
 {
-    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::A>()
 {
-    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::A>()
 {
-    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
 }
 
 template<> template<>
@@ -324,15 +323,15 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOB_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::B>()
 {
-    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::B>()
 {
-    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::B>()
 {
-    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
 }
 
 template<> template<>
@@ -400,15 +399,15 @@ inline void gpio::Port<gpio::B::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOC_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::C>()
 {
-    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::C>()
 {
-    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::C>()
 {
-    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
 }
 
 template<> template<>
@@ -476,15 +475,15 @@ inline void gpio::Port<gpio::C::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 #if defined XMCU_GPIOD_PRESENT
 template<> inline void ll::gpio_clock::enable<gpio::D>()
 {
-    xmcu::bit_flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
 }
 template<> inline void ll::gpio_clock::disable<gpio::D>()
 {
-    xmcu::bit_flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
 }
 template<> inline bool ll::gpio_clock::is_enabled<gpio::D>()
 {
-    return xmcu::bit_flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
 }
 
 template<> template<>

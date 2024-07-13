@@ -3,8 +3,8 @@
 /*
  *	Name: gpio.hpp
  *
- *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
- *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ *  Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
 // clang-format off

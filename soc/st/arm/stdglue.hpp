@@ -1,5 +1,12 @@
 #pragma once
 
+/*
+ *	Name: stdglue.cpp
+ *
+ *  Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 // std
 #include <string_view>
 

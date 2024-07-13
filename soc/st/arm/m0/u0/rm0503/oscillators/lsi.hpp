@@ -3,8 +3,8 @@
 /*
  *	Name: lsi.hpp
  *
- *   Copyright (c) Mateusz Semegen and contributors. All rights reserved.
- *   Licensed under the MIT license. See LICENSE file in the project root for details.
+ *  Copyright (c) Mateusz Semegen and contributors. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
 // std
@@ -15,7 +15,7 @@
 #include <stm32u0xx.h>
 
 // xmcu
-#include <xmcu/bit_flag.hpp>
+#include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {

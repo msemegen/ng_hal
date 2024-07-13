@@ -1,11 +1,11 @@
-#if XMCU_SOC_VENDOR == st && XMCU_SOC_ARCH == arm
-
 /*
  *	Name: systick.cpp
  *
  *  Copyright (c) Mateusz Semegen and contributors. All rights reserved.
  *  Licensed under the MIT license. See LICENSE file in the project root for details.
  */
+
+#if XMCU_SOC_VENDOR == st && XMCU_SOC_ARCH == arm
 
 // std
 #include <cassert>

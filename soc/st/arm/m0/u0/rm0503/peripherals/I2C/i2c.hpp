@@ -30,16 +30,17 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
 struct i2c_clock : private xmcu::non_constructible
 {
-    enum class Active_in_low_power
+    enum class Stop_mode_activity
     {
         disable,
         enable
     };
-
-    template<typename id_t, typename Source_t> static void enable(Active_in_low_power lp_a) = delete;
+    template<typename id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_activity_a) = delete;
     template<typename id_t> static void disable() = delete;
 
-    template<typename id_t> static bool is_enabled() = delete;
+    template<typename id_t> [[nodiscard]] static bool is_enabled() = delete;
+    template<typename id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
+    template<typename id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
 };
 
 struct i2c : public i2c_base
@@ -76,14 +77,14 @@ template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_1>(
     return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
 }
 
-template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
@@ -91,14 +92,14 @@ template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Activ
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
@@ -106,14 +107,14 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Active_in
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
             break;
     }
@@ -135,14 +136,14 @@ template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_2>()
     return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
 }
 
-template<> inline void i2c_clock::enable<i2c_base::_2, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_2, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
             break;
     }
@@ -161,14 +162,14 @@ template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_3>()
     return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
 }
 
-template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
     }
@@ -176,14 +177,14 @@ template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Activ
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
     }
@@ -191,14 +192,14 @@ template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Active_in
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
             break;
     }
@@ -220,14 +221,14 @@ template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_4>()
     return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
 }
 
-template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
-    switch (lp_a)
+    switch (stop_mode_activity_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
             break;
     }

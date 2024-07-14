@@ -34,16 +34,18 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
 struct usart_clock : private xmcu::non_constructible
 {
-    enum class Active_in_low_power
+    enum class Stop_mode_activity
     {
         disable,
         enable
     };
 
-    template<typename id_t, typename Source_t> static void enable(Active_in_low_power lp_a) = delete;
+    template<typename id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_a) = delete;
     template<typename id_t> static void disable() = delete;
 
-    template<typename id_t> static bool is_enabled() = delete;
+    template<typename id_t> [[nodiscard]] static bool is_enabled() = delete;
+    template<typename id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
+    template<typename id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
 };
 
 struct usart : public usart_base
@@ -57,10 +59,14 @@ struct usart : public usart_base
             enum Flags
             {
                 enable = USART_CR1_UE,
-                enable_in_stop_mode = USART_CR1_UESM
+                enable_stop_mode_activity = USART_CR1_UESM,
+                receiver_enable = USART_CR1_RE,
+                transmitter_enable = USART_CR1_TE
             };
 
             template<typename Flag_t> void set(Flag_t flags_a) = delete;
+            template<typename Flag_t> void clear(Flag_t flags_a) = delete;
+            template<typename Flag_t> bool is(Flag_t flags_a) = delete;
 
         private:
             volatile std::uint32_t v;
@@ -88,14 +94,14 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart
     return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
 }
 
-template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
@@ -103,14 +109,19 @@ template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(A
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
-template<> inline void usart_clock::enable<usart_base::_1, oscillators::lse>(Active_in_low_power lp_a)
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, oscillators::hsi16>()
 {
-    switch (lp_a)
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0) &&
+           true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_1);
+}
+template<> inline void usart_clock::enable<usart_base::_1, oscillators::lse>(Stop_mode_activity stop_mode_a)
+{
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
@@ -118,14 +129,18 @@ template<> inline void usart_clock::enable<usart_base::_1, oscillators::lse>(Act
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
-template<> inline void usart_clock::enable<usart_base::_1, clocks::pclk>(Active_in_low_power lp_a)
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, oscillators::lse>()
 {
-    switch (lp_a)
+    return xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
+}
+template<> inline void usart_clock::enable<usart_base::_1, clocks::pclk>(Stop_mode_activity stop_mode_a)
+{
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
@@ -133,14 +148,18 @@ template<> inline void usart_clock::enable<usart_base::_1, clocks::pclk>(Active_
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
     xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
-template<> inline void usart_clock::enable<usart_base::_1, clocks::sysclk>(Active_in_low_power lp_a)
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, clocks::pclk>()
 {
-    switch (lp_a)
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
+}
+template<> inline void usart_clock::enable<usart_base::_1, clocks::sysclk>(Stop_mode_activity stop_mode_a)
+{
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
             break;
     }
@@ -148,11 +167,24 @@ template<> inline void usart_clock::enable<usart_base::_1, clocks::sysclk>(Activ
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, clocks::sysclk>()
+{
+    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0) &&
+           false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_1);
+}
 template<> inline void usart_clock::disable<usart_base::_1>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
     xmcu::bit::flag::clear(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
+}
+template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_1>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR2, RCC_APBENR2_USART1EN);
+}
+template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_1>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR2, RCC_APBSMENR2_USART1SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 #if defined XMCU_USART2_PRESENT
@@ -161,14 +193,14 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart
     return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
 }
 
-template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
@@ -176,14 +208,14 @@ template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(A
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
-template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
@@ -191,14 +223,14 @@ template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Act
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
-template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
@@ -206,14 +238,14 @@ template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Active_
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
-template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
             break;
     }
@@ -227,6 +259,14 @@ template<> inline void usart_clock::disable<usart_base::_2>()
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_2>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART2EN);
+}
+template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_2>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART2SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
+}
 #endif
 #if defined XMCU_USART3_PRESENT
 template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_3>()
@@ -234,14 +274,14 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart
     return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
 }
 
-template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
             break;
     }
@@ -253,6 +293,14 @@ template<> inline void usart_clock::disable<usart_base::_3>()
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_3>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART3EN);
+}
+template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_3>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART3SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
+}
 #endif
 #if defined XMCU_USART4_PRESENT
 template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_4>()
@@ -260,14 +308,14 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart
     return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
 }
 
-template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Active_in_low_power lp_a)
+template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Stop_mode_activity stop_mode_a)
 {
-    switch (lp_a)
+    switch (stop_mode_a)
     {
-        case Active_in_low_power::disable:
+        case Stop_mode_activity::disable:
             xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
             break;
-        case Active_in_low_power::enable:
+        case Stop_mode_activity::enable:
             xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
             break;
     }
@@ -278,6 +326,14 @@ template<> inline void usart_clock::disable<usart_base::_4>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
+}
+template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_4>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART4EN);
+}
+template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_4>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART4SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 } // namespace ll
@@ -302,7 +358,7 @@ struct usart : public usart_base
         tx = USART_CR1_TE,
         rx = USART_CR1_RE
     };
-    enum class Active_in_low_power : std::uint32_t
+    enum class Stop_mode_activity : std::uint32_t
     {
         disable,
         enable = USART_CR1_UESM
@@ -518,7 +574,7 @@ struct usart : public usart_base
             return {};
         }
 
-        bool enable(Mode mode_a, Active_in_low_power active_in_low_power_a, std::chrono::milliseconds timeout_a);
+        bool enable(Mode mode_a, Stop_mode_activity stop_mode_activity_a, std::chrono::milliseconds timeout_a);
         bool disable(std::chrono::milliseconds timeout_a);
 
         std::pair<bool, Mode> is_enabled() const;

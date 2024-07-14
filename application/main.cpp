@@ -69,7 +69,7 @@ int main()
         gpio::clock::enable<gpio::A>();
 
         // compile time chceck for pins and basic configuration
-        usart::clock::enable<usart::_2, sysclk>(usart::clock::Active_in_low_power::disable);
+        usart::clock::enable<usart::_2, sysclk>(usart::clock::Stop_mode_activity::disable);
         usart::set_traits<
             usart::_2,
             usart::traits::full_duplex<gpio::A::Pin::_3,
@@ -79,7 +79,7 @@ int main()
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
-        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Active_in_low_power::disable);
+        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
         i2c::set_traits<
             i2c::_1,
             i2c::traits::half_duplex<gpio::A::Pin::_10,
@@ -113,7 +113,7 @@ int main()
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
             &led_pad);
 
-        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Active_in_low_power::disable, 10ms);
+        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
         if (true == usart1_enabled)
         {

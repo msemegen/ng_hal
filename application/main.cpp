@@ -102,14 +102,16 @@ int main()
             usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
                                 .oversampling = usart::Descriptor::Oversampling::_16,
                                 .sampling = usart::Descriptor::Sampling::three_sample_bit,
-                                .mute = usart::Descriptor::Mute::none,
-                                .auto_baudrate = usart::Descriptor::Auto_baudrate::disable | 115200u,
+                                .mute = usart::Descriptor::Mute::disable,
+                                .baudrate = 115200u,
                                 .clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Descriptor::Clock::Prescaler::_1 },
                                 .frame { .word_length = usart::Descriptor::Frame::Word_length::_8_bit,
                                          .parity = usart::Descriptor::Frame::Parity::none,
                                          .stop_bits = usart::Descriptor::Frame::Stop_bits::_1,
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
+
+        // i2c::Peripheral* p_i2c1 =
 
         gpio::Pad led_pad;
         gpio::interface<gpio::A>()->enable(

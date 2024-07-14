@@ -48,21 +48,23 @@ struct i2c : public i2c_base
 
     struct Peripheral : private xmcu::Non_copyable
     {
-        volatile std::uint32_t cr1;     /*!< I2C Control register 1,            Address offset: 0x00 */
-        volatile std::uint32_t cr2;     /*!< I2C Control register 2,            Address offset: 0x04 */
-        volatile std::uint32_t oar1;    /*!< I2C Own address 1 register,        Address offset: 0x08 */
-        volatile std::uint32_t oar2;    /*!< I2C Own address 2 register,        Address offset: 0x0C */
-        volatile std::uint32_t timingr; /*!< I2C Timing register,               Address offset: 0x10 */
+        volatile std::uint32_t cr1;     // control register 1
+        volatile std::uint32_t cr2;     // control register 2
+        volatile std::uint32_t oar1;    // own address 1 register
+        volatile std::uint32_t oar2;    // own address 2 register
+        volatile std::uint32_t timingr; // timing register
     private:
-        volatile std::uint32_t reserved; /*!< Reserved,                          Address offset: 0x14 */
+        volatile std::uint32_t reserved;
+
     public:
-        volatile std::uint32_t isr; /*!< I2C Interrupt and status register, Address offset: 0x18 */
-        volatile std::uint32_t icr; /*!< I2C Interrupt clear register,      Address offset: 0x1C */
+        volatile std::uint32_t isr; // interrupt and status register
+        volatile std::uint32_t icr; // interrupt clear register
     private:
-        volatile std::uint32_t reserved0; /*!< Reserved,                          Address offset: 0x20 */
+        volatile std::uint32_t reserved0;
+
     public:
-        volatile std::uint32_t rxdr; /*!< I2C Receive data register,         Address offset: 0x24 */
-        volatile std::uint32_t txdr; /*!< I2C Transmit data register,        Address offset: 0x28 */
+        volatile std::uint32_t rxdr; // receive data register
+        volatile std::uint32_t txdr; // transmit data register
     };
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
@@ -304,14 +306,39 @@ struct i2c : public i2c_base
     }
 };
 
-i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Master& master_a)
+constexpr i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Master& master_a)
 {
     assert(i2c::Descriptor::Mode::master == mode_a);
     return {};
 }
-i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Slave& slave_a)
+constexpr i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Slave& slave_a)
 {
     assert(i2c::Descriptor::Mode::slave == mode_a);
     return {};
 }
+
+#if defined XMCU_I2C1_PRESENT
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_1>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
+}
+#endif
+#if defined XMCU_I2C2_PRESENT
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_2>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
+}
+#endif
+#if defined XMCU_I2C3_PRESENT
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_3>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
+}
+#endif
+#if defined XMCU_I2C4_PRESENT
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_4>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
+}
+#endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

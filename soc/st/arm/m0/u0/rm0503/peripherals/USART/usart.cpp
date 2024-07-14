@@ -32,10 +32,10 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
 
     this->presc = static_cast<std::uint32_t>(descriptor_a.clock.prescaler);
 
-    if (usart::Descriptor::Auto_baudrate::disable == (usart::Descriptor::Auto_baudrate::disable & descriptor_a.auto_baudrate))
+    if (0x0u == (0xFFFFFFFFu & descriptor_a.baudrate))
     {
-        const std::uint32_t baudrate =
-            static_cast<std::uint32_t>((static_cast<std::uint64_t>(descriptor_a.auto_baudrate) >> 32u) & 0xFFFFFFFF);
+        const std::uint32_t baudrate = static_cast<std::uint32_t>((static_cast<std::uint64_t>(descriptor_a.baudrate) >> 32u));
+        assert(0x0u != baudrate);
         switch (descriptor_a.oversampling)
         {
             case usart::Descriptor::Oversampling::_8: {
@@ -72,7 +72,7 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
                        static_cast<std::uint32_t>(descriptor_a.mute) | static_cast<std::uint32_t>(descriptor_a.frame.parity) |
                        static_cast<std::uint32_t>(descriptor_a.frame.word_length));
     bit::flag::set(&(this->cr2),
-                   (static_cast<std::uint32_t>(descriptor_a.mute) & 0xFF) | static_cast<std::uint32_t>(descriptor_a.auto_baudrate) |
+                   (static_cast<std::uint32_t>(descriptor_a.mute) & 0xFF) | static_cast<std::uint32_t>(descriptor_a.baudrate) |
                        static_cast<std::uint32_t>(descriptor_a.frame.stop_bits) | static_cast<std::uint32_t>(descriptor_a.frame.msb_first) |
                        static_cast<std::uint32_t>(descriptor_a.frame.inversion));
     bit::flag::set(&(this->cr3), static_cast<std::uint32_t>(descriptor_a.sampling));

@@ -52,18 +52,18 @@ struct usart : public usart_base
 
     struct Peripheral : private xmcu::Non_copyable
     {
-        volatile std::uint32_t cr1;
-        volatile std::uint32_t cr2;
-        volatile std::uint32_t cr3;
-        volatile std::uint32_t brr;  /*!< USART Baud rate register,                 Address offset: 0x0C */
-        volatile std::uint32_t gtpr; /*!< USART Guard time and prescaler register,  Address offset: 0x10 */
-        volatile std::uint32_t rtor; /*!< USART Receiver Time Out register,         Address offset: 0x14 */
-        mutable volatile std::uint32_t rqr;
-        volatile std::uint32_t isr;
-        mutable volatile std::uint32_t icr;
-        volatile std::uint32_t rdr;   /*!< USART Receive Data register,              Address offset: 0x24 */
-        volatile std::uint32_t tdr;   /*!< USART Transmit Data register,             Address offset: 0x28 */
-        volatile std::uint32_t presc; /*!< USART clock Prescaler register,           Address offset: 0x2C */
+        volatile std::uint32_t cr1;         // control register 1
+        volatile std::uint32_t cr2;         // control register 2
+        volatile std::uint32_t cr3;         // control register 3
+        volatile std::uint32_t brr;         // baud rate register
+        volatile std::uint32_t gtpr;        // guard time and prescaler register
+        volatile std::uint32_t rtor;        // receiver Time Out register
+        mutable volatile std::uint32_t rqr; // request register
+        volatile std::uint32_t isr;         // interrupt and status register
+        mutable volatile std::uint32_t icr; // interrupt flag Clear register
+        volatile std::uint32_t rdr;         // receive Data register
+        volatile std::uint32_t tdr;         // transmit Data register
+        volatile std::uint32_t presc;       // clock Prescaler register
     };
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
@@ -307,13 +307,12 @@ struct usart : public usart_base
         };
         enum class Mute : std::uint32_t
         {
-            none = 0x0u,
+            disable = 0x0u,
             wake_on_idle_line = USART_CR1_MME,
             wake_on_address = USART_CR1_MME | USART_CR1_WAKE,
         };
         enum class Auto_baudrate : std::uint64_t
         {
-            disable = 0x0u,
             _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
             _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
         };
@@ -378,11 +377,32 @@ struct usart : public usart_base
             Inversion inversion;
         };
 
+        struct Baudrate
+        {
+            Baudrate() {}
+            Baudrate(std::uint32_t value_a)
+                : v(static_cast<std::uint64_t>(value_a) << 32u)
+            {
+            }
+            Baudrate(Auto_baudrate flag_a)
+                : v(static_cast<std::uint32_t>(flag_a))
+            {
+            }
+
+            operator std::uint64_t() const
+            {
+                return this->v;
+            }
+
+        private:
+            std::uint64_t v = 0u;
+        };
+
         Fifo fifo;
         Oversampling oversampling;
         Sampling sampling;
         Mute mute;
-        Auto_baudrate auto_baudrate;
+        Baudrate baudrate;
 
         Clock clock;
         Frame frame;
@@ -678,20 +698,6 @@ inline constexpr usart::Descriptor::Mute operator|(usart::Descriptor::Mute mode_
     else
     {
         assert(mode_a == usart::Descriptor::Mute::wake_on_address);
-        return mode_a;
-    }
-}
-
-inline constexpr usart::Descriptor::Auto_baudrate operator|(usart::Descriptor::Auto_baudrate mode_a, std::uint32_t baudrate_a)
-{
-    if (mode_a == usart::Descriptor::Auto_baudrate::disable)
-    {
-        return static_cast<usart::Descriptor::Auto_baudrate>(static_cast<std::uint32_t>(mode_a) |
-                                                             (static_cast<std::uint64_t>(baudrate_a) << 32u));
-    }
-    else
-    {
-        assert(mode_a == usart::Descriptor::Auto_baudrate::disable);
         return mode_a;
     }
 }

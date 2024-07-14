@@ -42,24 +42,24 @@ struct lsi : private xmcu::non_constructible
     {
         assert(false == is_enabled());
 
-        xmcu::bit_flag::set(&(RCC->CSR), RCC_CSR_LSIPREDIV, static_cast<std::uint32_t>(descriptor_a.prescaler));
+        xmcu::bit::flag::set(&(RCC->CSR), RCC_CSR_LSIPREDIV, static_cast<std::uint32_t>(descriptor_a.prescaler));
     }
 
     static void enable()
     {
         assert(false == is_enabled());
 
-        xmcu::bit_flag::set(&(RCC->CSR), RCC_CSR_LSION);
+        xmcu::bit::flag::set(&(RCC->CSR), RCC_CSR_LSION);
     }
 
     static bool is_enabled()
     {
-        return xmcu::bit_flag::is(RCC->CSR, RCC_CSR_LSION);
+        return xmcu::bit::flag::is(RCC->CSR, RCC_CSR_LSION);
     }
 
     static bool is_ready()
     {
-        return xmcu::bit_flag::is(RCC->CSR, RCC_CSR_LSIRDY);
+        return xmcu::bit::flag::is(RCC->CSR, RCC_CSR_LSIRDY);
     }
 
     static std::uint32_t get_frequency_Hz()

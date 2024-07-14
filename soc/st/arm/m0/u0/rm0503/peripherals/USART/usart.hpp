@@ -208,6 +208,11 @@ template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(S
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, oscillators::hsi16>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0) &&
+           true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_1);
+}
 template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Stop_mode_activity stop_mode_a)
 {
     switch (stop_mode_a)
@@ -222,6 +227,10 @@ template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Sto
 
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
+}
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, oscillators::lse>()
+{
+    return xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
 }
 template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Stop_mode_activity stop_mode_a)
 {
@@ -238,6 +247,10 @@ template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Stop_mo
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, clocks::pclk>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
+}
 template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Stop_mode_activity stop_mode_a)
 {
     switch (stop_mode_a)
@@ -253,12 +266,18 @@ template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Stop_
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, clocks::sysclk>()
+{
+    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0) &&
+           false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_1);
+}
 template<> inline void usart_clock::disable<usart_base::_2>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
 }
+
 template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_2>()
 {
     return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART2EN);
@@ -288,6 +307,11 @@ template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Stop_mo
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_3, clocks::pclk>()
+{
+    return true;
+}
+
 template<> inline void usart_clock::disable<usart_base::_3>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
@@ -322,6 +346,11 @@ template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Stop_mo
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
 }
+template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_4, clocks::pclk>()
+{
+    return true;
+}
+
 template<> inline void usart_clock::disable<usart_base::_4>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);

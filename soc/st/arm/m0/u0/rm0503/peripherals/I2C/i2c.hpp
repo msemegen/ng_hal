@@ -92,6 +92,10 @@ template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Stop_
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, oscillators::hsi16>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0) && true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_1);
+}
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Stop_mode_activity stop_mode_activity_a)
 {
     switch (stop_mode_activity_a)
@@ -106,6 +110,10 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Stop_mode
 
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, clocks::sysclk>()
+{
+    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0) && false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_1);
 }
 template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
@@ -122,12 +130,23 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Stop_mode_a
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, clocks::pclk>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0 | RCC_CCIPR_I2C1SEL_1);
+}
 template<> inline void i2c_clock::disable<i2c::_1>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
+template<> [[nodiscard]] inline bool i2c_clock::is_enabled<i2c_base::_1>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_I2C1EN);
+}
+template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_stop_mode_activity<i2c_base::_1>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_I2C1SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
@@ -150,10 +169,22 @@ template<> inline void i2c_clock::enable<i2c_base::_2, clocks::pclk>(Stop_mode_a
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C2EN);
 }
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_2, clocks::pclk>()
+{
+    return true;
+}
 template<> inline void i2c_clock::disable<i2c::_2>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C2EN);
+}
+template<> [[nodiscard]] inline bool i2c_clock::is_enabled<i2c_base::_2>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_I2C2EN);
+}
+template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_stop_mode_activity<i2c_base::_2>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_I2C2SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
@@ -177,6 +208,10 @@ template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Stop_
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, oscillators::hsi16>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0) && true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_1);
+}
 template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Stop_mode_activity stop_mode_activity_a)
 {
     switch (stop_mode_activity_a)
@@ -191,6 +226,10 @@ template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Stop_mode
 
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, clocks::sysclk>()
+{
+    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0) && false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_1);
 }
 template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Stop_mode_activity stop_mode_activity_a)
 {
@@ -207,12 +246,23 @@ template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Stop_mode_a
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, clocks::pclk>()
+{
+    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0 | RCC_CCIPR_I2C3SEL_1);
+}
 template<> inline void i2c_clock::disable<i2c::_3>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
+template<> [[nodiscard]] inline bool i2c_clock::is_enabled<i2c_base::_3>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_I2C3EN);
+}
+template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_stop_mode_activity<i2c_base::_3>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_I2C3SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 #if defined XMCU_I2C4_PRESENT
@@ -235,10 +285,22 @@ template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Stop_mode_a
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C4EN);
 }
+template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_4, clocks::pclk>()
+{
+    return true;
+}
 template<> inline void i2c_clock::disable<i2c::_4>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C4EN);
+}
+template<> [[nodiscard]] inline bool i2c_clock::is_enabled<i2c_base::_4>()
+{
+    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_I2C4EN);
+}
+template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_stop_mode_activity<i2c_base::_4>()
+{
+    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_I2C4SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
 }
 #endif
 } // namespace ll

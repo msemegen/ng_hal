@@ -50,7 +50,7 @@ struct usart : public usart_base
 {
     using clock = usart_clock;
 
-    struct Port : private xmcu::Non_copyable
+    struct Peripheral : private xmcu::Non_copyable
     {
         volatile std::uint32_t cr1;
         volatile std::uint32_t cr2;
@@ -65,9 +65,16 @@ struct usart : public usart_base
         volatile std::uint32_t tdr;   /*!< USART Transmit Data register,             Address offset: 0x28 */
         volatile std::uint32_t presc; /*!< USART clock Prescaler register,           Address offset: 0x2C */
     };
+
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
 };
 
 #if defined XMCU_USART1_PRESENT
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_1>()
+{
+    return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
+}
+
 template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(Active_in_low_power lp_a)
 {
     switch (lp_a)
@@ -136,6 +143,11 @@ template<> inline void usart_clock::disable<usart_base::_1>()
 }
 #endif
 #if defined XMCU_USART2_PRESENT
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_2>()
+{
+    return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
+}
+
 template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(Active_in_low_power lp_a)
 {
     switch (lp_a)
@@ -204,6 +216,11 @@ template<> inline void usart_clock::disable<usart_base::_2>()
 }
 #endif
 #if defined XMCU_USART3_PRESENT
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_3>()
+{
+    return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
+}
+
 template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
@@ -225,6 +242,11 @@ template<> inline void usart_clock::disable<usart_base::_3>()
 }
 #endif
 #if defined XMCU_USART4_PRESENT
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_4>()
+{
+    return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
+}
+
 template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Active_in_low_power lp_a)
 {
     switch (lp_a)
@@ -447,7 +469,7 @@ struct usart : public usart_base
         };
     };
 
-    class Peripheral : private ll::usart::Port
+    class Peripheral : private ll::usart::Peripheral
     {
     public:
         void set_descriptor(const Descriptor& descriptor_a);
@@ -707,7 +729,7 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart
 }
 #endif
 
-template<> class usart::Transceiver<api::traits::sync> : private ll::usart::Port
+template<> class usart::Transceiver<api::traits::sync> : private ll::usart::Peripheral
 {
 public:
     std::pair<std::size_t, usart::Error> read(std::span<std::uint8_t> out_a) const
@@ -921,7 +943,7 @@ private:
         return error;
     }
 };
-template<> class usart::Transceiver<api::traits::async> : private ll::usart::Port
+template<> class usart::Transceiver<api::traits::async> : private ll::usart::Peripheral
 {
 public:
     void start();

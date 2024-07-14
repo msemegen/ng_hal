@@ -42,7 +42,38 @@ struct i2c_clock : private xmcu::non_constructible
     template<typename id_t> static bool is_enabled() = delete;
 };
 
+struct i2c : public i2c_base
+{
+    using clock = i2c_clock;
+
+    struct Peripheral : private xmcu::Non_copyable
+    {
+        volatile std::uint32_t cr1;     /*!< I2C Control register 1,            Address offset: 0x00 */
+        volatile std::uint32_t cr2;     /*!< I2C Control register 2,            Address offset: 0x04 */
+        volatile std::uint32_t oar1;    /*!< I2C Own address 1 register,        Address offset: 0x08 */
+        volatile std::uint32_t oar2;    /*!< I2C Own address 2 register,        Address offset: 0x0C */
+        volatile std::uint32_t timingr; /*!< I2C Timing register,               Address offset: 0x10 */
+    private:
+        volatile std::uint32_t reserved; /*!< Reserved,                          Address offset: 0x14 */
+    public:
+        volatile std::uint32_t isr; /*!< I2C Interrupt and status register, Address offset: 0x18 */
+        volatile std::uint32_t icr; /*!< I2C Interrupt clear register,      Address offset: 0x1C */
+    private:
+        volatile std::uint32_t reserved0; /*!< Reserved,                          Address offset: 0x20 */
+    public:
+        volatile std::uint32_t rxdr; /*!< I2C Receive data register,         Address offset: 0x24 */
+        volatile std::uint32_t txdr; /*!< I2C Transmit data register,        Address offset: 0x28 */
+    };
+
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+};
+
 #if defined XMCU_I2C1_PRESENT
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_1>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
+}
+
 template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Active_in_low_power lp_a)
 {
     switch (lp_a)
@@ -88,37 +119,125 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Active_in_l
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
+
+template<> inline void i2c_clock::disable<i2c::_1>()
+{
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C1SMEN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
+}
 #endif
 #if defined XMCU_I2C2_PRESENT
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_2>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
+}
+
+template<> inline void i2c_clock::enable<i2c_base::_2, clocks::pclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
+            break;
+        case Active_in_low_power::enable:
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
+            break;
+    }
+
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C2EN);
+}
+template<> inline void i2c_clock::disable<i2c::_2>()
+{
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C2EN);
+}
 #endif
 #if defined XMCU_I2C3_PRESENT
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_3>()
+{
+    return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
+}
+
+template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+        case Active_in_low_power::enable:
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+    }
+
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_1);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
+template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+        case Active_in_low_power::enable:
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+    }
+
+    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_0);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
+template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
+    {
+        case Active_in_low_power::disable:
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+        case Active_in_low_power::enable:
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+            break;
+    }
+
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL);
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
+
+template<> inline void i2c_clock::disable<i2c::_3>()
+{
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C3SMEN);
+    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
+}
 #endif
 #if defined XMCU_I2C4_PRESENT
-#endif
-
-struct i2c : public i2c_base
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_4>()
 {
-    using clock = i2c_clock;
+    return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
+}
 
-    struct Port : private xmcu::Non_copyable
+template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Active_in_low_power lp_a)
+{
+    switch (lp_a)
     {
-        volatile std::uint32_t cr1;     /*!< I2C Control register 1,            Address offset: 0x00 */
-        volatile std::uint32_t cr2;     /*!< I2C Control register 2,            Address offset: 0x04 */
-        volatile std::uint32_t oar1;    /*!< I2C Own address 1 register,        Address offset: 0x08 */
-        volatile std::uint32_t oar2;    /*!< I2C Own address 2 register,        Address offset: 0x0C */
-        volatile std::uint32_t timingr; /*!< I2C Timing register,               Address offset: 0x10 */
-    private:
-        volatile std::uint32_t reserved; /*!< Reserved,                          Address offset: 0x14 */
-    public:
-        volatile std::uint32_t isr; /*!< I2C Interrupt and status register, Address offset: 0x18 */
-        volatile std::uint32_t icr; /*!< I2C Interrupt clear register,      Address offset: 0x1C */
-    private:
-        volatile std::uint32_t reserved0; /*!< Reserved,                          Address offset: 0x20 */
-    public:
-        volatile std::uint32_t rxdr; /*!< I2C Receive data register,         Address offset: 0x24 */
-        volatile std::uint32_t txdr; /*!< I2C Transmit data register,        Address offset: 0x28 */
-    };
-};
+        case Active_in_low_power::disable:
+            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
+            break;
+        case Active_in_low_power::enable:
+            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
+            break;
+    }
+
+    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C4EN);
+}
+template<> inline void i2c_clock::disable<i2c::_4>()
+{
+    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C4SMEN);
+    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_I2C4EN);
+}
+#endif
 } // namespace ll
 
 struct i2c : public i2c_base
@@ -160,7 +279,7 @@ struct i2c : public i2c_base
         };
     };
 
-    class Peripheral : private ll::i2c::Port
+    class Peripheral : private ll::i2c::Peripheral
     {
     public:
         void set_descriptor(const Descriptor& descriptor_a) {}

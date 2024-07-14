@@ -21,12 +21,6 @@ using namespace xmcu::hal::clocks;
 using namespace xmcu::hal::oscillators;
 using namespace xmcu::hal::peripherals;
 
-template<typename Duration_t> void delay(Duration_t timeout_a)
-{
-    const auto end = std::chrono::steady_clock::now() + timeout_a;
-    while (end >= std::chrono::steady_clock::now()) continue;
-}
-
 #ifndef NDEBUG
 void stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
 {
@@ -119,7 +113,7 @@ int main()
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
             &led_pad);
 
-        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, 10ms);
+        bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Active_in_low_power::disable, 10ms);
 
         if (true == usart1_enabled)
         {
@@ -141,11 +135,7 @@ int main()
         }
         else
         {
-            while (true)
-            {
-                delay(1000ms);
-                led_pad.toggle();
-            }
+            led_pad.write(gpio::Level::low);
         }
     }
 

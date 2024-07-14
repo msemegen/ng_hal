@@ -52,6 +52,19 @@ struct usart : public usart_base
 
     struct Peripheral : private xmcu::Non_copyable
     {
+        struct CR1
+        {
+            enum Flags
+            {
+                enable = USART_CR1_UE,
+                enable_in_stop_mode = USART_CR1_UESM
+            };
+
+            template<typename Flag_t> void set(Flag_t flags_a) = delete;
+
+        private:
+            volatile std::uint32_t v;
+        };
         volatile std::uint32_t cr1;         // control register 1
         volatile std::uint32_t cr2;         // control register 2
         volatile std::uint32_t cr3;         // control register 3
@@ -283,11 +296,18 @@ struct usart : public usart_base
         overrun,
         parity
     };
+
     enum class Mode : std::uint32_t
     {
         tx = USART_CR1_TE,
         rx = USART_CR1_RE
     };
+    enum class Active_in_low_power : std::uint32_t
+    {
+        disable,
+        enable = USART_CR1_UESM
+    };
+
     struct Descriptor
     {
         enum class Fifo : std::uint32_t
@@ -498,7 +518,7 @@ struct usart : public usart_base
             return {};
         }
 
-        bool enable(Mode mode_a, std::chrono::milliseconds timeout_a);
+        bool enable(Mode mode_a, Active_in_low_power active_in_low_power_a, std::chrono::milliseconds timeout_a);
         bool disable(std::chrono::milliseconds timeout_a);
 
         std::pair<bool, Mode> is_enabled() const;
@@ -700,14 +720,6 @@ inline constexpr usart::Descriptor::Mute operator|(usart::Descriptor::Mute mode_
         assert(mode_a == usart::Descriptor::Mute::wake_on_address);
         return mode_a;
     }
-}
-
-inline constexpr usart::Descriptor::Auto_baudrate operator&(usart::Descriptor::Auto_baudrate left_a,
-                                                            usart::Descriptor::Auto_baudrate right_a)
-{
-    return static_cast<usart::Descriptor::Auto_baudrate>(
-        (static_cast<std::underlying_type_t<usart::Descriptor::Auto_baudrate>>(left_a) & 0xFFFFFFFF) &
-        (static_cast<std::underlying_type_t<usart::Descriptor::Auto_baudrate>>(right_a) & 0xFFFFFFFF));
 }
 
 #if defined XMCU_USART1_PRESENT

@@ -78,8 +78,9 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
     bit::flag::set(&(this->cr3), static_cast<std::uint32_t>(descriptor_a.sampling));
 }
 
-bool usart::Peripheral::enable(Mode mode_a, std::chrono::milliseconds timeout_a)
+bool usart::Peripheral::enable(Mode mode_a, Active_in_low_power active_in_low_power_a, std::chrono::milliseconds timeout_a)
 {
+    bit::flag::set(&(this->cr1), USART_CR1_UESM, static_cast<std::uint32_t>(active_in_low_power_a));
     bit::flag::set(&(this->cr1), static_cast<std::uint32_t>(mode_a) | USART_CR1_UE);
     bit::flag::set(&(this->icr), USART_ICR_TCCF | USART_ICR_IDLECF);
 
@@ -90,7 +91,7 @@ bool usart::Peripheral::enable(Mode mode_a, std::chrono::milliseconds timeout_a)
 }
 bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
 {
-    bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE);
+    bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE | USART_CR1_UESM);
     return wait_for::all_bits_are_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
 }
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

@@ -57,7 +57,8 @@ int main()
     while (false == sysclk::is_source<hsi16>()) continue;
 
     msi::disable();
-    //hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
+    hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
+    hse::enable(4'000'000u);
 
     p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = sysclk::get_frequency_Hz() - 1u });
 

@@ -89,7 +89,7 @@ int main()
                                      gpio::Descriptor<gpio::Mode::alternate> {
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        usart::Peripheral* p_usart2 = usart::create<usart::_2>();
+        usart::Peripheral* p_usart2 = usart::interface<usart::_2>(); // TODO: interace, like in GPIO
 
         // transmission configuration
         p_usart2->set_descriptor(
@@ -107,11 +107,11 @@ int main()
 
         // i2c::Peripheral* p_i2c1 =
 
-        gpio::Pad led_pad;
+        gpio::Pad led;
         gpio::interface<gpio::A>()->enable(
             gpio::A::Pin::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
-            &led_pad);
+            &led);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
@@ -128,14 +128,14 @@ int main()
 
                 p_usart2_comm->read(std::span { &c, 1u });
                 p_usart2_comm->write(std::span { &c, 1u });
-                led_pad.toggle();
+                led.toggle();
 
                 assert(c != 't'); // assert test
             }
         }
         else
         {
-            led_pad.write(gpio::Level::low);
+            led.write(gpio::Level::low);
         }
     }
 

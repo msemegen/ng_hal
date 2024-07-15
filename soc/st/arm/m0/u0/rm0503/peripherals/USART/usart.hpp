@@ -98,7 +98,7 @@ struct usart : public usart_base
         volatile std::uint32_t presc;       // clock Prescaler register
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 };
 
 template<> inline void usart::Peripheral::CR1::set(usart::Peripheral::CR1::Flags flags_a)
@@ -115,7 +115,7 @@ template<> [[nodiscard]] inline bool usart::Peripheral::CR1::is(usart::Periphera
 }
 
 #if defined XMCU_USART1_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_1>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_1>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
 }
@@ -214,7 +214,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART2_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_2>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_2>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
 }
@@ -314,7 +314,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART3_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_3>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_3>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
 }
@@ -353,7 +353,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART4_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_4>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_4>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
 }
@@ -641,7 +641,7 @@ struct usart : public usart_base
     {
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 
     template<typename id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
     static void set_traits()
@@ -834,25 +834,25 @@ inline constexpr usart::Descriptor::Mute operator|(usart::Descriptor::Mute mode_
 }
 
 #if defined XMCU_USART1_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_1>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_1>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
 }
 #endif
 #if defined XMCU_USART2_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_2>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_2>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
 }
 #endif
 #if defined XMCU_USART3_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_3>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_3>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
 }
 #endif
 #if defined XMCU_USART4_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_4>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_4>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
 }

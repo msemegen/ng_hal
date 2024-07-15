@@ -47,7 +47,7 @@ struct gpio : public gpio_base
     using C = c;
 #endif
 
-#if defined XMCU_GPIOC_PRESENT
+#if defined XMCU_GPIOD_PRESENT
     using D = d;
 #endif
 

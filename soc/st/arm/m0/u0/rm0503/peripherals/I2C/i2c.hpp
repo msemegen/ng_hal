@@ -68,11 +68,11 @@ struct i2c : public i2c_base
         volatile std::uint32_t txdr; // transmit data register
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 };
 
 #if defined XMCU_I2C1_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_1>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_1>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
 }
@@ -150,7 +150,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_2>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_2>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
 }
@@ -188,7 +188,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_3>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_3>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
 }
@@ -266,7 +266,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C4_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::create<i2c::_4>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_4>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
 }
@@ -357,7 +357,7 @@ struct i2c : public i2c_base
     {
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
+    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 
     template<typename id_t, typename transmission_mode_t> static void set_traits()
     {
@@ -381,25 +381,25 @@ constexpr i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2
 }
 
 #if defined XMCU_I2C1_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_1>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_1>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_2>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_2>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_3>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_3>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
 }
 #endif
 #if defined XMCU_I2C4_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::create<i2c::_4>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_4>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
 }

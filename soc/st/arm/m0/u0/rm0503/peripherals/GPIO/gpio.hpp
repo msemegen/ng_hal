@@ -51,6 +51,10 @@ struct gpio : public gpio_base
     using D = d;
 #endif
 
+#if defined XMCU_GPIOF_PRESENT
+    using F = f;
+#endif
+
     using clock = gpio_clock;
 
     struct Port : private xmcu::Non_copyable
@@ -144,6 +148,25 @@ template<> inline void gpio_clock::disable<gpio::D>()
 template<> inline bool gpio_clock::is_enabled<gpio::D>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
+}
+#endif
+#if defined XMCU_GPIOF_PRESENT
+template<> inline constexpr gpio::Port* gpio::interface<gpio::F>()
+{
+    return reinterpret_cast<gpio::Port*>(GPIOF_BASE);
+}
+
+template<> inline void gpio_clock::enable<gpio::F>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOFEN);
+}
+template<> inline void gpio_clock::disable<gpio::F>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOFEN);
+}
+template<> inline bool gpio_clock::is_enabled<gpio::F>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOFEN);
 }
 #endif
 } // namespace ll
@@ -254,8 +277,12 @@ struct gpio : public gpio_base
     using C = Port<c>;
 #endif
 
-#if defined XMCU_GPIOC_PRESENT
+#if defined XMCU_GPIOD_PRESENT
     using D = Port<d>;
+#endif
+
+#if defined XMCU_GPIOF_PRESENT
+    using F = Port<f>;
 #endif
 
     template<typename Port_t> constexpr static Port_t* interface() = delete;
@@ -655,6 +682,95 @@ inline void gpio::Port<gpio::D::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
 }
 template<> template<>
 inline void gpio::Port<gpio::D::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::D::Pin pin_a,
+                                                                                      std::uint8_t function_a,
+                                                                                      const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
+                                                                                      Pad* p_out_pad_a)
+{
+    assert(nullptr != p_out_pad_a);
+
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
+}
+#endif
+#if defined XMCU_GPIOF_PRESENT
+template<> inline constexpr gpio::F* gpio::interface<gpio::F>()
+{
+    return reinterpret_cast<gpio::F*>(GPIOF_BASE);
+}
+
+template<> inline void ll::gpio_clock::enable<gpio::F>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOFEN);
+}
+template<> inline void ll::gpio_clock::disable<gpio::F>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOFEN);
+}
+template<> inline bool ll::gpio_clock::is_enabled<gpio::F>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOFEN);
+}
+
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::analog>>(gpio::F::Pin pin_a,
+                                                                                   const gpio::Descriptor<gpio::Mode::analog>& desc_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+}
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::analog>>(gpio::F::Pin pin_a,
+                                                                                   const gpio::Descriptor<gpio::Mode::analog>& desc_a,
+                                                                                   Pad* p_out_pad_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
+}
+
+template<> template<> inline void
+gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::in>>(gpio::F::Pin pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+}
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::in>>(gpio::F::Pin pin_a,
+                                                                               const gpio::Descriptor<gpio::Mode::in>& desc_a,
+                                                                               Pad* p_out_pad_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
+}
+
+template<> template<> inline void
+gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(gpio::F::Pin pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+}
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(gpio::F::Pin pin_a,
+                                                                                const gpio::Descriptor<gpio::Mode::out>& desc_a,
+                                                                                Pad* p_out_pad_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
+}
+
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::F::Pin pin_a,
+                                                                                      std::uint8_t function_a,
+                                                                                      const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
+{
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
+}
+template<> template<>
+inline void gpio::Port<gpio::F::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::F::Pin pin_a,
                                                                                       std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
                                                                                       Pad* p_out_pad_a)

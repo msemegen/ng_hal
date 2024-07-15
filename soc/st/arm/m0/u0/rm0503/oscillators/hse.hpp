@@ -7,7 +7,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
-// assert
+// std
 #include <cassert>
 
 // CMSIS
@@ -21,6 +21,18 @@
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::oscillators {
+namespace details {
+template<auto... pins_t> struct HSE_pins
+{
+    static constexpr bool is(auto value_a)
+    {
+        return ((value_a == pins_t) || ...);
+    }
+};
+HSE_pins<peripherals::gpio::F::Pin::_0> osc_in;
+HSE_pins<peripherals::gpio::F::Pin::_1> osc_out;
+} // namespace details
+
 namespace ll {
 struct hse : private xmcu::non_constructible
 {
@@ -41,24 +53,22 @@ struct hse : private xmcu::non_constructible
     public:
         struct clock
         {
-            static constexpr Source source = Source::clock;
+            static constexpr Source type = Source::clock;
         };
-        template<auto osc_in_pin_t,
-                 peripherals::gpio::Descriptor<peripherals::gpio::Mode::alternate> osc_in_pin_descriptor_t,
-                 auto osc_out_pin_t,
-                 peripherals::gpio::Descriptor<peripherals::gpio::Mode::alternate> osc_out_pin_descriptor_t>
-        struct xtal
+        template<auto osc_in_pin_t, auto osc_out_pin_t> struct xtal
         {
-            static constexpr Source source = Source::xtal;
+            static constexpr Source type = Source::xtal;
 
             constexpr static auto osc_in_pin = osc_in_pin_t;
-            constexpr static auto osc_in_pin_descriptor = osc_in_pin_descriptor_t;
             constexpr static auto osc_out_pin = osc_out_pin_t;
-            constexpr static auto osc_out_pin_descriptor = osc_out_pin_descriptor_t;
         };
     };
 
-    template<typename Source_t> static void set_traits() {}
+    template<typename Source_t> static void set_traits()
+    {
+        static_assert(true == details::osc_in.is(Source_t::osc_in_pin));
+        static_assert(true == details::osc_out.is(Source_t::osc_out_pin));
+    }
 
     static void enable()
     {

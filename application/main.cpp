@@ -4,6 +4,7 @@
 #include <xmcu/hal/api.hpp>
 #include <xmcu/hal/clocks/pclk.hpp>
 #include <xmcu/hal/clocks/sysclk.hpp>
+#include <xmcu/hal/oscillators/hse.hpp>
 #include <xmcu/hal/oscillators/hsi16.hpp>
 #include <xmcu/hal/oscillators/msi.hpp>
 #include <xmcu/hal/peripherals/GPIO.hpp>
@@ -56,6 +57,7 @@ int main()
     while (false == sysclk::is_source<hsi16>()) continue;
 
     msi::disable();
+    //hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
 
     p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = sysclk::get_frequency_Hz() - 1u });
 
@@ -104,8 +106,6 @@ int main()
                                          .stop_bits = usart::Descriptor::Frame::Stop_bits::_1,
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
-
-        // i2c::Peripheral* p_i2c1 =
 
         gpio::Pad led;
         gpio::interface<gpio::A>()->enable(

@@ -19,6 +19,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 #define XMCU_GPIOB_PRESENT
 #define XMCU_GPIOC_PRESENT
 #define XMCU_GPIOD_PRESENT
+#define XMCU_GPIOF_PRESENT
 
 struct gpio_base : private xmcu::non_constructible
 {
@@ -83,6 +84,12 @@ protected:
     enum class d : std::uint8_t
     {
         _2 = 2u
+    };
+    enum class f : std::uint8_t
+    {
+        _0,
+        _1,
+        _2
     };
 
 public:

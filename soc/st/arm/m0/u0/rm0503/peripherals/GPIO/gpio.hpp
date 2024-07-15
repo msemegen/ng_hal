@@ -55,23 +55,99 @@ struct gpio : public gpio_base
 
     struct Port : private xmcu::Non_copyable
     {
-        volatile std::uint32_t moder;   /*!< GPIO port mode register,               Address offset: 0x00      */
-        volatile std::uint32_t otyper;  /*!< GPIO port output type register,        Address offset: 0x04      */
-        volatile std::uint32_t ospeedr; /*!< GPIO port output speed register,       Address offset: 0x08      */
-        volatile std::uint32_t pupdr;   /*!< GPIO port pull-up/pull-down register,  Address offset: 0x0C      */
-        volatile std::uint32_t idr;     /*!< GPIO port input data register,         Address offset: 0x10      */
-        volatile std::uint32_t odr;     /*!< GPIO port output data register,        Address offset: 0x14      */
-        volatile std::uint32_t bsrr;    /*!< GPIO port bit set/reset  register,     Address offset: 0x18      */
-        volatile std::uint32_t lckr;    /*!< GPIO port configuration lock register, Address offset: 0x1C      */
-        volatile std::uint32_t afr[2];  /*!< GPIO alternate function registers,     Address offset: 0x20-0x24 */
-        volatile std::uint32_t brr;     /*!< GPIO Bit Reset register,               Address offset: 0x28      */
+        volatile std::uint32_t moder;   // port mode register
+        volatile std::uint32_t otyper;  // port output type register
+        volatile std::uint32_t ospeedr; // port output speed register
+        volatile std::uint32_t pupdr;   // port pull-up/pull-down register
+        volatile std::uint32_t idr;     // port input data register
+        volatile std::uint32_t odr;     // port output data register
+        volatile std::uint32_t bsrr;    // port bit set/reset  register
+        volatile std::uint32_t lckr;    // port configuration lock register
+        volatile std::uint32_t afr[2];  // alternate function registers
+        volatile std::uint32_t brr;     // bit reset register
     };
 
     template<typename Port_t> static constexpr Port* interface();
 };
+
+#if defined XMCU_GPIOA_PRESENT
+template<> inline constexpr gpio::Port* gpio::interface<gpio::A>()
+{
+    return reinterpret_cast<gpio::Port*>(GPIOA_BASE);
+}
+
+template<> inline void gpio_clock::enable<gpio::A>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+}
+template<> inline void gpio_clock::disable<gpio::A>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
+}
+template<> inline bool gpio_clock::is_enabled<gpio::A>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
+}
+#endif
+#if defined XMCU_GPIOB_PRESENT
+template<> inline constexpr gpio::Port* gpio::interface<gpio::B>()
+{
+    return reinterpret_cast<gpio::Port*>(GPIOB_BASE);
+}
+
+template<> inline void gpio_clock::enable<gpio::B>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+}
+template<> inline void gpio_clock::disable<gpio::B>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
+}
+template<> inline bool gpio_clock::is_enabled<gpio::B>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
+}
+#endif
+#if defined XMCU_GPIOC_PRESENT
+template<> inline constexpr gpio::Port* gpio::interface<gpio::C>()
+{
+    return reinterpret_cast<gpio::Port*>(GPIOC_BASE);
+}
+
+template<> inline void gpio_clock::enable<gpio::C>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+}
+template<> inline void gpio_clock::disable<gpio::C>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
+}
+template<> inline bool gpio_clock::is_enabled<gpio::C>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
+}
+#endif
+#if defined XMCU_GPIOD_PRESENT
+template<> inline constexpr gpio::Port* gpio::interface<gpio::D>()
+{
+    return reinterpret_cast<gpio::Port*>(GPIOD_BASE);
+}
+
+template<> inline void gpio_clock::enable<gpio::D>()
+{
+    xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+}
+template<> inline void gpio_clock::disable<gpio::D>()
+{
+    xmcu::bit::flag::clear(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
+}
+template<> inline bool gpio_clock::is_enabled<gpio::D>()
+{
+    return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
+}
+#endif
 } // namespace ll
 
-#if !defined XMCU_LL_ONLY
 struct gpio : public gpio_base
 {
     enum class Mode : std::uint32_t
@@ -230,6 +306,11 @@ template<> struct gpio::Descriptor<gpio::Mode::alternate>
 };
 
 #if defined XMCU_GPIOA_PRESENT
+template<> inline constexpr gpio::A* gpio::interface<gpio::A>()
+{
+    return reinterpret_cast<gpio::A*>(GPIOA_BASE);
+}
+
 template<> inline void ll::gpio_clock::enable<gpio::A>()
 {
     xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOAEN);
@@ -319,8 +400,12 @@ inline void gpio::Port<gpio::A::Pin>::enable<gpio::Descriptor<gpio::Mode::altern
     p_out_pad_a->p_port = this;
 }
 #endif
-
 #if defined XMCU_GPIOB_PRESENT
+template<> inline constexpr gpio::B* gpio::interface<gpio::B>()
+{
+    return reinterpret_cast<gpio::B*>(GPIOB_BASE);
+}
+
 template<> inline void ll::gpio_clock::enable<gpio::B>()
 {
     xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOBEN);
@@ -385,18 +470,31 @@ inline void gpio::Port<gpio::B::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(
 
 template<> template<>
 inline void gpio::Port<gpio::B::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::B::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
 }
 template<> template<>
 inline void gpio::Port<gpio::B::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::B::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
                                                                                       Pad* p_out_pad_a)
 {
+    assert(nullptr != p_out_pad_a);
+
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
 }
 #endif
-
 #if defined XMCU_GPIOC_PRESENT
+template<> inline constexpr gpio::C* gpio::interface<gpio::C>()
+{
+    return reinterpret_cast<gpio::C*>(GPIOC_BASE);
+}
+
 template<> inline void ll::gpio_clock::enable<gpio::C>()
 {
     xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIOCEN);
@@ -461,18 +559,31 @@ inline void gpio::Port<gpio::C::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(
 
 template<> template<>
 inline void gpio::Port<gpio::C::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::C::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
 }
 template<> template<>
 inline void gpio::Port<gpio::C::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::C::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
                                                                                       Pad* p_out_pad_a)
 {
+    assert(nullptr != p_out_pad_a);
+
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
+
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
 }
 #endif
-
 #if defined XMCU_GPIOD_PRESENT
+template<> inline constexpr gpio::D* gpio::interface<gpio::D>()
+{
+    return reinterpret_cast<gpio::D*>(GPIOD_BASE);
+}
+
 template<> inline void ll::gpio_clock::enable<gpio::D>()
 {
     xmcu::bit::flag::set(&(RCC->IOPENR), RCC_IOPENR_GPIODEN);
@@ -537,67 +648,23 @@ inline void gpio::Port<gpio::D::Pin>::enable<gpio::Descriptor<gpio::Mode::out>>(
 
 template<> template<>
 inline void gpio::Port<gpio::D::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::D::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
 }
 template<> template<>
 inline void gpio::Port<gpio::D::Pin>::enable<gpio::Descriptor<gpio::Mode::alternate>>(gpio::D::Pin pin_a,
+                                                                                      std::uint8_t function_a,
                                                                                       const gpio::Descriptor<gpio::Mode::alternate>& desc_a,
                                                                                       Pad* p_out_pad_a)
 {
-}
-#endif
-#endif
+    assert(nullptr != p_out_pad_a);
 
-#if !defined XMCU_LL_ONLY
-#if defined XMCU_GPIOA_PRESENT
-template<> inline constexpr gpio::A* gpio::interface<gpio::A>()
-{
-    return reinterpret_cast<gpio::A*>(GPIOA_BASE);
-}
-#endif
-#if defined XMCU_GPIOB_PRESENT
-template<> inline constexpr gpio::B* gpio::interface<gpio::B>()
-{
-    return reinterpret_cast<gpio::B*>(GPIOB_BASE);
-}
-#endif
-#if defined XMCU_GPIOC_PRESENT
-template<> inline constexpr gpio::C* gpio::interface<gpio::C>()
-{
-    return reinterpret_cast<gpio::C*>(GPIOC_BASE);
-}
-#if defined XMCU_GPIOD_PRESENT
-template<> inline constexpr gpio::D* gpio::interface<gpio::D>()
-{
-    return reinterpret_cast<gpio::D*>(GPIOD_BASE);
-}
-#endif
-#endif
-#endif
-#if defined XMCU_GPIOA_PRESENT
-template<> inline constexpr ll::gpio::Port* ll::gpio::interface<ll::gpio::A>()
-{
-    return reinterpret_cast<ll::gpio::Port*>(GPIOA_BASE);
-}
-#endif
-#if defined XMCU_GPIOB_PRESENT
-template<> inline constexpr ll::gpio::Port* ll::gpio::interface<ll::gpio::B>()
-{
-    return reinterpret_cast<ll::gpio::Port*>(GPIOB_BASE);
-}
-#endif
-#if defined XMCU_GPIOC_PRESENT
-template<> inline constexpr ll::gpio::Port* ll::gpio::interface<ll::gpio::C>()
-{
-    return reinterpret_cast<ll::gpio::Port*>(GPIOC_BASE);
-}
-#endif
-#if defined XMCU_GPIOC_PRESENT
-template<> inline constexpr ll::gpio::Port* ll::gpio::interface<ll::gpio::D>()
-{
-    return reinterpret_cast<ll::gpio::Port*>(GPIOD_BASE);
-}
-#endif
+    gpio::enable_pin(this, static_cast<std::uint32_t>(pin_a), function_a, desc_a);
 
+    p_out_pad_a->pin = static_cast<std::uint32_t>(pin_a);
+    p_out_pad_a->p_port = this;
+}
+#endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

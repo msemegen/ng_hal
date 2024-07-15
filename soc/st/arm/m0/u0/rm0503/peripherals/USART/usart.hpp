@@ -61,12 +61,25 @@ struct usart : public usart_base
                 enable = USART_CR1_UE,
                 enable_stop_mode_activity = USART_CR1_UESM,
                 receiver_enable = USART_CR1_RE,
-                transmitter_enable = USART_CR1_TE
+                transmitter_enable = USART_CR1_TE,
+                idle_interrupt_enable = USART_CR1_IDLEIE,
+                rx_not_epmpty_interrupt_emable = USART_CR1_RXNEIE_RXFNEIE,
+                transmission_complete_interrupt_enable = USART_CR1_TCIE
             };
 
             template<typename Flag_t> void set(Flag_t flags_a) = delete;
             template<typename Flag_t> void clear(Flag_t flags_a) = delete;
-            template<typename Flag_t> bool is(Flag_t flags_a) = delete;
+            template<typename Flag_t> [[nodiscard]] bool is(Flag_t flags_a) = delete;
+
+            operator std::uint32_t()
+            {
+                return this->v;
+            }
+
+            operator std::uint32_t() const
+            {
+                return this->v;
+            }
 
         private:
             volatile std::uint32_t v;
@@ -87,6 +100,19 @@ struct usart : public usart_base
 
     template<typename id_t> [[nodiscard]] constexpr static Peripheral* create() = delete;
 };
+
+template<> inline void usart::Peripheral::CR1::set(usart::Peripheral::CR1::Flags flags_a)
+{
+    xmcu::bit::flag::set(&(this->v), flags_a);
+}
+template<> inline void usart::Peripheral::CR1::clear(usart::Peripheral::CR1::Flags flags_a)
+{
+    xmcu::bit::flag::clear(&(this->v), flags_a);
+}
+template<> [[nodiscard]] inline bool usart::Peripheral::CR1::is(usart::Peripheral::CR1::Flags flags_a)
+{
+    return xmcu::bit::flag::is(this->v, flags_a);
+}
 
 #if defined XMCU_USART1_PRESENT
 template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::create<usart::_1>()

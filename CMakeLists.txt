@@ -16,8 +16,10 @@ if(STM32_MODEL STREQUAL "STM32U083RCT6U")
     set(XMCU_SOC_VENDOR_FAMILY_RM rm0503)
     set(XMCU_SOC_VENDOR_MODEL stm32l0u083rct6u)
     set(CMSIS_SOC_MODEL STM32U083xx)
-    set(MCU_LD_OPTIONS -mcpu=cortex-m0plus -mthumb)
-    set(XMCU_ISR_CONTEXT 0)
+    set(LDFLAGS -mcpu=cortex-m0plus -mthumb)
+    set(CFLAGS -mcpu=cortex-m0plus -mthumb -mfloat-abi=softfp -mfpu=fpv4-sp-d16)
+    set(XMCU_ISR_CONTEXT ${XMCU_ISR_CONTEXT})
+    set(XMCU_NOSTDLIB ${XMCU_NOSTDLIB})
     set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/soc/st/arm/CMSIS/Device/ST/STM32U0xx/Source/Templates/gcc/linker/STM32U083xx_FLASH.ld)
     set(CMSIS_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/soc/st/arm/CMSIS/Include)
     set(CMSIS_DEVICE_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/soc/st/arm/CMSIS/Device/ST/STM32U0xx/Include)
@@ -29,7 +31,8 @@ endif()
 
 add_compile_definitions(XMCU_SOC_VENDOR=${XMCU_SOC_VENDOR} XMCU_SOC_ARCH_CORE_FAMILY=${XMCU_SOC_ARCH_CORE_FAMILY} XMCU_SOC_VENDOR_FAMILY=${XMCU_SOC_VENDOR_FAMILY} XMCU_SOC_ARCH=${XMCU_SOC_ARCH} XMCU_SOC_ARM_CORE_FAMILY_NAME=${XMCU_SOC_ARM_CORE_FAMILY_NAME})
 add_compile_definitions(XMCU_SOC_STM32_FAMILY=${XMCU_SOC_VENDOR_FAMILY} XMCU_SOC_VENDOR_FAMILY_RM=${XMCU_SOC_VENDOR_FAMILY_RM} XMCU_SOC_VENDOR_MODEL=${XMCU_SOC_VENDOR_MODEL})
-add_compile_definitions(XMCU_ISR_CONTEXT=${XMCU_ISR_CONTEXT} ${CMSIS_SOC_MODEL} CMSIS_SOC_FILE=stm32u0xx.h)
+add_compile_definitions(XMCU_ISR_CONTEXT=${XMCU_ISR_CONTEXT} XMCU_NOSTDLIB=${XMCU_NOSTDLIB} ${CMSIS_SOC_MODEL} CMSIS_SOC_FILE=stm32u0xx.h)
+add_compile_definitions(ARM_MATH_CM0PLUS ARM_MATH_ROUNDING)
 
 include_directories(PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CMSIS_DEVICE_INCLUDE_PATH} ${CMSIS_INCLUDE_PATH})
 
@@ -77,33 +80,35 @@ add_executable(${ELF_NAME} ${src} ${CMAKE_CURRENT_LIST_DIR}"/soc/ST/arm/CMSIS/De
                               ${CMSIS_STARTUP} 
                               ${VENDOR_SYSTEM_INIT} "soc/st/arm/systick.cpp" "soc/st/arm/stdglue.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.cpp" "soc/st/arm/m0/u0/rm0503/peripherals/I2C/i2c.cpp")
 
-set(CFLAGS -Wall -Wextra -Wno-strict-aliasing -Werror -Wno-unused-parameter -I. -c -fno-common
-           -mcpu=cortex-m0plus -mthumb -nostartfiles -nostdlib -mfloat-abi=softfp -mfpu=fpv4-sp-d16
-           -ffast-math -ffunction-sections -fdata-sections -fsingle-precision-constant
-           -DARM_MATH_CM0PLUS -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING)
-
-set(CPPFLAGS ${CFLAGS} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+set(CFLAGS ${CFLAGS} -c -fno-common -ffast-math -fsingle-precision-constant)
+set(CPPFLAGS ${CFLAGS} -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit)
+set(MCU_LD_OPTIONS )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CFLAGS ${CFLAGS} -Og -g3)
-    set(CPPFLAGS ${CPPFLAGS} -Og -g3)
+    set(CPPFLAGS ${CPPFLAGS} ${CFLAGS})
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(NDEBUG)
-    set(CFLAGS ${CFLAGS} -Os)
-    set(CPPFLAGS ${CPPFLAGS} -Os)
+    set(CFLAGS ${CFLAGS} -Os -ffunction-sections -fdata-sections)
+    set(CPPFLAGS ${CPPFLAGS} ${CFLAGS})
+    set(LDFLAGS ${LDFLAGS} -Wl,--gc-sections)
+endif()
+
+if (XMCU_NOSTDLIB STREQUAL "1")
+    set(LDFLAGS ${LDFLAGS} --specs=nosys.specs -nostdlib)
+else()
+    set(LDFLAGS ${LDFLAGS} --specs=nano.specs --specs=nosys.specs)
 endif()
 
 target_compile_options(${ELF_NAME} PRIVATE "$<$<COMPILE_LANGUAGE:ASM,C>:${CFLAGS}>")
 target_compile_options(${ELF_NAME} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CPPFLAGS}>")
         
-set(MAIN_LDFLAGS_COMMON -mcpu=cortex-m0 -mthumb -nostartfiles -fno-exceptions -nostdlib -fno-rtti -Wl,--gc-sections -lc_nano)
-
 set(OUTPUT_STEM out)
                          
 target_link_options(${ELF_NAME} PRIVATE
-        ${MCU_LD_OPTIONS} ${MAIN_LDFLAGS_COMMON}
+        ${LDFLAGS}
         -Wl,-Map=${OUTPUT_STEM}.map,-cref,--print-memory-usage
         -T${LINKER_SCRIPT})
         

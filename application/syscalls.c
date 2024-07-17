@@ -154,9 +154,10 @@ int _execve(char *name, char **argv, char **env)
 	return -1;
 }
 
+
 __attribute__((weak)) int _init()
 {
     return 0;
 }
 
-__attribute__((used)) void _fini(void) {}
+__attribute__((weak)) void _fini(void) {}

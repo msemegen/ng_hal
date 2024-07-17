@@ -16,11 +16,18 @@
 #include <cassert>
 #include <charconv>
 #include <chrono>
+#include <sys/time.h>
 
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
 using namespace xmcu::hal::oscillators;
 using namespace xmcu::hal::peripherals;
+
+template<typename Duration_t> void delay(Duration_t timeout_a)
+{
+    const auto end = std::chrono::steady_clock::now() + timeout_a;
+    while (end >= std::chrono::steady_clock::now()) continue;
+}
 
 #ifndef NDEBUG
 void stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
@@ -60,7 +67,7 @@ int main()
     hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
     hse::enable(4'000'000u);
 
-    p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = sysclk::get_frequency_Hz() - 1u });
+    p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = (sysclk::get_frequency_Hz() / 1000u) - 1u });
 
     auto* p_async_systick = p_systick->get_view<systick::Tick_counter<api::traits::async>>();
 
@@ -82,15 +89,15 @@ int main()
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
-        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
-        i2c::set_traits<
-            i2c::_1,
-            i2c::traits::half_duplex<gpio::A::Pin::_10,
-                                     gpio::Descriptor<gpio::Mode::alternate> {
-                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
-                                     gpio::A::Pin::_9,
-                                     gpio::Descriptor<gpio::Mode::alternate> {
-                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
+        // i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
+        // i2c::set_traits<
+        //     i2c::_1,
+        //     i2c::traits::half_duplex<gpio::A::Pin::_10,
+        //                              gpio::Descriptor<gpio::Mode::alternate> {
+        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
+        //                              gpio::A::Pin::_9,
+        //                              gpio::Descriptor<gpio::Mode::alternate> {
+        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
         usart::Peripheral* p_usart2 = usart::interface<usart::_2>(); // TODO: interace, like in GPIO
 
@@ -116,27 +123,31 @@ int main()
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
-        if (true == usart1_enabled)
-        {
-            // sync transmission view
-            usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
-            stdglue::assert::set_context(p_usart2_comm);
+        // if (true == usart1_enabled)
+        //{
+        //     // sync transmission view
+        //     usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
+        //     stdglue::assert::set_context(p_usart2_comm);
 
-            // echo
+        //    // echo
+        //    while (true)
+        //    {
+        //        char c = '\0';
+
+        //        p_usart2_comm->read(std::span { &c, 1u });
+        //        p_usart2_comm->write(std::span { &c, 1u });
+        //        led.toggle();
+
+        //        assert(c != 't'); // assert test
+        //    }
+        //}
+        // else
+        {
             while (true)
             {
-                char c = '\0';
-
-                p_usart2_comm->read(std::span { &c, 1u });
-                p_usart2_comm->write(std::span { &c, 1u });
                 led.toggle();
-
-                assert(c != 't'); // assert test
+                delay(1s);
             }
-        }
-        else
-        {
-            led.write(gpio::Level::low);
         }
     }
 

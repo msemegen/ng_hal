@@ -11,6 +11,8 @@
 #include <cassert>
 #include <chrono>
 #include <sys/time.h>
+#include <thread>
+#include <unistd.h>
 
 // soc
 #include <soc/st/arm/Systick.hpp>
@@ -38,28 +40,36 @@ volatile std::uint64_t high_ticks = 0u;
 #ifndef NDEBUG
 void* p_assert_context = nullptr;
 #endif
-extern "C" {
-void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, const char* p_condition_a)
+
+void delay(std::chrono::seconds timeout_a)
 {
-#ifndef NDEBUG
-    stdglue::assert::handler::output("\r\n", p_assert_context);
-    stdglue::assert::handler::output(p_file_a, p_assert_context);
-    stdglue::assert::handler::output("(", p_assert_context);
-    stdglue::assert::handler::output(line_a, p_assert_context);
-    stdglue::assert::handler::output("):", p_assert_context);
-    stdglue::assert::handler::output(p_function_a, p_assert_context);
-    stdglue::assert::handler::output(" -> ", p_assert_context);
-    stdglue::assert::handler::output(p_condition_a, p_assert_context);
-    stdglue::assert::handler::output("\n", p_assert_context);
-
-    __disable_irq();
-
+    const auto end = std::chrono::steady_clock::now() + timeout_a;
+    while (end >= std::chrono::steady_clock::now()) continue;
+}
+#if 0 == XMCU_NOSTDLIB
+void delay(std::chrono::microseconds timeout_a)
+{
+    const auto end = std::chrono::steady_clock::now() + timeout_a;
+    while (end >= std::chrono::steady_clock::now()) continue;
+}
 #endif
-    while (true) continue;
+#if 1 == XMCU_NOSTDLIB
+void delay(std::chrono::nanoseconds timeout_a)
+{
+    const auto end = std::chrono::steady_clock::now() + timeout_a;
+    while (end >= std::chrono::steady_clock::now()) continue;
 }
-}
+#endif
+} // namespace
 
-void update(systick::Tick_counter<api::traits::async>* p_systick_a)
+namespace soc::st::arm {
+#if 1 == XMCU_ISR_CONTEXT
+void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a, void*)
+#endif
+#if 0 == XMCU_ISR_CONTEXT
+void systick::Tick_counter
+<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a)
+#endif
 {
     systick_count = systick_count + 1u;
 #if 1 == XMCU_NOSTDLIB
@@ -76,19 +86,6 @@ void update(systick::Tick_counter<api::traits::async>* p_systick_a)
 
     high_ticks += (p_systick_a->get_value() * prescaler) / 1000u;
 #endif
-}
-} // namespace
-
-namespace soc::st::arm {
-#if 1 == XMCU_ISR_CONTEXT
-void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a, void*)
-#endif
-#if 0 == XMCU_ISR_CONTEXT
-void systick::Tick_counter
-<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a)
-#endif
-{
-    update(p_systick_a);
 }
 
 __WEAK void stdglue::assert::handler::output(std::string_view, void*) {}
@@ -124,8 +121,36 @@ steady_clock::time_point steady_clock::now() noexcept
     return time_point(duration((high_ticks_temp - val * prescaler)));
 }
 } // namespace std::chrono
-#else
+
+namespace std::this_thread {
+void __sleep_for(chrono::seconds seconds_a, chrono::nanoseconds nanoseconds_a)
+{
+    delay(seconds_a);
+    delay(nanoseconds_a);
+}
+} // namespace std::this_thread
+#endif
 extern "C" {
+void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, const char* p_condition_a)
+{
+#ifndef NDEBUG
+    stdglue::assert::handler::output("\r\n", p_assert_context);
+    stdglue::assert::handler::output(p_file_a, p_assert_context);
+    stdglue::assert::handler::output("(", p_assert_context);
+    stdglue::assert::handler::output(line_a, p_assert_context);
+    stdglue::assert::handler::output("):", p_assert_context);
+    stdglue::assert::handler::output(p_function_a, p_assert_context);
+    stdglue::assert::handler::output(" -> ", p_assert_context);
+    stdglue::assert::handler::output(p_condition_a, p_assert_context);
+    stdglue::assert::handler::output("\n", p_assert_context);
+
+    __disable_irq();
+
+#endif
+    while (true) continue;
+}
+
+#if 0 == XMCU_NOSTDLIB
 int _gettimeofday(struct timeval* p_time_val_a, void*)
 {
     volatile std::uint64_t high_ticks_temp = high_ticks;
@@ -142,6 +167,17 @@ int _gettimeofday(struct timeval* p_time_val_a, void*)
 
     return 0;
 }
+
+int usleep(useconds_t timeout_a)
+{
+    delay(std::chrono::microseconds(timeout_a));
+    return 0;
+}
+unsigned int sleep(unsigned int seconds_a)
+{
+    delay(std::chrono::seconds(seconds_a));
+    return 0;
 }
 #endif
+}
 #endif

@@ -17,17 +17,12 @@
 #include <charconv>
 #include <chrono>
 #include <sys/time.h>
+#include <thread>
 
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
 using namespace xmcu::hal::oscillators;
 using namespace xmcu::hal::peripherals;
-
-template<typename Duration_t> void delay(Duration_t timeout_a)
-{
-    const auto end = std::chrono::steady_clock::now() + timeout_a;
-    while (end >= std::chrono::steady_clock::now()) continue;
-}
 
 #ifndef NDEBUG
 void stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
@@ -150,7 +145,7 @@ int main()
             while (true)
             {
                 led.toggle();
-                delay(1s);
+                std::this_thread::sleep_for(1s);
             }
         }
     }

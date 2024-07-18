@@ -19,7 +19,6 @@
 #include <xmcu/macros.hpp>
 #include <xmcu/non_constructible.hpp>
 #include <xmcu/various.hpp>
-#include <xmcu/wait_for.hpp>
 
 // soc
 #include <soc/st/arm/api.hpp>
@@ -935,7 +934,7 @@ private:
             }
         }
 
-        xmcu::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
+        xmcu::bit::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
         xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;
@@ -956,7 +955,7 @@ private:
             }
         }
 
-        xmcu::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
+        xmcu::bit::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
         xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;

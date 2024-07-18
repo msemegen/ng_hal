@@ -84,15 +84,15 @@ bool usart::Peripheral::enable(Mode mode_a, Stop_mode_activity stop_mode_activit
     bit::flag::set(&(this->cr1), static_cast<std::uint32_t>(mode_a) | USART_CR1_UE);
     bit::flag::set(&(this->icr), USART_ICR_TCCF | USART_ICR_IDLECF);
 
-    return wait_for::all_bits_are_set(this->isr,
-                                      (usart::Mode::rx == (mode_a & usart::Mode::rx) ? USART_ISR_REACK : 0x0u) |
-                                          (usart::Mode::tx == (mode_a & usart::Mode::tx) ? USART_ISR_TEACK : 0x0u),
-                                      timeout_a);
+    return bit::wait_for::all_bits_are_set(this->isr,
+                                           (usart::Mode::rx == (mode_a & usart::Mode::rx) ? USART_ISR_REACK : 0x0u) |
+                                               (usart::Mode::tx == (mode_a & usart::Mode::tx) ? USART_ISR_TEACK : 0x0u),
+                                           timeout_a);
 }
 bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
 {
     bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE | USART_CR1_UESM);
-    return wait_for::all_bits_are_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
+    return bit::wait_for::all_bits_are_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
 }
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

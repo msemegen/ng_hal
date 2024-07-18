@@ -16,7 +16,9 @@
 
 // soc
 #include <soc/st/arm/Systick.hpp>
-#include <soc/st/arm/stdglue.hpp>
+
+// xmcu
+#include <xmcu/stdglue.hpp>
 
 namespace {
 using namespace soc;
@@ -87,7 +89,9 @@ void systick::Tick_counter
     high_ticks += (p_systick_a->get_value() * prescaler) / 1000u;
 #endif
 }
+} // namespace soc::st::arm
 
+namespace xmcu {
 __WEAK void stdglue::assert::handler::output(std::string_view, void*) {}
 __WEAK void stdglue::assert::handler::output(std::int32_t, void*) {}
 
@@ -103,7 +107,7 @@ void stdglue::steady_clock::set_source(systick::Tick_counter<api::traits::async>
     p_timer = p_clock_a;
     prescaler = (parts_in_millisecond / (p_timer->get_reload() + 1u));
 }
-} // namespace soc::st::arm
+} // namespace xmcu
 
 #if 1 == XMCU_NOSTDLIB
 namespace std::chrono {
@@ -134,15 +138,15 @@ extern "C" {
 void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, const char* p_condition_a)
 {
 #ifndef NDEBUG
-    stdglue::assert::handler::output("\r\n", p_assert_context);
-    stdglue::assert::handler::output(p_file_a, p_assert_context);
-    stdglue::assert::handler::output("(", p_assert_context);
-    stdglue::assert::handler::output(line_a, p_assert_context);
-    stdglue::assert::handler::output("):", p_assert_context);
-    stdglue::assert::handler::output(p_function_a, p_assert_context);
-    stdglue::assert::handler::output(" -> ", p_assert_context);
-    stdglue::assert::handler::output(p_condition_a, p_assert_context);
-    stdglue::assert::handler::output("\n", p_assert_context);
+    xmcu::stdglue::assert::handler::output("\r\n", p_assert_context);
+    xmcu::stdglue::assert::handler::output(p_file_a, p_assert_context);
+    xmcu::stdglue::assert::handler::output("(", p_assert_context);
+    xmcu::stdglue::assert::handler::output(line_a, p_assert_context);
+    xmcu::stdglue::assert::handler::output("):", p_assert_context);
+    xmcu::stdglue::assert::handler::output(p_function_a, p_assert_context);
+    xmcu::stdglue::assert::handler::output(" -> ", p_assert_context);
+    xmcu::stdglue::assert::handler::output(p_condition_a, p_assert_context);
+    xmcu::stdglue::assert::handler::output("\n", p_assert_context);
 
     __disable_irq();
 

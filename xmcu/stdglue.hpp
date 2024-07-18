@@ -11,10 +11,10 @@
 #include <string_view>
 
 // soc
-#include <xmcu/non_constructible.hpp>
 #include <soc/st/arm/Systick.hpp>
+#include <xmcu/non_constructible.hpp>
 
-namespace soc::st::arm {
+namespace xmcu {
 struct stdglue : private xmcu::non_constructible
 {
     struct assert : private non_constructible
@@ -30,7 +30,7 @@ struct stdglue : private xmcu::non_constructible
 
     struct steady_clock : private non_constructible
     {
-        static void set_source(systick::Tick_counter<soc::st::arm::api::traits::async>* p_clock_a);
+        static void set_source(soc::st::arm::systick::Tick_counter<soc::st::arm::api::traits::async>* p_clock_a);
     };
 };
-} // namespace soc::st::arm
+} // namespace xmcu

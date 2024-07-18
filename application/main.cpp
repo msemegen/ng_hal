@@ -10,12 +10,13 @@
 #include <xmcu/hal/peripherals/GPIO.hpp>
 #include <xmcu/hal/peripherals/i2c.hpp>
 #include <xmcu/hal/peripherals/usart.hpp>
-#include <xmcu/hal/stdglue.hpp>
+#include <xmcu/stdglue.hpp>
 
 // std
 #include <cassert>
 #include <charconv>
 #include <chrono>
+#include <format>
 #include <sys/time.h>
 #include <thread>
 
@@ -25,13 +26,13 @@ using namespace xmcu::hal::oscillators;
 using namespace xmcu::hal::peripherals;
 
 #ifndef NDEBUG
-void stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
+void xmcu::stdglue::assert::handler::output(std::string_view message_a, void* p_context_a)
 {
     auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
 
     p_usart->write(message_a);
 }
-void stdglue::assert::handler::output(std::int32_t line_a, void* p_context_a)
+void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context_a)
 {
     auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
 
@@ -44,6 +45,7 @@ void stdglue::assert::handler::output(std::int32_t line_a, void* p_context_a)
 
 int main()
 {
+    using namespace xmcu;
     using namespace std::chrono_literals;
 
     systick::Peripheral* p_systick = systick::create();

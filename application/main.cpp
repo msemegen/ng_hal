@@ -73,7 +73,11 @@ int main()
 
     if (nullptr != p_async_systick)
     {
+#if 1 == XMCU_ISR_CONTEXT
         p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u }, nullptr);
+#else
+        p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u });
+#endif
         stdglue::steady_clock::set_source(p_async_systick);
 
         gpio::clock::enable<gpio::A>();

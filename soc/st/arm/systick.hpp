@@ -162,7 +162,7 @@ public:
     struct isr : private non_constructible
     {
 #if 1 == XMCU_ISR_CONTEXT
-        void static reload(Systick::Tick_counter<api::traits::async>* p_systick_a, void* p_context_a);
+        void static reload(systick::Tick_counter<api::traits::async>* p_systick_a, void* p_context_a);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT

@@ -73,7 +73,7 @@ int main()
 
     if (nullptr != p_async_systick)
     {
-        p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u });
+        p_async_systick->start({ .preempt_priority = 1u, .sub_priority = 1u }, nullptr);
         stdglue::steady_clock::set_source(p_async_systick);
 
         gpio::clock::enable<gpio::A>();

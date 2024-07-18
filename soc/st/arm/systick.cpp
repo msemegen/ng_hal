@@ -26,7 +26,8 @@ extern "C" {
 void SysTick_Handler()
 {
 #if 1 == XMCU_ISR_CONTEXT
-    systick::Handler<api::traits::async>::isr::reload(reinterpret_cast<systick::Handler<api::traits::async>*>(SysTick_BASE), p_context);
+    systick::Tick_counter<api::traits::async>::isr::reload(reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE),
+                                                           p_context);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
@@ -43,7 +44,10 @@ using namespace xmcu;
 using namespace soc;
 
 #if 1 == XMCU_ISR_CONTEXT
-__WEAK void systick::Tick_counter<api::traits::async>::isr::reload(systick::Handler<traits::async>* p_systick_a, p_context) {}
+__WEAK void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a,
+                                                                   void* p_context_a)
+{
+}
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
@@ -54,7 +58,7 @@ systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api
 #endif
 
 #if 1 == XMCU_ISR_CONTEXT
-void systick::Tick_counter<traits::async>::start(const IRQ_priority priority_a, void* p_context_a)
+void systick::Tick_counter<api::traits::async>::start(const IRQ_priority priority_a, void* p_context_a)
 #endif
 #if 0 == XMCU_ISR_CONTEXT
     void systick::Tick_counter<api::traits::async>::start(const IRQ_priority priority_a)

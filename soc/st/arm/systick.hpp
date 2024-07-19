@@ -19,9 +19,9 @@
 // clang-format on
 
 // xmcu
-#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
+#include <xmcu/non_copyable.hpp>
 
 // soc
 #include <soc/st/arm/IRQ_priority.hpp>

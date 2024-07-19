@@ -14,9 +14,9 @@
 #include <stm32u0xx.h>
 
 // xmcu
-#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
+#include <xmcu/non_copyable.hpp>
 #include <xmcu/various.hpp>
 
 // soc

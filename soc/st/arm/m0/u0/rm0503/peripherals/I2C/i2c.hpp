@@ -11,8 +11,8 @@
 #include <chrono>
 
 // xmcu
-#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/macros.hpp>
+#include <xmcu/non_copyable.hpp>
 
 // soc
 #include <soc/st/arm/api.hpp>

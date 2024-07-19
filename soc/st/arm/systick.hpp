@@ -19,7 +19,7 @@
 // clang-format on
 
 // xmcu
-#include <xmcu/Non_copyable.hpp>
+#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 
@@ -61,7 +61,7 @@ struct systick : private xmcu::non_constructible
     };
 
     class Peripheral
-        : private xmcu::Non_copyable
+        : private xmcu::non_copyable
         , private ll::systick::Port
 
     {
@@ -95,7 +95,7 @@ template<> inline systick::Tick_counter<api::traits::async>* systick::Peripheral
 }
 
 template<> class systick::Tick_counter<api::traits::sync>
-    : private xmcu::Non_copyable
+    : private xmcu::non_copyable
     , private ll::systick::Port
 {
 public:
@@ -131,7 +131,7 @@ public:
 };
 
 template<> class systick::Tick_counter<api::traits::async>
-    : private xmcu::Non_copyable
+    : private xmcu::non_copyable
     , private ll::systick::Port
 {
 public:

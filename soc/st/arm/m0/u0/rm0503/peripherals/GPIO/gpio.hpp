@@ -14,7 +14,7 @@
 #include <stm32u0xx.h>
 
 // xmcu
-#include <xmcu/Non_copyable.hpp>
+#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 #include <xmcu/various.hpp>
@@ -57,7 +57,7 @@ struct gpio : public gpio_base
 
     using clock = gpio_clock;
 
-    struct Port : private xmcu::Non_copyable
+    struct Port : private xmcu::non_copyable
     {
         volatile std::uint32_t moder;   // port mode register
         volatile std::uint32_t otyper;  // port output type register
@@ -210,7 +210,7 @@ struct gpio : public gpio_base
     {
     };
 
-    class Pad : private xmcu::Non_copyable
+    class Pad : private xmcu::non_copyable
     {
     public:
         Level read() const

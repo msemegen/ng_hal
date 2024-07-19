@@ -51,7 +51,7 @@ struct usart : public usart_base
 {
     using clock = usart_clock;
 
-    struct Peripheral : private xmcu::Non_copyable
+    struct Peripheral : private xmcu::non_copyable
     {
         struct CR1
         {

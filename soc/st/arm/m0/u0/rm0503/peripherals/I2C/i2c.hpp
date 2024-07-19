@@ -11,7 +11,7 @@
 #include <chrono>
 
 // xmcu
-#include <xmcu/Non_copyable.hpp>
+#include <xmcu/Non_copyable_.hpp>
 #include <xmcu/macros.hpp>
 
 // soc
@@ -47,7 +47,7 @@ struct i2c : public i2c_base
 {
     using clock = i2c_clock;
 
-    struct Peripheral : private xmcu::Non_copyable
+    struct Peripheral : private xmcu::non_copyable
     {
         volatile std::uint32_t cr1;     // control register 1
         volatile std::uint32_t cr2;     // control register 2

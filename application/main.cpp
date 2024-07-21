@@ -19,6 +19,7 @@
 #include <format>
 #include <sys/time.h>
 #include <thread>
+#include <iostream>
 
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
@@ -124,25 +125,25 @@ int main()
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
-        // if (true == usart1_enabled)
-        //{
-        //     // sync transmission view
-        //     usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
-        //     stdglue::assert::set_context(p_usart2_comm);
+        if (true == usart1_enabled)
+        {
+            // sync transmission view
+            usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
+            stdglue::assert::set_context(p_usart2_comm);
 
-        //    // echo
-        //    while (true)
-        //    {
-        //        char c = '\0';
+            // echo
+            while (true)
+            {
+                char c = '\0';
 
-        //        p_usart2_comm->read(std::span { &c, 1u });
-        //        p_usart2_comm->write(std::span { &c, 1u });
-        //        led.toggle();
+                p_usart2_comm->read(std::span { &c, 1u });
+                p_usart2_comm->write(std::span { &c, 1u });
+                led.toggle();
 
-        //        assert(c != 't'); // assert test
-        //    }
-        //}
-        // else
+                assert(c != 't'); // assert test
+            }
+        }
+        else
         {
             while (true)
             {

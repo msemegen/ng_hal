@@ -934,7 +934,7 @@ private:
             }
         }
 
-        xmcu::bit::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
+        xmcu::bit::wait_for::all_set(this->isr, USART_ISR_TC);
         xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;
@@ -955,7 +955,7 @@ private:
             }
         }
 
-        xmcu::bit::wait_for::all_bits_are_set(this->isr, USART_ISR_TC);
+        xmcu::bit::wait_for::all_set(this->isr, USART_ISR_TC);
         xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
 
         return sent;

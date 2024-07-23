@@ -52,17 +52,17 @@ struct lsi : private xmcu::non_constructible
         xmcu::bit::flag::set(&(RCC->CSR), RCC_CSR_LSION);
     }
 
-    static bool is_enabled()
+    [[nodiscard]] static bool is_enabled()
     {
         return xmcu::bit::flag::is(RCC->CSR, RCC_CSR_LSION);
     }
 
-    static bool is_ready()
+    [[nodiscard]] static bool is_ready()
     {
         return xmcu::bit::flag::is(RCC->CSR, RCC_CSR_LSIRDY);
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         return 32'000u;
     }

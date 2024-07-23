@@ -30,8 +30,8 @@ template<auto... pins_t> struct HSE_pins
     }
 };
 #if XMCU_SOC_STM32_MODEL == stm32l0u083rct6u
-HSE_pins<peripherals::gpio::F::Pin::_0> osc_in;
-HSE_pins<peripherals::gpio::F::Pin::_1> osc_out;
+constexpr HSE_pins<peripherals::gpio::F::Pin::_0> osc_in;
+constexpr HSE_pins<peripherals::gpio::F::Pin::_1> osc_out;
 #endif
 } // namespace details
 
@@ -68,12 +68,12 @@ struct hse : private xmcu::non_constructible
         };
     };
 
-    template<typename Source_t> static void set_traits()
+    template<typename trait> static void set_traits()
     {
-        if constexpr (traits::Source::xtal == Source_t::type)
+        if constexpr (traits::Source::xtal == trait::type)
         {
-            static_assert(true == details::osc_in.is(Source_t::osc_in_pin));
-            static_assert(true == details::osc_out.is(Source_t::osc_out_pin));
+            static_assert(true == details::osc_in.is(trait::osc_in_pin));
+            static_assert(true == details::osc_out.is(trait::osc_out_pin));
 
             xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSEBYP);
         }
@@ -97,17 +97,17 @@ struct hse : private xmcu::non_constructible
         xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSEON);
     }
 
-    static bool is_ready()
+    [[nodiscard]] static bool is_ready()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSERDY);
     }
 
-    static bool is_enabled()
+    [[nodiscard]] static bool is_enabled()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSEON);
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         return frequency_Hz;
     }

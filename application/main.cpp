@@ -7,6 +7,7 @@
 #include <xmcu/hal/oscillators/hse.hpp>
 #include <xmcu/hal/oscillators/hsi16.hpp>
 #include <xmcu/hal/oscillators/msi.hpp>
+#include <xmcu/hal/oscillators/pll.hpp>
 #include <xmcu/hal/peripherals/GPIO.hpp>
 #include <xmcu/hal/peripherals/i2c.hpp>
 #include <xmcu/hal/peripherals/usart.hpp>
@@ -17,9 +18,9 @@
 #include <charconv>
 #include <chrono>
 #include <format>
+#include <iostream>
 #include <sys/time.h>
 #include <thread>
-#include <iostream>
 
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
@@ -58,12 +59,15 @@ int main()
     hsi16::enable();
     while (false == hsi16::is_ready()) continue;
 
-    sysclk::set_source<hsi16>();
-    while (false == sysclk::is_source<hsi16>()) continue;
+    sysclk::set_traits<sysclk::traits::source<hsi16>>();
+    while (false == sysclk::is_trait<sysclk::traits::source<hsi16>>()) continue;
 
     msi::disable();
     hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
     hse::enable(4'000'000u);
+
+    pll::r.set_descriptor({});
+    pll::p.set_descriptor({});
 
     p_systick->set_descriptor({ .prescaler = systick::Descriptor::Prescaler::_1, .reload = (sysclk::get_frequency_Hz() / 1000u) - 1u });
 
@@ -122,6 +126,8 @@ int main()
             gpio::A::Pin::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
             &led);
+
+        Limited<std::uint32_t, 5, 10> l(1);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 

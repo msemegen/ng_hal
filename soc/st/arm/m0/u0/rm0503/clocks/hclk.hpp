@@ -55,12 +55,12 @@ struct hclk : private xmcu::non_constructible
         xmcu::bit::flag::set(&(RCC->CFGR), RCC_CFGR_HPRE, static_cast<std::uint32_t>(descriptor_a.prescaler));
     }
 
-    static Descriptor get_descriptor()
+    [[nodiscard]] static Descriptor get_descriptor()
     {
         return Descriptor { .prescaler = static_cast<Descriptor::Prescaler>(xmcu::bit::flag::get(RCC->CFGR, RCC_CFGR_HPRE)) };
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         const std::uint32_t lut_pos = (xmcu::bit::flag::get(RCC->CFGR, RCC_CFGR_HPRE) >> RCC_CFGR_HPRE_Pos) -
                                       (static_cast<std::uint32_t>(Descriptor::Prescaler::_1) >> RCC_CFGR_HPRE_Pos);

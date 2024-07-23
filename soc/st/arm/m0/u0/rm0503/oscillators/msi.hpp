@@ -133,17 +133,17 @@ struct msi : private xmcu::non_constructible
         xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_MSION);
     }
 
-    static bool is_enabled()
+    [[nodiscard]] static bool is_enabled()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_MSION);
     }
 
-    static bool is_ready()
+    [[nodiscard]] static bool is_ready()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_MSIRDY);
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         if (false == standby.is_active())
         {

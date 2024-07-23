@@ -38,12 +38,12 @@ struct hsi48 : private xmcu::non_constructible
         xmcu::bit::flag::clear(&(RCC->CRRCR), RCC_CRRCR_HSI48ON);
     }
 
-    static std::uint32_t get_calibration_value()
+    [[nodiscard]] static std::uint32_t get_calibration_value()
     {
         return xmcu::bit::flag::get(RCC->CRRCR, RCC_CRRCR_HSI48CAL);
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         return 48'000'000;
     }

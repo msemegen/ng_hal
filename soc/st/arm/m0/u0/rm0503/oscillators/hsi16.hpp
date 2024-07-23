@@ -52,7 +52,7 @@ struct hsi16 : private xmcu::non_constructible
         xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSIASFS, static_cast<std::uint32_t>(descriptor_a.start_from_stop));
         xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSIKERON, static_cast<std::uint32_t>(descriptor_a.power));
     }
-    static Descriptor get_descriptor()
+    [[nodiscard]] static Descriptor get_descriptor()
     {
         return {};
     }
@@ -70,17 +70,17 @@ struct hsi16 : private xmcu::non_constructible
         xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSION);
     }
 
-    static bool is_ready()
+    [[nodiscard]] static bool is_ready()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSIRDY);
     }
 
-    static bool is_enabled()
+    [[nodiscard]] static bool is_enabled()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSION);
     }
 
-    static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static std::uint32_t get_frequency_Hz()
     {
         return 16'000'000u;
     }

@@ -53,10 +53,33 @@ struct pll : private xmcu::non_constructible
             xmcu::Limited<std::uint32_t, 2u, 32u> divider;
         };
 
-        void set_descriptor(Descriptor descriptor_a) {}
+        void set_descriptor(Descriptor descriptor_a)
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLP, (descriptor_a.divider - 1u) << RCC_PLLCFGR_PLLP_Pos);
+        }
+        [[nodiscard]] Descriptor get_descriptor() const
+        {
+            return {};
+        }
 
-        void enable();
-        void disable();
+        void enable()
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLPEN);
+        }
+        void disable()
+        {
+            xmcu::bit::flag::clear(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLPEN);
+        }
+
+        [[nodiscard]] bool is_enabled() const
+        {
+            return xmcu::bit::flag::is(RCC->PLLCFGR, RCC_PLLCFGR_PLLREN);
+        }
+
+        [[nodiscard]] std::uint32_t get_frequency_Hz() const
+        {
+            return 0u;
+        }
     };
     struct R : private xmcu::non_copyable
     {
@@ -65,10 +88,33 @@ struct pll : private xmcu::non_constructible
             xmcu::Limited<std::uint32_t, 2u, 8u> divider;
         };
 
-        void set_descriptor(Descriptor descriptor_a) {}
+        void set_descriptor(Descriptor descriptor_a)
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLR, (descriptor_a.divider - 1u) << RCC_PLLCFGR_PLLR_Pos);
+        }
+        [[nodiscard]] Descriptor get_descriptor() const
+        {
+            return {};
+        }
 
-        void enable();
-        void disable();
+        void enable()
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLREN);
+        }
+        void disable()
+        {
+            xmcu::bit::flag::clear(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLREN);
+        }
+
+        [[nodiscard]] bool is_enabled() const
+        {
+            return xmcu::bit::flag::is(RCC->PLLCFGR, RCC_PLLCFGR_PLLREN);
+        }
+
+        [[nodiscard]] std::uint32_t get_frequency_Hz() const
+        {
+            return 0u;
+        }
     };
     struct Q : private xmcu::non_copyable
     {
@@ -76,7 +122,34 @@ struct pll : private xmcu::non_constructible
         {
             xmcu::Limited<std::uint32_t, 2u, 8u> divider;
         };
-        void set_descriptor(Descriptor descriptor_a) {}
+
+        void set_descriptor(Descriptor descriptor_a)
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLQ, (descriptor_a.divider - 1u) << RCC_PLLCFGR_PLLQ_Pos);
+        }
+        [[nodiscard]] Descriptor get_descriptor() const
+        {
+            return {};
+        }
+
+        void enable()
+        {
+            xmcu::bit::flag::set(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLQEN);
+        }
+        void disable()
+        {
+            xmcu::bit::flag::clear(&(RCC->PLLCFGR), RCC_PLLCFGR_PLLQEN);
+        }
+
+        [[nodiscard]] bool is_enabled() const
+        {
+            return xmcu::bit::flag::is(RCC->PLLCFGR, RCC_PLLCFGR_PLLQEN);
+        }
+
+        [[nodiscard]] std::uint32_t get_frequency_Hz() const
+        {
+            return 0u;
+        }
     };
 
     static P p;

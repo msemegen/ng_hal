@@ -47,7 +47,8 @@ template<> inline void sysclk::set_traits<sysclk::traits::source<soc::st::arm::m
 }
 template<> inline bool sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::hsi16>>()
 {
-    return xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_0);
+    return true == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_0) && false == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_1) &&
+           false == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_2);
 }
 
 template<> inline void sysclk::set_traits<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::msi>>()
@@ -59,6 +60,16 @@ template<> inline bool sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0:
     return 0x0u == xmcu::bit::flag::get(RCC->CFGR, RCC_CFGR_SWS);
 }
 
+template<> inline void sysclk::set_traits<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::pll::R>>()
+{
+    xmcu::bit::flag::set(&(RCC->CFGR), RCC_CFGR_SW, RCC_CFGR_SW_0 | RCC_CFGR_SW_1);
+}
+template<> inline bool sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::pll::R>>()
+{
+    return true == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_0) && true == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_1) &&
+           false == xmcu::bit::flag::is(RCC->CFGR, RCC_CFGR_SWS_2);
+}
+
 inline std::uint32_t sysclk::get_frequency_Hz()
 {
     if (true == sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::hsi16>>())
@@ -68,6 +79,10 @@ inline std::uint32_t sysclk::get_frequency_Hz()
     if (true == sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::msi>>())
     {
         return soc::st::arm::m0::u0::rm0503::oscillators::msi::get_frequency_Hz();
+    }
+    if (true == sysclk::is_trait<sysclk::traits::source<soc::st::arm::m0::u0::rm0503::oscillators::pll::R>>())
+    {
+        return soc::st::arm::m0::u0::rm0503::oscillators::pll::r.get_frequency_Hz();
     }
 
     assert(false);

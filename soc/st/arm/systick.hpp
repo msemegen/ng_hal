@@ -76,6 +76,12 @@ struct systick : private xmcu::non_constructible
             this->ctrl = static_cast<std::uint32_t>(descriptor_a.prescaler);
         }
 
+        Descriptor get_descriptor() const
+        {
+            return { .prescaler = static_cast<Descriptor::Prescaler>(xmcu::bit::flag::get(this->ctrl, SysTick_CTRL_CLKSOURCE_Msk)),
+                     .reload = this->load };
+        }
+
         template<typename Type_t> Type_t* get_view() const = delete;
     };
 
@@ -99,6 +105,12 @@ template<> class systick::Tick_counter<api::traits::sync>
     , private ll::systick::Port
 {
 public:
+    Descriptor get_descriptor() const
+    {
+        return { .prescaler = static_cast<Descriptor::Prescaler>(xmcu::bit::flag::get(this->ctrl, SysTick_CTRL_CLKSOURCE_Msk)),
+                 .reload = this->load };
+    }
+
     void start()
     {
         xmcu::bit::flag::set(&(this->ctrl), SysTick_CTRL_ENABLE_Msk);
@@ -112,11 +124,6 @@ public:
     void wait_for_reload() const
     {
         while (false == xmcu::bit::flag::is(this->ctrl, SysTick_CTRL_COUNTFLAG_Msk)) continue;
-    }
-
-    std::uint32_t get_reload() const
-    {
-        return this->load;
     }
 
     std::uint32_t get_value() const
@@ -135,24 +142,20 @@ template<> class systick::Tick_counter<api::traits::async>
     , private ll::systick::Port
 {
 public:
+    Descriptor get_descriptor() const
+    {
+        return { .prescaler = static_cast<Descriptor::Prescaler>(xmcu::bit::flag::get(this->ctrl, SysTick_CTRL_CLKSOURCE_Msk)),
+                 .reload = this->load };
+    }
+
 #if 1 == XMCU_ISR_CONTEXT
-    void start(const IRQ_priority priority_a, void* p_context_a);
+    void start(const IRQ_priority& priority_a, void* p_context_a);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-    void start(const IRQ_priority priority_a);
+    void start(const IRQ_priority& priority_a);
 #endif
     void stop();
-
-    std::uint32_t get_reload() const
-    {
-        return this->load;
-    }
-
-    std::uint32_t get_value() const
-    {
-        return this->val;
-    }
 
     bool is_started() const
     {
@@ -162,11 +165,11 @@ public:
     struct isr : private non_constructible
     {
 #if 1 == XMCU_ISR_CONTEXT
-        void static reload(systick::Tick_counter<api::traits::async>* p_systick_a, void* p_context_a);
+        void static on_reload(systick::Tick_counter<api::traits::async>* p_systick_a, std::uint32_t value_a, void* p_context_a);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-        void static reload(systick::Tick_counter<api::traits::async>* p_systick_a);
+        void static on_reload(systick::Tick_counter<api::traits::async>* p_systick_a, std::uint32_t value_a);
 #endif
     };
 };

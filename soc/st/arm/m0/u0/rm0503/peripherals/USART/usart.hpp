@@ -21,6 +21,7 @@
 #include <xmcu/various.hpp>
 
 // soc
+#include <soc/st/arm/IRQ_priority.hpp>
 #include <soc/st/arm/api.hpp>
 #include <soc/st/arm/m0/u0/rm0503/clocks/pclk.hpp>
 #include <soc/st/arm/m0/u0/rm0503/clocks/sysclk.hpp>
@@ -1031,8 +1032,31 @@ private:
 template<> class usart::Transceiver<api::traits::async> : private ll::usart::Peripheral
 {
 public:
-    void start();
-    void stop();
+#if 1 == XMCU_ISR_CONTEXT
+    void enable(const IRQ_priority& priority_a, void* p_context_a);
+#endif
+
+#if 0 == XMCU_ISR_CONTEXT
+    void enable(const IRQ_priority& priority_a);
+#endif
+    void disable();
+
+    void read_start();
+    void read_stop();
+
+    void write_start();
+    void write_stop();
+
+    void errors_listening_start();
+    void errors_listening_stop();
+
+    struct isr : private xmcu::non_constructible
+    {
+        static void on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this);
+        static std::uint32_t on_write(usart::Transceiver<api::traits::async>* p_this);
+
+        static void on_error(Error errors_a, usart::Transceiver<api::traits::async>* p_this);
+    };
 };
 
 template<> inline usart::Transceiver<api::traits::sync>* usart::Peripheral::get_view<usart::Transceiver<api::traits::sync>>() const

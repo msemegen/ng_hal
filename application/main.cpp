@@ -45,6 +45,16 @@ void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context
 }
 #endif
 
+volatile std::uint32_t flag = 0x0u;
+char c;
+gpio::Pad led;
+void usart::Transceiver<api::traits::async>::isr::on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this)
+{
+    c = static_cast<char>(word_a);
+    flag = 0x1u;
+    led.toggle();
+}
+
 int main()
 {
     using namespace xmcu;
@@ -121,13 +131,10 @@ int main()
                                          .msb_first = usart::Descriptor::Frame::MSB_first::disable,
                                          .inversion = usart::Descriptor::Frame::Inversion::disable } });
 
-        gpio::Pad led;
         gpio::interface<gpio::A>()->enable(
             gpio::A::Pin::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
             &led);
-
-        Limited<std::uint32_t, 5, 10> l(1);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
@@ -137,16 +144,25 @@ int main()
             usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
             stdglue::assert::set_context(p_usart2_comm);
 
+            auto usart_async = p_usart2->get_view<usart::Transceiver<api::traits::async>>();
+
+            usart_async->enable({ 0x0u, 0x0u });
+            usart_async->read_start();
+
+            led.write(gpio::Level::high);
+
             // echo
             while (true)
             {
-                char c = '\0';
+                // char c = '\0';
 
-                p_usart2_comm->read(std::span { &c, 1u });
-                p_usart2_comm->write(std::span { &c, 1u });
-                led.toggle();
+                // p_usart2_comm->read(std::span { &c, 1u });
+                if (0x1u == flag)
+                {
+                    flag = 0x0u;
 
-                assert(c != 't'); // assert test
+                    p_usart2_comm->write(std::span { &c, 1u });
+                }
             }
         }
         else

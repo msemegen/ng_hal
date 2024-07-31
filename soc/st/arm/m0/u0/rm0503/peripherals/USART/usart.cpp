@@ -11,7 +11,85 @@
 #include <soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.hpp>
 
 namespace {
+using namespace xmcu;
+using namespace soc::st::arm;
+using namespace soc::st::arm::m0::u0::rm0503::peripherals;
+
 constexpr std::uint32_t clock_prescaler_lut[] = { 1u, 2u, 4u, 6u, 8u, 10u, 12u, 16u, 32u, 64u, 128u, 256u };
+
+IRQn_Type select_irq(std::uint32_t base_address_a)
+{
+    switch (base_address_a)
+    {
+#if defined XMCU_USART1_PRESENT
+        case USART1_BASE:
+            return USART1_IRQn;
+#endif
+#if defined XMCU_USART2_PRESENT
+        case USART2_BASE:
+            return USART2_LPUART2_IRQn;
+#endif
+#if defined XMCU_USART3_PRESENT
+        case USART3_BASE:
+            return USART3_LPUART1_IRQn;
+#endif
+#if defined XMCU_USART4_PRESENT
+        case USART4_BASE:
+            return USART4_LPUART3_IRQn;
+#endif
+    }
+
+    assert(false);
+    return static_cast<IRQn_Type>(0xFFFFFFFF);
+}
+
+void usart_isr_handler(USART_TypeDef* p_registers_a, usart::Transceiver<api::traits::async>* p_handler_a)
+{
+    const std::uint32_t isr = p_registers_a->ISR;
+    const std::uint32_t cr1 = p_registers_a->CR1;
+
+    if (true == bit::flag::is(p_registers_a->ISR, USART_ISR_RXNE_RXFNE) &&
+        true == bit::flag::is(p_registers_a->CR1, USART_CR1_RXNEIE_RXFNEIE))
+    {
+        usart::Transceiver<api::traits::async>::isr::on_read(p_registers_a->RDR, p_handler_a);
+    }
+
+    if (true == bit::flag::is(p_registers_a->ISR, USART_ISR_TXE_TXFNF) &&
+        true == bit::flag::is(p_registers_a->CR1, USART_CR1_TXEIE_TXFNFIE))
+    {
+        p_registers_a->TDR = usart::Transceiver<api::traits::async>::isr::on_write(p_handler_a);
+    }
+}
+} // namespace
+
+extern "C" {
+using namespace soc::st::arm;
+using namespace soc::st::arm::m0::u0::rm0503::peripherals;
+
+#if defined XMCU_USART1_PRESENT
+void USART1_IRQHandler()
+{
+    usart_isr_handler(USART1, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART1_BASE));
+}
+#endif
+#if defined XMCU_USART2_PRESENT
+void USART2_LPUART2_IRQHandler()
+{
+    usart_isr_handler(USART2, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART2_BASE));
+}
+#endif
+#if defined XMCU_USART3_PRESENT
+void USART3_LPUART1_IRQHandler()
+{
+    usart_isr_handler(USART3, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART3_BASE));
+}
+#endif
+#if defined XMCU_USART4_PRESENT
+void USART4_LPUART3_IRQHandler()
+{
+    usart_isr_handler(USART4, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART4_BASE));
+}
+#endif
 }
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
@@ -94,5 +172,44 @@ bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
     bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE | USART_CR1_UESM);
     return bit::wait_for::all_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
 }
+
+#if 1 == XMCU_ISR_CONTEXT
+void usart::Transceiver<api::traits::async>::enable(const IRQ_priority& priority_a, void* p_context_a)
+#endif
+#if 0 == XMCU_ISR_CONTEXT
+    void usart::Transceiver<api::traits::async>::enable(const IRQ_priority& priority_a)
+#endif
+{
+    IRQn_Type irq_type = select_irq(reinterpret_cast<std::uint32_t>(this));
+
+    NVIC_EnableIRQ(irq_type);
+    NVIC_SetPriority(irq_type, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority_a.preempt_priority, priority_a.sub_priority));
+}
+void usart::Transceiver<api::traits::async>::disable() {}
+
+void usart::Transceiver<api::traits::async>::read_start()
+{
+    bit::flag::set(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE);
+}
+void usart::Transceiver<api::traits::async>::read_stop()
+{
+    bit::flag::clear(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE);
+}
+
+void usart::Transceiver<api::traits::async>::write_start()
+{
+    bit::flag::set(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
+}
+void usart::Transceiver<api::traits::async>::write_stop()
+{
+    bit::flag::clear(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
+}
+
+__WEAK void usart::Transceiver<api::traits::async>::isr::on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this) {}
+__WEAK std::uint32_t usart::Transceiver<api::traits::async>::isr::on_write(usart::Transceiver<api::traits::async>* p_this)
+{
+    return 0;
+}
+__WEAK void usart::Transceiver<api::traits::async>::isr::on_error(usart::Error errors_a, usart::Transceiver<api::traits::async>* p_this) {}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

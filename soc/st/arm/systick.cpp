@@ -26,13 +26,13 @@ extern "C" {
 void SysTick_Handler()
 {
 #if 1 == XMCU_ISR_CONTEXT
-    systick::Tick_counter<api::traits::async>::isr::reload(reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE),
-                                                           p_context);
+    systick::Tick_counter<api::traits::async>::isr::reload(
+        reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE), SysTick->VAL, p_context);
 #endif
 
 #if 0 == XMCU_ISR_CONTEXT
-    systick::Tick_counter<api::traits::async>::isr::reload(
-        reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE));
+    systick::Tick_counter<api::traits::async>::isr::on_reload(
+        reinterpret_cast<systick::Tick_counter<api::traits::async>*>(SysTick_BASE), SysTick->VAL);
 #endif
 }
 }
@@ -45,6 +45,7 @@ using namespace soc;
 
 #if 1 == XMCU_ISR_CONTEXT
 __WEAK void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a,
+                                                                   std::uint32_t value_a,
                                                                    void* p_context_a)
 {
 }
@@ -52,7 +53,7 @@ __WEAK void systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick
 
 #if 0 == XMCU_ISR_CONTEXT
 __WEAK void
-systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api::traits::async>* p_systick_a)
+systick::Tick_counter<api::traits::async>::isr::on_reload(systick::Tick_counter<api::traits::async>* p_systick_a, std::uint32_t value_a)
 {
 }
 #endif
@@ -61,7 +62,7 @@ systick::Tick_counter<api::traits::async>::isr::reload(systick::Tick_counter<api
 void systick::Tick_counter<api::traits::async>::start(const IRQ_priority priority_a, void* p_context_a)
 #endif
 #if 0 == XMCU_ISR_CONTEXT
-    void systick::Tick_counter<api::traits::async>::start(const IRQ_priority priority_a)
+    void systick::Tick_counter<api::traits::async>::start(const IRQ_priority& priority_a)
 #endif
 {
 #if 1 == XMCU_ISR_CONTEXT

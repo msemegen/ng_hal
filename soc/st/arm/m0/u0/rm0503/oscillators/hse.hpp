@@ -57,28 +57,31 @@ struct hse : private xmcu::non_constructible
     public:
         struct clock
         {
-            static constexpr Source type = Source::clock;
+            constexpr static Source type = Source::clock;
         };
         template<auto osc_in_pin_t, auto osc_out_pin_t> struct xtal
         {
-            static constexpr Source type = Source::xtal;
+            constexpr static Source type = Source::xtal;
 
             constexpr static auto osc_in_pin = osc_in_pin_t;
             constexpr static auto osc_out_pin = osc_out_pin_t;
         };
     };
 
-    template<typename trait> static void set_traits()
+    template<typename trait_t> static void set_traits()
     {
-        if constexpr (traits::Source::xtal == trait::type)
+        if constexpr (traits::Source::xtal == trait_t::type)
         {
-            static_assert(true == details::osc_in.is(trait::osc_in_pin));
-            static_assert(true == details::osc_out.is(trait::osc_out_pin));
+            static_assert(true == details::osc_in.is(trait_t::osc_in_pin));
+            static_assert(true == details::osc_out.is(trait_t::osc_out_pin));
 
+            assert(false == hse::is_enabled());
             xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSEBYP);
         }
         else
         {
+            assert(false == hse::is_enabled());
+
             xmcu::bit::flag::set(&(RCC->CR), RCC_CR_HSEBYP);
         }
     }
@@ -97,14 +100,14 @@ struct hse : private xmcu::non_constructible
         xmcu::bit::flag::clear(&(RCC->CR), RCC_CR_HSEON);
     }
 
-    [[nodiscard]] static bool is_ready()
-    {
-        return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSERDY);
-    }
-
     [[nodiscard]] static bool is_enabled()
     {
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSEON);
+    }
+
+    [[nodiscard]] static bool is_ready()
+    {
+        return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSERDY);
     }
 
     [[nodiscard]] static std::uint32_t get_frequency_Hz()

@@ -1,9 +1,11 @@
 // hal
+#include <xmcu/Scoped_guard.hpp>
 #include <xmcu/hal/IRQ_priority.hpp>
 #include <xmcu/hal/Systick.hpp>
 #include <xmcu/hal/api.hpp>
 #include <xmcu/hal/clocks/pclk.hpp>
 #include <xmcu/hal/clocks/sysclk.hpp>
+#include <xmcu/hal/nvic.hpp>
 #include <xmcu/hal/oscillators/hse.hpp>
 #include <xmcu/hal/oscillators/hsi16.hpp>
 #include <xmcu/hal/oscillators/msi.hpp>
@@ -12,8 +14,6 @@
 #include <xmcu/hal/peripherals/i2c.hpp>
 #include <xmcu/hal/peripherals/usart.hpp>
 #include <xmcu/stdglue.hpp>
-#include <xmcu/Scoped_guard.hpp>
-#include <xmcu/hal/nvic.hpp>
 
 // std
 #include <cassert>
@@ -82,7 +82,7 @@ void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event even
         p_this->transmit_stop();
         i = 0u;
     }
-    if (usart::Event::idle == (events_a & usart::Event::idle))    
+    if (usart::Event::idle == (events_a & usart::Event::idle))
     {
         led.toggle();
     }
@@ -92,6 +92,9 @@ int main()
 {
     using namespace xmcu;
     using namespace std::chrono_literals;
+
+    nvic::set_descriptor({ .grouping = nvic::Descriptor::Grouping::_2 });
+    nvic::enable();
 
     systick::Peripheral* p_systick = systick::create();
 

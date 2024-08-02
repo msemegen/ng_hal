@@ -28,7 +28,6 @@
 #include <soc/st/arm/m0/u0/rm0503/oscillators/hsi16.hpp>
 #include <soc/st/arm/m0/u0/rm0503/oscillators/lse.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/USART/base.hpp>
-#include <soc/st/arm/m0/u0/rm0503/peripherals/USART/usart.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 namespace ll {
@@ -359,10 +358,17 @@ struct usart : public usart_base
     enum class Error : std::uint32_t
     {
         none,
-        framing,
-        noise,
-        overrun,
-        parity
+        framing = USART_ISR_FE,
+        noise = USART_ISR_NE,
+        overrun = USART_ISR_ORE,
+        parity = USART_ISR_PE
+    };
+    enum class Event : std::uint32_t
+    {
+        none,
+        idle = USART_ISR_IDLE,
+        transfer_complete = USART_ISR_TC,
+        character_matched = USART_ISR_CMF
     };
 
     enum class Mode : std::uint32_t
@@ -759,10 +765,40 @@ inline constexpr usart::Error operator|(usart::Error left_a, usart::Error right_
     return static_cast<usart::Error>(static_cast<std::underlying_type<usart::Error>::type>(left_a) |
                                      static_cast<std::underlying_type<usart::Error>::type>(right_a));
 }
-
+inline constexpr usart::Error operator&(usart::Error left_a, usart::Error right_a)
+{
+    return static_cast<usart::Error>(static_cast<std::underlying_type<usart::Error>::type>(left_a) &
+                                     static_cast<std::underlying_type<usart::Error>::type>(right_a));
+}
 inline constexpr usart::Error& operator|=(usart::Error& left_a, usart::Error right_a)
 {
     left_a = left_a | right_a;
+    return left_a;
+}
+inline constexpr usart::Error& operator&=(usart::Error& left_a, usart::Error right_a)
+{
+    left_a = left_a & right_a;
+    return left_a;
+}
+
+inline constexpr usart::Event operator|(usart::Event left_a, usart::Event right_a)
+{
+    return static_cast<usart::Event>(static_cast<std::underlying_type<usart::Event>::type>(left_a) |
+                                     static_cast<std::underlying_type<usart::Event>::type>(right_a));
+}
+inline constexpr usart::Event operator&(usart::Event left_a, usart::Event right_a)
+{
+    return static_cast<usart::Event>(static_cast<std::underlying_type<usart::Event>::type>(left_a) &
+                                     static_cast<std::underlying_type<usart::Event>::type>(right_a));
+}
+inline constexpr usart::Event& operator|=(usart::Event& left_a, usart::Event right_a)
+{
+    left_a = left_a | right_a;
+    return left_a;
+}
+inline constexpr usart::Event& operator&=(usart::Event& left_a, usart::Event right_a)
+{
+    left_a = left_a & right_a;
     return left_a;
 }
 
@@ -818,60 +854,60 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<us
 template<> class usart::Transceiver<api::traits::sync> : private ll::usart::Peripheral
 {
 public:
-    std::pair<std::size_t, usart::Error> read(std::span<std::uint8_t> out_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<std::uint8_t> out_a) const
     {
         return this->receive(out_a);
     }
-    std::pair<std::size_t, usart::Error> read(std::span<char> out_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<char> out_a) const
     {
         return this->receive(out_a);
     }
-    std::pair<std::size_t, usart::Error> read(std::span<std::uint16_t> out_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<std::uint16_t> out_a) const
     {
         return this->receive(out_a);
     }
-    std::pair<std::size_t, usart::Error> read(std::span<std::uint8_t> out_a, std::chrono::milliseconds timeout_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<std::uint8_t> out_a, std::chrono::milliseconds timeout_a) const
     {
         return this->receive(out_a, timeout_a);
     }
-    std::pair<std::size_t, usart::Error> read(std::span<char> out_a, std::chrono::milliseconds timeout_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<char> out_a, std::chrono::milliseconds timeout_a) const
     {
         return this->receive(out_a, timeout_a);
     }
-    std::pair<std::size_t, usart::Error> read(std::span<std::uint16_t> out_a, std::chrono::milliseconds timeout_a) const
+    std::pair<std::size_t, usart::Error> receive(std::span<std::uint16_t> out_a, std::chrono::milliseconds timeout_a) const
     {
         return this->receive(out_a, timeout_a);
     }
 
-    std::size_t write(std::span<const std::uint8_t> data_a)
+    std::size_t transmit(std::span<const std::uint8_t> data_a)
     {
         return this->trasmit(data_a);
     }
-    std::size_t write(std::string_view data_a)
+    std::size_t transmit(std::string_view data_a)
     {
         return this->trasmit(std::span { data_a.data(), data_a.length() });
     }
-    std::size_t write(std::span<const char> data_a)
+    std::size_t transmit(std::span<const char> data_a)
     {
         return this->trasmit(data_a);
     }
-    std::size_t write(std::span<const std::uint16_t> data_a)
+    std::size_t transmit(std::span<const std::uint16_t> data_a)
     {
         return this->trasmit(data_a);
     }
-    std::size_t write(std::span<const std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
+    std::size_t transmit(std::span<const std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
     {
         return this->trasmit(data_a, timeout_a);
     }
-    std::size_t write(std::string_view data_a, std::chrono::milliseconds timeout_a)
+    std::size_t transmit(std::string_view data_a, std::chrono::milliseconds timeout_a)
     {
         return this->trasmit(std::span { data_a.data(), data_a.length() }, timeout_a);
     }
-    std::size_t write(std::span<const char> data_a, std::chrono::milliseconds timeout_a)
+    std::size_t transmit(std::span<const char> data_a, std::chrono::milliseconds timeout_a)
     {
         return this->trasmit(data_a, timeout_a);
     }
-    std::size_t write(std::span<const std::uint16_t> data_a, std::chrono::milliseconds timeout_a)
+    std::size_t transmit(std::span<const std::uint16_t> data_a, std::chrono::milliseconds timeout_a)
     {
         return this->trasmit(data_a, timeout_a);
     }
@@ -924,7 +960,7 @@ private:
         assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_REACK));
 
         std::size_t received = 0;
-        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error())
+        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && Error::none == this->get_rx_error())
         {
             if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
             {
@@ -947,12 +983,13 @@ private:
 
         xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
 
-        if (true == this->is_rx_error())
+        const Error err = this->get_rx_error();
+
+        if (Error::none != err)
         {
-            const Error errors = this->get_rx_error();
             xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
 
-            return { received, errors };
+            return { received, err };
         }
 
         return { received, Error::none };
@@ -965,7 +1002,7 @@ private:
         std::size_t received = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
 
-        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && false == this->is_rx_error() &&
+        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && Error::none == this->get_rx_error() &&
                std::chrono::steady_clock::now() <= timeout)
         {
             if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
@@ -989,44 +1026,21 @@ private:
 
         xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
 
-        if (true == this->is_rx_error())
+        const Error err = this->get_rx_error();
+
+        if (Error::none != err)
         {
-            const Error errors = this->get_rx_error();
             xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
 
-            return { received, errors };
+            return { received, err };
         }
 
         return { received, Error::none };
     }
 
-    bool is_rx_error() const
-    {
-        return xmcu::bit::is_any(this->icr, USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
-    }
-
     Error get_rx_error() const
     {
-        Error error = Error::none;
-
-        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_FE))
-        {
-            error |= Error::framing;
-        }
-        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_NE))
-        {
-            error |= Error::noise;
-        }
-        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_ORE))
-        {
-            error |= Error::overrun;
-        }
-        if (true == xmcu::bit::flag::is(this->isr, USART_ISR_PE))
-        {
-            error |= Error::parity;
-        }
-
-        return error;
+        return static_cast<Error>(xmcu::bit::flag::get(this->isr, USART_ISR_FE | USART_ISR_NE | USART_ISR_ORE | USART_ISR_PE));
     }
 };
 template<> class usart::Transceiver<api::traits::async> : private ll::usart::Peripheral
@@ -1041,22 +1055,27 @@ public:
 #endif
     void disable();
 
-    void read_start();
-    void read_stop();
+    void receive_start();
+    void receive_stop();
 
-    void write_start();
-    void write_stop();
+    void transmit_start();
+    void transmit_stop();
 
-    void errors_listening_start();
-    void errors_listening_stop();
+    void events_start(Event events_a);
+    void events_stop();
 
-    struct isr : private xmcu::non_constructible
+    struct handler : private xmcu::non_constructible
     {
-        static void on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this);
-        static std::uint32_t on_write(usart::Transceiver<api::traits::async>* p_this);
+        static void on_receive(std::uint32_t word_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this);
+        static std::uint32_t on_transmit(usart::Transceiver<api::traits::async>* p_this);
 
-        static void on_error(Error errors_a, usart::Transceiver<api::traits::async>* p_this);
+        static void on_event(Event events_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this);
     };
+
+private:
+    friend void usart_isr_handler(usart::Transceiver<api::traits::async>* p_handler_a);
+
+    constexpr static std::uint32_t no_data_to_transmit = 0x200u;
 };
 
 template<> inline usart::Transceiver<api::traits::sync>* usart::Peripheral::get_view<usart::Transceiver<api::traits::sync>>() const

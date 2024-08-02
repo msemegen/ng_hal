@@ -32,7 +32,7 @@ void xmcu::stdglue::assert::handler::output(std::string_view message_a, void* p_
 {
     auto* p_usart = reinterpret_cast<usart::Transceiver<api::traits::sync>*>(p_context_a);
 
-    p_usart->write(message_a);
+    p_usart->transmit(message_a);
 }
 void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context_a)
 {
@@ -41,18 +41,49 @@ void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context
     char buff[7u];
     std::to_chars(buff, buff + 7u, line_a);
 
-    p_usart->write(std::string_view { buff });
+    p_usart->transmit(std::string_view { buff });
 }
 #endif
 
 volatile std::uint32_t flag = 0x0u;
-char c;
+char c[5];
+volatile std::size_t i = 0;
 gpio::Pad led;
-void usart::Transceiver<api::traits::async>::isr::on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this)
+void usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a,
+                                                                 usart::Error errors_a,
+                                                                 usart::Transceiver<api::traits::async>* p_this)
 {
-    c = static_cast<char>(word_a);
-    flag = 0x1u;
-    led.toggle();
+    if (usart::Error::none == errors_a)
+    {
+        c[4] = static_cast<char>(word_a);
+        flag = 0x1u;
+    }
+}
+
+std::uint32_t usart::Transceiver<api::traits::async>::handler::on_transmit(usart::Transceiver<api::traits::async>* p_this)
+{
+    if (i < 5u)
+    {
+        i = i + 1u;
+        return c[i - 1u];
+    }
+
+    return no_data_to_transmit;
+}
+
+void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event events_a,
+                                                               usart::Error errors_a,
+                                                               usart::Transceiver<api::traits::async>* p_this)
+{
+    if (usart::Event::transfer_complete == (events_a & usart::Event::transfer_complete))
+    {
+        p_this->transmit_stop();
+        i = 0u;
+    }
+    if (usart::Event::idle == (events_a & usart::Event::idle))    
+    {
+        led.toggle();
+    }
 }
 
 int main()
@@ -147,11 +178,17 @@ int main()
             auto usart_async = p_usart2->get_view<usart::Transceiver<api::traits::async>>();
 
             usart_async->enable({ 0x0u, 0x0u });
-            usart_async->read_start();
+            usart_async->receive_start();
+            usart_async->events_start(usart::Event::transfer_complete | usart::Event::idle);
 
             led.write(gpio::Level::high);
 
             // echo
+            c[0] = 'A';
+            c[1] = 'B';
+            c[2] = 'C';
+            c[3] = 'D';
+
             while (true)
             {
                 // char c = '\0';
@@ -161,7 +198,7 @@ int main()
                 {
                     flag = 0x0u;
 
-                    p_usart2_comm->write(std::span { &c, 1u });
+                    usart_async->transmit_start();
                 }
             }
         }

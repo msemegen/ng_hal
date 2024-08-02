@@ -43,23 +43,6 @@ IRQn_Type select_irq(std::uint32_t base_address_a)
     return static_cast<IRQn_Type>(0xFFFFFFFF);
 }
 
-void usart_isr_handler(USART_TypeDef* p_registers_a, usart::Transceiver<api::traits::async>* p_handler_a)
-{
-    const std::uint32_t isr = p_registers_a->ISR;
-    const std::uint32_t cr1 = p_registers_a->CR1;
-
-    if (true == bit::flag::is(p_registers_a->ISR, USART_ISR_RXNE_RXFNE) &&
-        true == bit::flag::is(p_registers_a->CR1, USART_CR1_RXNEIE_RXFNEIE))
-    {
-        usart::Transceiver<api::traits::async>::isr::on_read(p_registers_a->RDR, p_handler_a);
-    }
-
-    if (true == bit::flag::is(p_registers_a->ISR, USART_ISR_TXE_TXFNF) &&
-        true == bit::flag::is(p_registers_a->CR1, USART_CR1_TXEIE_TXFNFIE))
-    {
-        p_registers_a->TDR = usart::Transceiver<api::traits::async>::isr::on_write(p_handler_a);
-    }
-}
 } // namespace
 
 extern "C" {
@@ -69,31 +52,83 @@ using namespace soc::st::arm::m0::u0::rm0503::peripherals;
 #if defined XMCU_USART1_PRESENT
 void USART1_IRQHandler()
 {
-    usart_isr_handler(USART1, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART1_BASE));
+    usart_isr_handler(reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART1_BASE));
 }
 #endif
 #if defined XMCU_USART2_PRESENT
 void USART2_LPUART2_IRQHandler()
 {
-    usart_isr_handler(USART2, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART2_BASE));
+    usart_isr_handler(reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART2_BASE));
 }
 #endif
 #if defined XMCU_USART3_PRESENT
 void USART3_LPUART1_IRQHandler()
 {
-    usart_isr_handler(USART3, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART3_BASE));
+    usart_isr_handler(reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART3_BASE));
 }
 #endif
 #if defined XMCU_USART4_PRESENT
 void USART4_LPUART3_IRQHandler()
 {
-    usart_isr_handler(USART4, reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART4_BASE));
+    usart_isr_handler(reinterpret_cast<usart::Transceiver<api::traits::async>*>(USART4_BASE));
 }
 #endif
 }
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 using namespace xmcu;
+
+void usart_isr_handler(usart::Transceiver<api::traits::async>* p_handler_a)
+{
+    const std::uint32_t isr = p_handler_a->isr;
+    const std::uint32_t cr1 = p_handler_a->cr1;
+
+    const usart::Error errors =
+        static_cast<usart::Error>(xmcu::bit::flag::get(isr, USART_ISR_FE | USART_ISR_NE | USART_ISR_ORE | USART_ISR_PE));
+
+    if (usart::Error::none != errors)
+    {
+        bit::flag::set(&(p_handler_a->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+    }
+
+    if (true == bit::flag::is(p_handler_a->cr1, USART_CR1_RXNEIE_RXFNEIE) &&
+        (true == bit::flag::is(p_handler_a->isr, USART_ISR_RXNE_RXFNE) || usart::Error::none != errors))
+    {
+        usart::Transceiver<api::traits::async>::handler::on_receive(p_handler_a->rdr, errors, p_handler_a);
+    }
+
+    if (true == bit::flag::is(p_handler_a->isr, USART_ISR_TXE_TXFNF) && true == bit::flag::is(p_handler_a->cr1, USART_CR1_TXEIE_TXFNFIE))
+    {
+        const std::uint32_t r = usart::Transceiver<api::traits::async>::handler::on_transmit(p_handler_a);
+
+        if (usart::Transceiver<api::traits::async>::no_data_to_transmit != r)
+        {
+            p_handler_a->tdr = r;
+        }
+    }
+
+    if (true == bit::is_any(cr1, USART_CR1_IDLEIE | USART_CR1_TCIE | USART_CR1_CMIE) &&
+        (bit::is_any(isr, USART_ISR_IDLE | USART_ISR_TC | USART_ISR_CMF) || usart::Error::none != errors))
+    {
+        usart::Event events = usart::Event::none;
+
+        if (true == bit::flag::is(cr1, USART_CR1_IDLEIE) && true == bit::flag::is(isr, USART_ISR_IDLE))
+        {
+            events |= usart::Event::idle;
+        }
+        if (true == bit::flag::is(cr1, USART_CR1_TCIE) && true == bit::flag::is(isr, USART_ISR_TC))
+        {
+            events |= usart::Event::transfer_complete;
+        }
+        if (true == bit::flag::is(cr1, USART_CR1_CMIE) && true == bit::flag::is(isr, USART_ISR_CMF))
+        {
+            events |= usart::Event::character_matched;
+        }
+
+        bit::flag::set(&(p_handler_a->icr), USART_ICR_IDLECF | USART_ICR_TCCF | USART_ICR_CMCF);
+        usart::Transceiver<api::traits::async>::handler::on_event(events, errors, p_handler_a);
+    }
+}
 
 void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
 {
@@ -185,31 +220,69 @@ void usart::Transceiver<api::traits::async>::enable(const IRQ_priority& priority
     NVIC_EnableIRQ(irq_type);
     NVIC_SetPriority(irq_type, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority_a.preempt_priority, priority_a.sub_priority));
 }
-void usart::Transceiver<api::traits::async>::disable() {}
-
-void usart::Transceiver<api::traits::async>::read_start()
+void usart::Transceiver<api::traits::async>::disable()
 {
-    bit::flag::set(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE);
-}
-void usart::Transceiver<api::traits::async>::read_stop()
-{
-    bit::flag::clear(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE);
+    IRQn_Type irq_type = select_irq(reinterpret_cast<std::uint32_t>(this));
+    NVIC_DisableIRQ(irq_type);
 }
 
-void usart::Transceiver<api::traits::async>::write_start()
+void usart::Transceiver<api::traits::async>::receive_start()
+{
+    bit::flag::set(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE);
+    bit::flag::set(&(this->cr3), USART_CR3_EIE);
+}
+void usart::Transceiver<api::traits::async>::receive_stop()
+{
+    bit::flag::clear(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE);
+    bit::flag::clear(&(this->cr3), USART_CR3_EIE);
+}
+
+void usart::Transceiver<api::traits::async>::transmit_start()
 {
     bit::flag::set(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
 }
-void usart::Transceiver<api::traits::async>::write_stop()
+void usart::Transceiver<api::traits::async>::transmit_stop()
 {
     bit::flag::clear(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
 }
 
-__WEAK void usart::Transceiver<api::traits::async>::isr::on_read(std::uint32_t word_a, usart::Transceiver<api::traits::async>* p_this) {}
-__WEAK std::uint32_t usart::Transceiver<api::traits::async>::isr::on_write(usart::Transceiver<api::traits::async>* p_this)
+void usart::Transceiver<api::traits::async>::events_start(Event events_a)
+{
+    std::uint32_t enabled_events = 0x0u;
+
+    if (Event::character_matched == (Event::character_matched & events_a))
+    {
+        enabled_events |= USART_CR1_CMIE;
+    }
+    if (Event::idle == (Event::idle & events_a))
+    {
+        enabled_events |= USART_CR1_IDLEIE;
+    }
+    if (Event::transfer_complete == (Event::transfer_complete & events_a))
+    {
+        enabled_events |= USART_CR1_TCIE;
+    }
+
+    bit::flag::set(&(this->cr1), enabled_events | USART_CR1_PEIE);
+    bit::flag::set(&(this->cr3), USART_CR3_EIE);
+}
+void usart::Transceiver<api::traits::async>::events_stop()
+{
+    bit::flag::clear(&(this->cr1), USART_CR1_IDLEIE | USART_CR1_CMIE | USART_CR1_TCIE | USART_CR1_PEIE);
+    bit::flag::clear(&(this->cr3), USART_CR3_EIE);
+}
+
+__WEAK void
+usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a, Error errors_a, Transceiver<api::traits::async>* p_this)
+{
+}
+__WEAK std::uint32_t usart::Transceiver<api::traits::async>::handler::on_transmit(Transceiver<api::traits::async>* p_this)
 {
     return 0;
 }
-__WEAK void usart::Transceiver<api::traits::async>::isr::on_error(usart::Error errors_a, usart::Transceiver<api::traits::async>* p_this) {}
+__WEAK void
+usart::Transceiver<api::traits::async>::handler::on_event(Event events_a, Error errors_a, Transceiver<api::traits::async>* p_this)
+{
+}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

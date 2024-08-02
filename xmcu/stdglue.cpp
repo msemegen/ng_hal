@@ -153,9 +153,8 @@ void __assert_func(const char* p_file_a, int line_a, const char* p_function_a, c
     stdglue::assert::handler::output(" -> ", p_assert_context);
     stdglue::assert::handler::output(p_condition_a, p_assert_context);
     stdglue::assert::handler::output("\n", p_assert_context);
-
-    while (true) continue;
 #endif
+    while (true) continue;
 }
 
 #if 0 == XMCU_NOSTDLIB

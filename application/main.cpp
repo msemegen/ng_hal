@@ -12,6 +12,8 @@
 #include <xmcu/hal/peripherals/i2c.hpp>
 #include <xmcu/hal/peripherals/usart.hpp>
 #include <xmcu/stdglue.hpp>
+#include <xmcu/Scoped_guard.hpp>
+#include <xmcu/hal/nvic.hpp>
 
 // std
 #include <cassert>

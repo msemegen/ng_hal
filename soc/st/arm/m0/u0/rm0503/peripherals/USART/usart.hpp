@@ -39,12 +39,12 @@ struct usart_clock : private xmcu::non_constructible
         enable
     };
 
-    template<typename id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_a) = delete;
-    template<typename id_t> static void disable() = delete;
+    template<usart_base::Id id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_a) = delete;
+    template<usart_base::Id id_t> static void disable() = delete;
 
-    template<typename id_t> [[nodiscard]] static bool is_enabled() = delete;
-    template<typename id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
-    template<typename id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
+    template<usart_base::Id id_t> [[nodiscard]] static bool is_enabled() = delete;
+    template<usart_base::Id id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
+    template<usart_base::Id id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
 };
 
 struct usart : public usart_base
@@ -67,7 +67,7 @@ struct usart : public usart_base
         volatile std::uint32_t presc;       // clock Prescaler register
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 };
 
 #if defined XMCU_USART1_PRESENT
@@ -382,116 +382,116 @@ struct usart : public usart_base
         enable = USART_CR1_UESM
     };
 
+    enum class Fifo : std::uint32_t
+    {
+        disable = 0x0u,
+        enable = USART_CR1_FIFOEN
+    };
+    enum class Oversampling : std::uint32_t
+    {
+        _16 = 0x0u,
+        _8 = USART_CR1_OVER8,
+    };
+    enum class Sampling : std::uint32_t
+    {
+        three_sample_bit = 0,
+        one_sample_bit = USART_CR3_ONEBIT,
+    };
+    enum class Mute : std::uint32_t
+    {
+        disable = 0x0u,
+        wake_on_idle_line = USART_CR1_MME,
+        wake_on_address = USART_CR1_MME | USART_CR1_WAKE,
+    };
+    enum class Auto_baudrate : std::uint64_t
+    {
+        _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
+        _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
+    };
+
+    struct Clock
+    {
+        enum class Prescaler : std::uint32_t
+        {
+            _1 = 0x0u,
+            _2 = 0x1u,
+            _4 = 0x2u,
+            _6 = 0x3u,
+            _8 = 0x4u,
+            _10 = 0x5u,
+            _12 = 0x6u,
+            _16 = 0x7u,
+            _32 = 0x8u,
+            _64 = 0x9u,
+            _128 = 0xAu,
+            _256 = 0xBu
+        };
+
+        std::uint32_t clk_freq_Hz = 0x0u;
+        Prescaler prescaler;
+    };
+    struct Frame
+    {
+        enum class Word_length : std::uint32_t
+        {
+            _7_bit = USART_CR1_M1,
+            _8_bit = 0x0u,
+            _9_bit = USART_CR1_M0,
+        };
+        enum class Parity : std::uint32_t
+        {
+            none = 0x0u,
+            even = USART_CR1_PCE,
+            odd = USART_CR1_PCE | USART_CR1_PS,
+        };
+        enum class Stop_bits : std::uint32_t
+        {
+            _0_5 = USART_CR2_STOP_0,
+            _1 = 0x0u,
+            _1_5 = USART_CR2_STOP_0 | USART_CR2_STOP_1,
+            _2 = USART_CR2_STOP_1,
+        };
+        enum class MSB_first : std::uint32_t
+        {
+            disable = 0x0u,
+            enable = USART_CR2_MSBFIRST
+        };
+        enum class Inversion : std::uint32_t
+        {
+            disable = 0x0u,
+            enable = USART_CR2_DATAINV
+        };
+
+        Word_length word_length;
+        Parity parity;
+        Stop_bits stop_bits;
+        MSB_first msb_first;
+        Inversion inversion;
+    };
+
+    struct Baudrate
+    {
+        Baudrate() {}
+        Baudrate(std::uint32_t value_a)
+            : v(static_cast<std::uint64_t>(value_a) << 32u)
+        {
+        }
+        Baudrate(Auto_baudrate flag_a)
+            : v(static_cast<std::uint32_t>(flag_a))
+        {
+        }
+
+        operator std::uint64_t() const
+        {
+            return this->v;
+        }
+
+    private:
+        std::uint64_t v = 0u;
+    };
+
     struct Descriptor
     {
-        enum class Fifo : std::uint32_t
-        {
-            disable = 0x0u,
-            enable = USART_CR1_FIFOEN
-        };
-        enum class Oversampling : std::uint32_t
-        {
-            _16 = 0x0u,
-            _8 = USART_CR1_OVER8,
-        };
-        enum class Sampling : std::uint32_t
-        {
-            three_sample_bit = 0,
-            one_sample_bit = USART_CR3_ONEBIT,
-        };
-        enum class Mute : std::uint32_t
-        {
-            disable = 0x0u,
-            wake_on_idle_line = USART_CR1_MME,
-            wake_on_address = USART_CR1_MME | USART_CR1_WAKE,
-        };
-        enum class Auto_baudrate : std::uint64_t
-        {
-            _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
-            _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
-        };
-
-        struct Clock
-        {
-            enum class Prescaler : std::uint32_t
-            {
-                _1 = 0x0u,
-                _2 = 0x1u,
-                _4 = 0x2u,
-                _6 = 0x3u,
-                _8 = 0x4u,
-                _10 = 0x5u,
-                _12 = 0x6u,
-                _16 = 0x7u,
-                _32 = 0x8u,
-                _64 = 0x9u,
-                _128 = 0xAu,
-                _256 = 0xBu
-            };
-
-            std::uint32_t clk_freq_Hz = 0x0u;
-            Prescaler prescaler;
-        };
-        struct Frame
-        {
-            enum class Word_length : std::uint32_t
-            {
-                _7_bit = USART_CR1_M1,
-                _8_bit = 0x0u,
-                _9_bit = USART_CR1_M0,
-            };
-            enum class Parity : std::uint32_t
-            {
-                none = 0x0u,
-                even = USART_CR1_PCE,
-                odd = USART_CR1_PCE | USART_CR1_PS,
-            };
-            enum class Stop_bits : std::uint32_t
-            {
-                _0_5 = USART_CR2_STOP_0,
-                _1 = 0x0u,
-                _1_5 = USART_CR2_STOP_0 | USART_CR2_STOP_1,
-                _2 = USART_CR2_STOP_1,
-            };
-            enum class MSB_first : std::uint32_t
-            {
-                disable = 0x0u,
-                enable = USART_CR2_MSBFIRST
-            };
-            enum class Inversion : std::uint32_t
-            {
-                disable = 0x0u,
-                enable = USART_CR2_DATAINV
-            };
-
-            Word_length word_length;
-            Parity parity;
-            Stop_bits stop_bits;
-            MSB_first msb_first;
-            Inversion inversion;
-        };
-
-        struct Baudrate
-        {
-            Baudrate() {}
-            Baudrate(std::uint32_t value_a)
-                : v(static_cast<std::uint64_t>(value_a) << 32u)
-            {
-            }
-            Baudrate(Auto_baudrate flag_a)
-                : v(static_cast<std::uint32_t>(flag_a))
-            {
-            }
-
-            operator std::uint64_t() const
-            {
-                return this->v;
-            }
-
-        private:
-            std::uint64_t v = 0u;
-        };
-
         Fifo fifo;
         Oversampling oversampling;
         Sampling sampling;
@@ -604,9 +604,9 @@ struct usart : public usart_base
     {
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 
-    template<typename id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
+    template<usart::Id id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
     static void set_traits()
     {
         if constexpr (transmission_mode_t::trait_kind == traits::Kind::full_duplex)
@@ -711,7 +711,7 @@ struct usart : public usart_base
     }
 
 private:
-    template<typename id_t, typename trait_t> void configure_cts_and_rts()
+    template<usart::Id id_t, typename trait_t> void configure_cts_and_rts()
     {
         // cts configuration
         if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
@@ -741,7 +741,7 @@ private:
             detail::rts_pin<id_t, trait_t::b::pin_descriptor, trait_t::b::pin>::configure();
         }
     }
-    template<typename id_t, typename trait_t> void configure_cts_or_rts()
+    template<usart::Id id_t, typename trait_t> void configure_cts_or_rts()
     {
         // cts configuration
         if constexpr (trait_t::a::kind == usart::traits::Hardware_flow_control::cts)
@@ -813,15 +813,15 @@ inline constexpr usart::Mode operator&(usart::Mode left_a, usart::Mode right_a)
                                     static_cast<std::underlying_type<usart::Mode>::type>(right_a));
 }
 
-inline constexpr usart::Descriptor::Mute operator|(usart::Descriptor::Mute mode_a, std::uint8_t address_a)
+inline constexpr usart::Mute operator|(usart::Mute mode_a, std::uint8_t address_a)
 {
-    if (mode_a == usart::Descriptor::Mute::wake_on_address)
+    if (mode_a == usart::Mute::wake_on_address)
     {
-        return static_cast<usart::Descriptor::Mute>(static_cast<std::uint32_t>(mode_a) | address_a);
+        return static_cast<usart::Mute>(static_cast<std::uint32_t>(mode_a) | address_a);
     }
     else
     {
-        assert(mode_a == usart::Descriptor::Mute::wake_on_address);
+        assert(mode_a == usart::Mute::wake_on_address);
         return mode_a;
     }
 }

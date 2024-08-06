@@ -26,26 +26,26 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 
 struct i2c_base : protected xmcu::non_constructible
 {
-#if defined XMCU_I2C1_PRESENT
-    struct _1
+    enum class Id
     {
-    };
+#if defined XMCU_I2C1_PRESENT
+        _1
 #endif
 #if defined XMCU_I2C2_PRESENT
-    struct _2
-    {
-    };
+        ,
+        _2
 #endif
 #if defined XMCU_I2C3_PRESENT
-    struct _3
-    {
-    };
+        ,
+        _3
 #endif
 #if defined XMCU_I2C4_PRESENT
-    struct _4
-    {
-    };
+        ,
+        _4
 #endif
+    };
+
+    using enum Id;
 };
 
 namespace detail {
@@ -57,11 +57,13 @@ template<auto... pins_t> struct I2C_pins
     }
 };
 
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct scl_pin : private xmcu::non_constructible
+template<i2c_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct scl_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct sda_pin : private xmcu::non_constructible
+template<i2c_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct sda_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
@@ -206,21 +208,21 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sc
     }
 };
 
-template<typename id_t> constexpr auto get_allowed_scl_pins()
+template<i2c_base::Id id_t> constexpr auto get_allowed_scl_pins()
 {
-    if constexpr (true == std::is_same_v<i2c_base::_1, id_t>)
+    if constexpr (i2c_base::_1 == id_t)
     {
         return i2c_1_scl_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_2, id_t>)
+    if constexpr (i2c_base::_2 == id_t)
     {
         return i2c_2_scl_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_3, id_t>)
+    if constexpr (i2c_base::_3 == id_t)
     {
         return i2c_3_scl_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_4, id_t>)
+    if constexpr (i2c_base::_4 == id_t)
     {
         return i2c_4_scl_pins;
     }
@@ -272,25 +274,24 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sd
     }
 };
 
-template<typename id_t> constexpr auto get_allowed_sda_pins()
+template<i2c_base::Id id_t> constexpr auto get_allowed_sda_pins()
 {
-    if constexpr (true == std::is_same_v<i2c_base::_1, id_t>)
+    if constexpr (i2c_base::_1 == id_t)
     {
         return i2c_1_sda_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_2, id_t>)
+    if constexpr (i2c_base::_2 == id_t)
     {
         return i2c_2_sda_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_3, id_t>)
+    if constexpr (i2c_base::_3 == id_t)
     {
         return i2c_3_sda_pins;
     }
-    if constexpr (true == std::is_same_v<i2c_base::_4, id_t>)
+    if constexpr (i2c_base::_4 == id_t)
     {
         return i2c_4_sda_pins;
     }
 }
-
 #endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

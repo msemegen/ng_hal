@@ -141,31 +141,37 @@ int main()
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
-        // i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
-        // i2c::set_traits<
-        //     i2c::_1,
-        //     i2c::traits::half_duplex<gpio::A::Pin::_10,
-        //                              gpio::Descriptor<gpio::Mode::alternate> {
-        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
-        //                              gpio::A::Pin::_9,
-        //                              gpio::Descriptor<gpio::Mode::alternate> {
-        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
+        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
+        i2c::set_traits<
+            i2c::_1,
+            i2c::traits::half_duplex<gpio::A::Pin::_10,
+                                     gpio::Descriptor<gpio::Mode::alternate> {
+                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
+                                     gpio::A::Pin::_9,
+                                     gpio::Descriptor<gpio::Mode::alternate> {
+                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        usart::Peripheral* p_usart2 = usart::interface<usart::_2>(); // TODO: interace, like in GPIO
+        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::interface<i2c::_1, i2c::master>();
+        auto i2c_transceview = p_i2c_bus->get_view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>();
+
+        p_i2c_bus->set_descriptor({});
+        p_i2c_bus->enable(10ms);
+
+        usart::Peripheral* p_usart2 = usart::interface<usart::_2>();
 
         // transmission configuration
         p_usart2->set_descriptor(
-            usart::Descriptor { .fifo = usart::Descriptor::Fifo::disable,
-                                .oversampling = usart::Descriptor::Oversampling::_16,
-                                .sampling = usart::Descriptor::Sampling::three_sample_bit,
-                                .mute = usart::Descriptor::Mute::disable,
+            usart::Descriptor { .fifo = usart::Fifo::disable,
+                                .oversampling = usart::Oversampling::_16,
+                                .sampling = usart::Sampling::three_sample_bit,
+                                .mute = usart::Mute::disable,
                                 .baudrate = 115200u,
-                                .clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Descriptor::Clock::Prescaler::_1 },
-                                .frame { .word_length = usart::Descriptor::Frame::Word_length::_8_bit,
-                                         .parity = usart::Descriptor::Frame::Parity::none,
-                                         .stop_bits = usart::Descriptor::Frame::Stop_bits::_1,
-                                         .msb_first = usart::Descriptor::Frame::MSB_first::disable,
-                                         .inversion = usart::Descriptor::Frame::Inversion::disable } });
+                                .clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
+                                .frame { .word_length = usart::Frame::Word_length::_8_bit,
+                                         .parity = usart::Frame::Parity::none,
+                                         .stop_bits = usart::Frame::Stop_bits::_1,
+                                         .msb_first = usart::Frame::MSB_first::disable,
+                                         .inversion = usart::Frame::Inversion::disable } });
 
         gpio::interface<gpio::A>()->enable(
             gpio::A::Pin::_5,

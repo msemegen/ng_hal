@@ -25,26 +25,26 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 
 struct usart_base : protected xmcu::non_constructible
 {
-#if defined XMCU_USART1_PRESENT
-    struct _1
+    enum class Id
     {
-    };
+#if defined XMCU_USART1_PRESENT
+        _1
 #endif
 #if defined XMCU_USART2_PRESENT
-    struct _2
-    {
-    };
+        ,
+        _2
 #endif
 #if defined XMCU_USART3_PRESENT
-    struct _3
-    {
-    };
+        ,
+        _3
 #endif
 #if defined XMCU_USART4_PRESENT
-    struct _4
-    {
-    };
+        ,
+        _4
 #endif
+    };
+
+    using enum Id;
 };
 
 namespace detail {
@@ -56,23 +56,28 @@ template<auto... pins_t> struct USART_pins
     }
 };
 
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rx_pin : private xmcu::non_constructible
+template<usart_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rx_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct tx_pin : private xmcu::non_constructible
+template<usart_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct tx_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct clk_pin : private xmcu::non_constructible
+template<usart_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct clk_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct cts_pin : private xmcu::non_constructible
+template<usart_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct cts_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
-template<typename id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rts_pin : private xmcu::non_constructible
+template<usart_base::Id id_t, gpio::Descriptor<gpio::Mode::alternate> descriptor_t, auto pin_t> struct rts_pin
+    : private xmcu::non_constructible
 {
     static void configure() = delete;
 };
@@ -84,21 +89,21 @@ constexpr detail::USART_pins<gpio::A::Pin::_3, gpio::A::Pin::_15> usart_2_rx_pin
 constexpr detail::USART_pins<gpio::A::Pin::_7, gpio::B::Pin::_9, gpio::B::Pin::_11, gpio::C::Pin::_5, gpio::C::Pin::_11> usart_3_rx_pins;
 constexpr detail::USART_pins<gpio::A::Pin::_1, gpio::C::Pin::_11> usart_4_rx_pins;
 
-template<typename id_t> constexpr auto get_allowed_rx_pins()
+template<usart_base::Id id_t> constexpr auto get_allowed_rx_pins()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return usart_1_rx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return usart_2_rx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return usart_3_rx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return usart_4_rx_pins;
     }
@@ -199,21 +204,21 @@ constexpr detail::USART_pins<gpio::A::Pin::_2> usart_2_tx_pins;
 constexpr detail::USART_pins<gpio::A::Pin::_5, gpio::B::Pin::_8, gpio::B::Pin::_10, gpio::C::Pin::_4, gpio::C::Pin::_10> usart_3_tx_pins;
 constexpr detail::USART_pins<gpio::A::Pin::_0, gpio::C::Pin::_10> usart_4_tx_pins;
 
-template<typename id_t> constexpr auto get_allowed_tx_pins()
+template<usart_base::Id id_t> constexpr auto get_allowed_tx_pins()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return usart_1_tx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return usart_2_tx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return usart_3_tx_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return usart_4_tx_pins;
     }
@@ -306,21 +311,21 @@ constexpr detail::USART_pins<gpio::A::Pin::_4> usart_2_ck_pins;
 constexpr detail::USART_pins<> usart_3_ck_pins;
 constexpr detail::USART_pins<gpio::C::Pin::_3, gpio::C::Pin::_12> usart_4_ck_pins;
 
-template<typename id_t> constexpr auto get_allowed_ck_pins()
+template<usart_base::Id id_t> constexpr auto get_allowed_ck_pins()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return usart_1_ck_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return usart_2_ck_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return usart_3_ck_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return usart_4_ck_pins;
     }
@@ -353,21 +358,21 @@ constexpr detail::USART_pins<> usart_2_cts_pins;
 constexpr detail::USART_pins<> usart_3_cts_pins;
 constexpr detail::USART_pins<gpio::B::Pin::_7> usart_4_cts_pins;
 
-template<typename id_t> constexpr auto get_allowed_cts_pins()
+template<usart_base::Id id_t> constexpr auto get_allowed_cts_pins()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return usart_1_cts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return usart_2_cts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return usart_3_cts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return usart_4_cts_pins;
     }
@@ -391,21 +396,21 @@ constexpr detail::USART_pins<> usart_2_rts_pins;
 constexpr detail::USART_pins<gpio::D::Pin::_2> usart_3_rts_pins;
 constexpr detail::USART_pins<gpio::A::Pin::_15> usart_4_rts_pins;
 
-template<typename id_t> constexpr auto get_allowed_rts_pins()
+template<usart_base::Id id_t> constexpr auto get_allowed_rts_pins()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return usart_1_rts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return usart_2_rts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return usart_3_rts_pins;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return usart_4_rts_pins;
     }
@@ -428,25 +433,24 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::rt
     static void configure() {}
 };
 
-template<typename id_t> constexpr inline auto get_usart_port_address()
+template<usart_base::Id id_t> constexpr inline auto get_usart_port_address()
 {
-    if constexpr (true == std::is_same_v<usart_base::_1, id_t>)
+    if constexpr (usart_base::_1 == id_t)
     {
         return USART1_BASE;
     }
-    if constexpr (true == std::is_same_v<usart_base::_2, id_t>)
+    if constexpr (usart_base::_2 == id_t)
     {
         return USART2_BASE;
     }
-    if constexpr (true == std::is_same_v<usart_base::_3, id_t>)
+    if constexpr (usart_base::_3 == id_t)
     {
         return USART3_BASE;
     }
-    if constexpr (true == std::is_same_v<usart_base::_4, id_t>)
+    if constexpr (usart_base::_4 == id_t)
     {
         return USART4_BASE;
     }
 }
-
 #endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

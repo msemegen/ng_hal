@@ -151,7 +151,7 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
         assert(0x0u != baudrate);
         switch (descriptor_a.oversampling)
         {
-            case usart::Descriptor::Oversampling::_8: {
+            case usart::Oversampling::_8: {
                 std::uint32_t div =
                     ((((descriptor_a.clock.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(descriptor_a.clock.prescaler)]) *
                        2u) +
@@ -166,7 +166,7 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
             }
             break;
 
-            case usart::Descriptor::Oversampling::_16: {
+            case usart::Oversampling::_16: {
                 std::uint32_t div =
                     ((descriptor_a.clock.clk_freq_Hz / clock_prescaler_lut[static_cast<std::uint32_t>(descriptor_a.clock.prescaler)] +
                       (baudrate / 2u)) /

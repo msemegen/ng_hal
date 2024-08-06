@@ -35,12 +35,12 @@ struct i2c_clock : private xmcu::non_constructible
         disable,
         enable
     };
-    template<typename id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_activity_a) = delete;
-    template<typename id_t> static void disable() = delete;
+    template<i2c_base::Id id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_activity_a) = delete;
+    template<i2c_base::Id id_t> static void disable() = delete;
 
-    template<typename id_t> [[nodiscard]] static bool is_enabled() = delete;
-    template<typename id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
-    template<typename id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
+    template<i2c_base::Id id_t> [[nodiscard]] static bool is_enabled() = delete;
+    template<i2c_base::Id id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
+    template<i2c_base::Id id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
 };
 
 struct i2c : public i2c_base
@@ -68,7 +68,7 @@ struct i2c : public i2c_base
         volatile std::uint32_t txdr; // transmit data register
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<i2c::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
 };
 
 #if defined XMCU_I2C1_PRESENT
@@ -92,7 +92,7 @@ template<> inline void i2c_clock::enable<i2c_base::_1, oscillators::hsi16>(Stop_
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, oscillators::hsi16>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_1, oscillators::hsi16>()
 {
     return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0) && true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_1);
 }
@@ -111,7 +111,7 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::sysclk>(Stop_mode
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL, RCC_CCIPR_I2C1SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, clocks::sysclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_1, clocks::sysclk>()
 {
     return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0) && false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_1);
 }
@@ -130,7 +130,7 @@ template<> inline void i2c_clock::enable<i2c_base::_1, clocks::pclk>(Stop_mode_a
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C1SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C1EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_1, clocks::pclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_1, clocks::pclk>()
 {
     return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C1SEL_0 | RCC_CCIPR_I2C1SEL_1);
 }
@@ -169,7 +169,7 @@ template<> inline void i2c_clock::enable<i2c_base::_2, clocks::pclk>(Stop_mode_a
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C2EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_2, clocks::pclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_2, clocks::pclk>()
 {
     return true;
 }
@@ -208,7 +208,7 @@ template<> inline void i2c_clock::enable<i2c_base::_3, oscillators::hsi16>(Stop_
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_1);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, oscillators::hsi16>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_3, oscillators::hsi16>()
 {
     return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0) && true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_1);
 }
@@ -227,7 +227,7 @@ template<> inline void i2c_clock::enable<i2c_base::_3, clocks::sysclk>(Stop_mode
     xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL, RCC_CCIPR_I2C3SEL_0);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, clocks::sysclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_3, clocks::sysclk>()
 {
     return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0) && false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_1);
 }
@@ -246,7 +246,7 @@ template<> inline void i2c_clock::enable<i2c_base::_3, clocks::pclk>(Stop_mode_a
     xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_I2C3SEL);
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C3EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_3, clocks::pclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_3, clocks::pclk>()
 {
     return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_I2C3SEL_0 | RCC_CCIPR_I2C3SEL_1);
 }
@@ -285,7 +285,7 @@ template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Stop_mode_a
 
     xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_I2C4EN);
 }
-template<> [[nodiscard]] bool i2c_clock::is_source_selected<i2c::_4, clocks::pclk>()
+template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_4, clocks::pclk>()
 {
     return true;
 }
@@ -309,24 +309,21 @@ struct i2c : public i2c_base
 {
     using clock = ll::i2c_clock;
 
-    struct Descriptor
+    enum class Mode : std::uint64_t
     {
-        enum class Mode : std::uint64_t
-        {
-            master = 0x1u,
-            slave = 0x2u
-        };
+        master = 0x1u,
+        slave = 0x2u
+    };
 
-        struct Master
-        {
-        };
+    using enum Mode;
 
-        struct Slave
-        {
-            std::uint8_t address;
-        };
+    enum class Speed : std::uint32_t
+    {
 
-        Mode mode;
+    };
+
+    template<Mode mode_t> struct Descriptor : private xmcu::non_constructible
+    {
     };
 
     struct traits : private xmcu::non_constructible
@@ -344,22 +341,17 @@ struct i2c : public i2c_base
         };
     };
 
-    class Peripheral : private ll::i2c::Peripheral
-    {
-    public:
-        void set_descriptor(const Descriptor& descriptor_a) {}
-
-        bool enable(std::chrono::milliseconds timeout_a);
-        bool disable(std::chrono::milliseconds timeout_a);
-    };
-
-    template<api::traits trait_t> class Transceiver : private non_constructible
+    template<Mode mode_t> class Peripheral : private xmcu::non_constructible
     {
     };
 
-    template<typename id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<api::traits trait_t, Mode mode_t> class Transceiver : private non_constructible
+    {
+    };
 
-    template<typename id_t, typename transmission_mode_t> static void set_traits()
+    template<i2c::Id id_t, Mode mode_t> [[nodiscard]] constexpr static Peripheral<mode_t>* interface() = delete;
+
+    template<i2c::Id id_t, typename transmission_mode_t> static void set_traits()
     {
         static_assert(get_allowed_sda_pins<id_t>().is(transmission_mode_t::sda_pin), "incorrect sda pin");
         static_assert(get_allowed_scl_pins<id_t>().is(transmission_mode_t::scl_pin), "incorrect scl pin");
@@ -369,39 +361,117 @@ struct i2c : public i2c_base
     }
 };
 
-constexpr i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Master& master_a)
+template<> struct i2c::Descriptor<i2c::master>
 {
-    assert(i2c::Descriptor::Mode::master == mode_a);
-    return {};
-}
-constexpr i2c::Descriptor::Mode operator|(i2c::Descriptor::Mode mode_a, const i2c::Descriptor::Slave& slave_a)
+    i2c::Speed speed;
+};
+template<> struct i2c::Descriptor<i2c::slave>
 {
-    assert(i2c::Descriptor::Mode::slave == mode_a);
-    return {};
-}
+    i2c::Speed speed;
+    std::uint8_t address;
+};
+
+template<> class i2c::Peripheral<i2c::master> : private xmcu::non_copyable
+{
+public:
+    void set_descriptor(const i2c::Descriptor<i2c::master>& descriptor_a) {}
+
+    void enable(std::chrono::milliseconds timeout_a) {}
+    void disable() {}
+
+    template<typename Type_t> Type_t* get_view() const = delete;
+};
+
+template<> class i2c::Peripheral<i2c::slave> : private xmcu::non_copyable
+{
+public:
+    void set_descriptor(const i2c::Descriptor<i2c::slave>& descriptor_a) {}
+
+    void enable(std::chrono::milliseconds timeout_a) {}
+    void disable() {}
+
+    template<typename Type_t> Type_t* get_view() const = delete;
+};
 
 #if defined XMCU_I2C1_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_1>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_1, i2c::master>()
 {
-    return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
+    return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C1_BASE);
+}
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_1, i2c::slave>()
+{
+    return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C1_BASE);
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_2>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_2, i2c::master>()
 {
-    return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
+    return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C2_BASE);
+}
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_2, i2c::slave>()
+{
+    return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C2_BASE);
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_3>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_3, i2c::master>()
 {
-    return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
+    return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C3_BASE);
 }
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_3, i2c::slave>()
+{
+    return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C3_BASE);
+}
+
 #endif
 #if defined XMCU_I2C4_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_4>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_4, i2c::master>()
 {
-    return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
+    return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C4_BASE);
+}
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_4, i2c::slave>()
+{
+    return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C4_BASE);
 }
 #endif
+
+template<> class i2c::Transceiver<api::traits::sync, i2c::master>
+{
+};
+template<> class i2c::Transceiver<api::traits::sync, i2c::slave>
+{
+};
+
+template<> class i2c::Transceiver<api::traits::async, i2c::master>
+{
+};
+template<> class i2c::Transceiver<api::traits::async, i2c::Mode::slave>
+{
+};
+
+template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::master>*
+i2c::Peripheral<i2c::Mode::master>::get_view<i2c::Transceiver<api::traits::sync, i2c::Mode::master>>() const
+{
+    const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
+    return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::master>*>(base_address);
+}
+template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::slave>*
+i2c::Peripheral<i2c::Mode::slave>::get_view<i2c::Transceiver<api::traits::sync, i2c::Mode::slave>>() const
+{
+    const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
+    return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::slave>*>(base_address);
+}
+
+template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::master>*
+i2c::Peripheral<i2c::Mode::master>::get_view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>() const
+{
+    const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
+    return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::master>*>(base_address);
+}
+template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::slave>*
+i2c::Peripheral<i2c::Mode::slave>::get_view<i2c::Transceiver<api::traits::async, i2c::Mode::slave>>() const
+{
+    const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
+    return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::slave>*>(base_address);
+}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

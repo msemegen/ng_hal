@@ -152,7 +152,7 @@ int main()
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
         i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
-        auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>();
+        auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::master>>();
 
         p_i2c_bus->set_descriptor({});
         p_i2c_bus->enable(10ms);

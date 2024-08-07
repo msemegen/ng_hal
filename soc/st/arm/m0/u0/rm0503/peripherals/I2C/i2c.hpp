@@ -309,20 +309,20 @@ struct i2c : public i2c_base
 {
     using clock = ll::i2c_clock;
 
-    enum class Mode : std::uint64_t
+    enum class Kind : std::uint64_t
     {
         master = 0x1u,
         slave = 0x2u
     };
 
-    using enum Mode;
+    using enum Kind;
 
     enum class Speed : std::uint32_t
     {
 
     };
 
-    template<Mode mode_t> struct Descriptor : private xmcu::non_constructible
+    template<Kind kind_t> struct Descriptor : private xmcu::non_constructible
     {
     };
 
@@ -341,15 +341,15 @@ struct i2c : public i2c_base
         };
     };
 
-    template<Mode mode_t> class Peripheral : private xmcu::non_constructible
+    template<Kind kind_t> class Peripheral : private xmcu::non_constructible
     {
     };
 
-    template<api::traits trait_t, Mode mode_t> class Transceiver : private non_constructible
+    template<api::traits trait_t, Kind kind_t> class Transceiver : private non_constructible
     {
     };
 
-    template<i2c::Id id_t, Mode mode_t> [[nodiscard]] constexpr static Peripheral<mode_t>* peripheral() = delete;
+    template<i2c::Id id_t, Kind kind_t> [[nodiscard]] constexpr static Peripheral<kind_t>* peripheral() = delete;
 
     template<i2c::Id id_t, typename transmission_mode_t> static void set_traits()
     {
@@ -451,33 +451,33 @@ template<> class i2c::Transceiver<api::traits::sync, i2c::slave> : private ll::i
 template<> class i2c::Transceiver<api::traits::async, i2c::master> : private ll::i2c::Peripheral
 {
 };
-template<> class i2c::Transceiver<api::traits::async, i2c::Mode::slave> : private ll::i2c::Peripheral
+template<> class i2c::Transceiver<api::traits::async, i2c::slave> : private ll::i2c::Peripheral
 {
 };
 
-template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::master>*
-i2c::Peripheral<i2c::Mode::master>::view<i2c::Transceiver<api::traits::sync, i2c::Mode::master>>() const
+template<> inline i2c::Transceiver<api::traits::sync, i2c::master>*
+i2c::Peripheral<i2c::master>::view<i2c::Transceiver<api::traits::sync, i2c::master>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
-    return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::master>*>(base_address);
+    return reinterpret_cast<Transceiver<api::traits::sync, i2c::master>*>(base_address);
 }
-template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::slave>*
-i2c::Peripheral<i2c::Mode::slave>::view<i2c::Transceiver<api::traits::sync, i2c::Mode::slave>>() const
+template<> inline i2c::Transceiver<api::traits::sync, i2c::slave>*
+i2c::Peripheral<i2c::slave>::view<i2c::Transceiver<api::traits::sync, i2c::slave>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
-    return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::slave>*>(base_address);
+    return reinterpret_cast<Transceiver<api::traits::sync, i2c::slave>*>(base_address);
 }
 
-template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::master>*
-i2c::Peripheral<i2c::Mode::master>::view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>() const
+template<> inline i2c::Transceiver<api::traits::async, i2c::master>*
+i2c::Peripheral<i2c::master>::view<i2c::Transceiver<api::traits::async, i2c::master>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
-    return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::master>*>(base_address);
+    return reinterpret_cast<Transceiver<api::traits::async, i2c::master>*>(base_address);
 }
-template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::slave>*
-i2c::Peripheral<i2c::Mode::slave>::view<i2c::Transceiver<api::traits::async, i2c::Mode::slave>>() const
+template<> inline i2c::Transceiver<api::traits::async, i2c::slave>*
+i2c::Peripheral<i2c::slave>::view<i2c::Transceiver<api::traits::async, i2c::slave>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
-    return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::slave>*>(base_address);
+    return reinterpret_cast<Transceiver<api::traits::async, i2c::slave>*>(base_address);
 }
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

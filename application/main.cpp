@@ -151,29 +151,32 @@ int main()
                                      gpio::Descriptor<gpio::Mode::alternate> {
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::interface<i2c::_1, i2c::master>();
-        auto i2c_transceview = p_i2c_bus->get_view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>();
+        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
+        auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>();
 
         p_i2c_bus->set_descriptor({});
         p_i2c_bus->enable(10ms);
 
-        usart::Peripheral* p_usart2 = usart::interface<usart::_2>();
+        auto i2c_transc = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
+
+        usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
         // transmission configuration
-        p_usart2->set_descriptor(
-            usart::Descriptor { .fifo = usart::Fifo::disable,
-                                .oversampling = usart::Oversampling::_16,
-                                .sampling = usart::Sampling::three_sample_bit,
-                                .mute = usart::Mute::disable,
-                                .baudrate = 115200u,
-                                .clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
-                                .frame { .word_length = usart::Frame::Word_length::_8_bit,
-                                         .parity = usart::Frame::Parity::none,
-                                         .stop_bits = usart::Frame::Stop_bits::_1,
-                                         .msb_first = usart::Frame::MSB_first::disable,
-                                         .inversion = usart::Frame::Inversion::disable } });
+        p_usart2->set_descriptor(usart::Descriptor { .prescaler = usart::Prescaler::_1,
+                                                     .fifo = usart::Fifo::disable,
+                                                     .oversampling = usart::Oversampling::_16,
+                                                     .sampling = usart::Sampling::three_sample_bit,
+                                                     .mute = usart::Mute::disable,
+                                                     .baudrate = 115200u,
+                                                     .frame { .word_length = usart::Frame::Word_length::_8_bit,
+                                                              .parity = usart::Frame::Parity::none,
+                                                              .stop_bits = usart::Frame::Stop_bits::_1,
+                                                              .msb_first = usart::Frame::MSB_first::disable,
+                                                              .inversion = usart::Frame::Inversion::disable } });
 
-        gpio::interface<gpio::A>()->enable(
+        //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
+
+        gpio::port<gpio::A>()->enable(
             gpio::A::Pin::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
             &led);
@@ -183,10 +186,10 @@ int main()
         if (true == usart1_enabled)
         {
             // sync transmission view
-            usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->get_view<usart::Transceiver<api::traits::sync>>();
+            usart::Transceiver<api::traits::sync>* p_usart2_comm = p_usart2->view<usart::Transceiver<api::traits::sync>>();
             stdglue::assert::set_context(p_usart2_comm);
 
-            auto usart_async = p_usart2->get_view<usart::Transceiver<api::traits::async>>();
+            auto usart_async = p_usart2->view<usart::Transceiver<api::traits::async>>();
 
             usart_async->enable({ 0x0u, 0x0u });
             usart_async->receive_start();

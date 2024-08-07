@@ -80,7 +80,7 @@ struct hsi16 : private xmcu::non_constructible
         return xmcu::bit::flag::is(RCC->CR, RCC_CR_HSION);
     }
 
-    [[nodiscard]] static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static constexpr std::uint32_t get_frequency_Hz()
     {
         return 16'000'000u;
     }

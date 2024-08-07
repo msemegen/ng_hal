@@ -67,11 +67,11 @@ struct usart : public usart_base
         volatile std::uint32_t presc;       // clock Prescaler register
     };
 
-    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* peripheral() = delete;
 };
 
 #if defined XMCU_USART1_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_1>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_1>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
 }
@@ -170,7 +170,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART2_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_2>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_2>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
 }
@@ -270,7 +270,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART3_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_3>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_3>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
 }
@@ -293,12 +293,24 @@ template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base:
 {
     return true;
 }
-
 template<> inline void usart_clock::disable<usart_base::_3>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
     xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
 }
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, oscillators::hsi16>()
+{
+    return false;
+}
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, oscillators::lse>()
+{
+    return false;
+}
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, clocks::sysclk>()
+{
+    return false;
+}
+
 template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_3>()
 {
     return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART3EN);
@@ -309,7 +321,7 @@ template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get
 }
 #endif
 #if defined XMCU_USART4_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_4>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_4>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
 }
@@ -331,6 +343,18 @@ template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Stop_mo
 template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_4, clocks::pclk>()
 {
     return true;
+}
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, oscillators::hsi16>()
+{
+    return false;
+}
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, oscillators::lse>()
+{
+    return false;
+}
+template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, clocks::sysclk>()
+{
+    return false;
 }
 
 template<> inline void usart_clock::disable<usart_base::_4>()
@@ -408,28 +432,22 @@ struct usart : public usart_base
         _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
         _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
     };
-
-    struct Clock
+    enum class Prescaler : std::uint32_t
     {
-        enum class Prescaler : std::uint32_t
-        {
-            _1 = 0x0u,
-            _2 = 0x1u,
-            _4 = 0x2u,
-            _6 = 0x3u,
-            _8 = 0x4u,
-            _10 = 0x5u,
-            _12 = 0x6u,
-            _16 = 0x7u,
-            _32 = 0x8u,
-            _64 = 0x9u,
-            _128 = 0xAu,
-            _256 = 0xBu
-        };
-
-        std::uint32_t clk_freq_Hz = 0x0u;
-        Prescaler prescaler;
+        _1 = 0x0u,
+        _2 = 0x1u,
+        _4 = 0x2u,
+        _6 = 0x3u,
+        _8 = 0x4u,
+        _10 = 0x5u,
+        _12 = 0x6u,
+        _16 = 0x7u,
+        _32 = 0x8u,
+        _64 = 0x9u,
+        _128 = 0xAu,
+        _256 = 0xBu
     };
+
     struct Frame
     {
         enum class Word_length : std::uint32_t
@@ -492,13 +510,13 @@ struct usart : public usart_base
 
     struct Descriptor
     {
+        Prescaler prescaler;
         Fifo fifo;
         Oversampling oversampling;
         Sampling sampling;
         Mute mute;
         Baudrate baudrate;
 
-        Clock clock;
         Frame frame;
     };
 
@@ -596,15 +614,16 @@ struct usart : public usart_base
         bool disable(std::chrono::milliseconds timeout_a);
 
         std::pair<bool, Mode> is_enabled() const;
+        Id get_id() const;
 
-        template<typename Type_t> Type_t* get_view() const = delete;
+        template<typename Type_t> Type_t* view() const = delete;
     };
 
     template<api::traits trait_t> class Transceiver : private non_constructible
     {
     };
 
-    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* peripheral() = delete;
 
     template<usart::Id id_t, typename transmission_mode_t, typename trait_a_t = const void, typename trait_b_t = const void>
     static void set_traits()
@@ -827,25 +846,25 @@ inline constexpr usart::Mute operator|(usart::Mute mode_a, std::uint8_t address_
 }
 
 #if defined XMCU_USART1_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_1>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_1>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
 }
 #endif
 #if defined XMCU_USART2_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_2>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_2>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
 }
 #endif
 #if defined XMCU_USART3_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_3>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_3>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
 }
 #endif
 #if defined XMCU_USART4_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::interface<usart::_4>()
+template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_4>()
 {
     return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
 }
@@ -1078,13 +1097,13 @@ private:
     constexpr static std::uint32_t no_data_to_transmit = 0x200u;
 };
 
-template<> inline usart::Transceiver<api::traits::sync>* usart::Peripheral::get_view<usart::Transceiver<api::traits::sync>>() const
+template<> inline usart::Transceiver<api::traits::sync>* usart::Peripheral::view<usart::Transceiver<api::traits::sync>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
     return reinterpret_cast<Transceiver<api::traits::sync>*>(base_address);
 }
 
-template<> inline usart::Transceiver<api::traits::async>* usart::Peripheral::get_view<usart::Transceiver<api::traits::async>>() const
+template<> inline usart::Transceiver<api::traits::async>* usart::Peripheral::view<usart::Transceiver<api::traits::async>>() const
 {
     const std::uint32_t base_address = reinterpret_cast<std::uint32_t>(this);
     return reinterpret_cast<Transceiver<api::traits::async>*>(base_address);

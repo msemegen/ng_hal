@@ -68,11 +68,11 @@ struct i2c : public i2c_base
         volatile std::uint32_t txdr; // transmit data register
     };
 
-    template<i2c::Id id_t> [[nodiscard]] constexpr static Peripheral* interface() = delete;
+    template<i2c::Id id_t> [[nodiscard]] constexpr static Peripheral* peripheral() = delete;
 };
 
 #if defined XMCU_I2C1_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::interface<i2c::_1>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral* i2c::peripheral<i2c::_1>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C1_BASE);
 }
@@ -150,7 +150,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_2>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::peripheral<i2c::_2>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C2_BASE);
 }
@@ -188,7 +188,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_3>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::peripheral<i2c::_3>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C3_BASE);
 }
@@ -266,7 +266,7 @@ template<> [[nodiscard]] inline i2c_clock::Stop_mode_activity i2c_clock::get_sto
 }
 #endif
 #if defined XMCU_I2C4_PRESENT
-template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::interface<i2c::_4>()
+template<> [[nodiscard]] constexpr i2c::Peripheral* i2c::peripheral<i2c::_4>()
 {
     return reinterpret_cast<i2c::Peripheral*>(I2C4_BASE);
 }
@@ -349,7 +349,7 @@ struct i2c : public i2c_base
     {
     };
 
-    template<i2c::Id id_t, Mode mode_t> [[nodiscard]] constexpr static Peripheral<mode_t>* interface() = delete;
+    template<i2c::Id id_t, Mode mode_t> [[nodiscard]] constexpr static Peripheral<mode_t>* peripheral() = delete;
 
     template<i2c::Id id_t, typename transmission_mode_t> static void set_traits()
     {
@@ -371,7 +371,7 @@ template<> struct i2c::Descriptor<i2c::slave>
     std::uint8_t address;
 };
 
-template<> class i2c::Peripheral<i2c::master> : private xmcu::non_copyable
+template<> class i2c::Peripheral<i2c::master> : private ll::i2c::Peripheral
 {
 public:
     void set_descriptor(const i2c::Descriptor<i2c::master>& descriptor_a) {}
@@ -379,10 +379,10 @@ public:
     void enable(std::chrono::milliseconds timeout_a) {}
     void disable() {}
 
-    template<typename Type_t> Type_t* get_view() const = delete;
+    template<typename Type_t> Type_t* view() const = delete;
 };
 
-template<> class i2c::Peripheral<i2c::slave> : private xmcu::non_copyable
+template<> class i2c::Peripheral<i2c::slave> : private ll::i2c::Peripheral
 {
 public:
     void set_descriptor(const i2c::Descriptor<i2c::slave>& descriptor_a) {}
@@ -390,86 +390,92 @@ public:
     void enable(std::chrono::milliseconds timeout_a) {}
     void disable() {}
 
-    template<typename Type_t> Type_t* get_view() const = delete;
+    template<typename Type_t> Type_t* view() const = delete;
 };
 
 #if defined XMCU_I2C1_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_1, i2c::master>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_1, i2c::master>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C1_BASE);
 }
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_1, i2c::slave>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peripheral<i2c::_1, i2c::slave>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C1_BASE);
 }
 #endif
 #if defined XMCU_I2C2_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_2, i2c::master>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_2, i2c::master>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C2_BASE);
 }
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_2, i2c::slave>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peripheral<i2c::_2, i2c::slave>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C2_BASE);
 }
 #endif
 #if defined XMCU_I2C3_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_3, i2c::master>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_3, i2c::master>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C3_BASE);
 }
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_3, i2c::slave>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peripheral<i2c::_3, i2c::slave>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C3_BASE);
 }
 
 #endif
 #if defined XMCU_I2C4_PRESENT
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::interface<i2c::_4, i2c::master>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_4, i2c::master>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::master>*>(I2C4_BASE);
 }
-template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::interface<i2c::_4, i2c::slave>()
+template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peripheral<i2c::_4, i2c::slave>()
 {
     return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C4_BASE);
 }
 #endif
 
-template<> class i2c::Transceiver<api::traits::sync, i2c::master>
+template<> class i2c::Transceiver<api::traits::sync, i2c::master> : private ll::i2c::Peripheral
 {
+public:
+    std::size_t transmit(std::uint8_t address_a, const std::span<std::uint8_t> data_a);
+    std::size_t transmit(std::uint8_t address_a, const std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a);
+
+    std::size_t receive(std::uint8_t address_a, std::span<std::uint8_t> data_a) const;
+    std::size_t receive(std::uint8_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const;
 };
-template<> class i2c::Transceiver<api::traits::sync, i2c::slave>
+template<> class i2c::Transceiver<api::traits::sync, i2c::slave> : private ll::i2c::Peripheral
 {
 };
 
-template<> class i2c::Transceiver<api::traits::async, i2c::master>
+template<> class i2c::Transceiver<api::traits::async, i2c::master> : private ll::i2c::Peripheral
 {
 };
-template<> class i2c::Transceiver<api::traits::async, i2c::Mode::slave>
+template<> class i2c::Transceiver<api::traits::async, i2c::Mode::slave> : private ll::i2c::Peripheral
 {
 };
 
 template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::master>*
-i2c::Peripheral<i2c::Mode::master>::get_view<i2c::Transceiver<api::traits::sync, i2c::Mode::master>>() const
+i2c::Peripheral<i2c::Mode::master>::view<i2c::Transceiver<api::traits::sync, i2c::Mode::master>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
     return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::master>*>(base_address);
 }
 template<> inline i2c::Transceiver<api::traits::sync, i2c::Mode::slave>*
-i2c::Peripheral<i2c::Mode::slave>::get_view<i2c::Transceiver<api::traits::sync, i2c::Mode::slave>>() const
+i2c::Peripheral<i2c::Mode::slave>::view<i2c::Transceiver<api::traits::sync, i2c::Mode::slave>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
     return reinterpret_cast<Transceiver<api::traits::sync, i2c::Mode::slave>*>(base_address);
 }
 
 template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::master>*
-i2c::Peripheral<i2c::Mode::master>::get_view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>() const
+i2c::Peripheral<i2c::Mode::master>::view<i2c::Transceiver<api::traits::async, i2c::Mode::master>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
     return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::master>*>(base_address);
 }
 template<> inline i2c::Transceiver<api::traits::async, i2c::Mode::slave>*
-i2c::Peripheral<i2c::Mode::slave>::get_view<i2c::Transceiver<api::traits::async, i2c::Mode::slave>>() const
+i2c::Peripheral<i2c::Mode::slave>::view<i2c::Transceiver<api::traits::async, i2c::Mode::slave>>() const
 {
     const std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(this);
     return reinterpret_cast<Transceiver<api::traits::async, i2c::Mode::slave>*>(base_address);

@@ -113,7 +113,7 @@ struct lse : private xmcu::non_constructible
         return xmcu::bit::flag::is(RCC->BDCR, RCC_BDCR_LSERDY);
     }
 
-    [[nodiscard]] static std::uint32_t get_frequency_Hz()
+    [[nodiscard]] static constexpr std::uint32_t get_frequency_Hz()
     {
         return 32768u;
     }

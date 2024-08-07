@@ -173,6 +173,14 @@ template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_2, cloc
 {
     return true;
 }
+template<> [[nodiscard]] constexpr bool i2c_clock::is_source_selected<i2c::_2, oscillators::hsi16>()
+{
+    return false;
+}
+template<> [[nodiscard]] constexpr bool i2c_clock::is_source_selected<i2c::_2, clocks::sysclk>()
+{
+    return false;
+}
 template<> inline void i2c_clock::disable<i2c::_2>()
 {
     xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_I2C2SMEN);
@@ -288,6 +296,14 @@ template<> inline void i2c_clock::enable<i2c_base::_4, clocks::pclk>(Stop_mode_a
 template<> [[nodiscard]] inline bool i2c_clock::is_source_selected<i2c::_4, clocks::pclk>()
 {
     return true;
+}
+template<> [[nodiscard]] constexpr bool i2c_clock::is_source_selected<i2c::_4, oscillators::hsi16>()
+{
+    return false;
+}
+template<> [[nodiscard]] constexpr bool i2c_clock::is_source_selected<i2c::_4, clocks::sysclk>()
+{
+    return false;
 }
 template<> inline void i2c_clock::disable<i2c::_4>()
 {

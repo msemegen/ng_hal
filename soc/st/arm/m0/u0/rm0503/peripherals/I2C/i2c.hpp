@@ -333,9 +333,35 @@ struct i2c : public i2c_base
 
     using enum Kind;
 
-    enum class Speed : std::uint32_t
+    enum class Fast_mode_plus : std::uint32_t
     {
-
+        disable = 0x0u,
+        enable = I2C_CR1_FMP
+    };
+    enum class General_call : std::uint32_t
+    {
+        disable = 0x0u,
+        enable = I2C_CR1_GCEN
+    };
+    enum class Clock_streetch : std::uint32_t
+    {
+        disable = I2C_CR1_NOSTRETCH,
+        enable = 0x0u
+    };
+    enum class Wakeup_from_stop : std::uint32_t
+    {
+        disable = 0x0u,
+        enable = I2C_CR1_WUPEN
+    };
+    enum class Address_kind : std::uint32_t
+    {
+        _7bit = 0x0u,
+        _10bit = 0xFFFu
+    };
+    enum class Analog_noise_filter : std::uint32_t
+    {
+        disable = I2C_CR1_ANFOFF,
+        enable = 0x0u
     };
 
     template<Kind kind_t> struct Descriptor : private xmcu::non_constructible
@@ -379,35 +405,29 @@ struct i2c : public i2c_base
 
 template<> struct i2c::Descriptor<i2c::master>
 {
-    i2c::Speed speed;
+    i2c::Fast_mode_plus fast_mode_plus;
+    i2c::Analog_noise_filter analog_noise_filter;
+    i2c::Wakeup_from_stop wakeup_from_stop;
+    i2c::Address_kind address_kind;
+    std::uint32_t timing;
+    std::uint8_t digital_noise_filter;
 };
 template<> struct i2c::Descriptor<i2c::slave>
 {
-    i2c::Speed speed;
-    std::uint8_t address;
+    i2c::Fast_mode_plus fast_mode_plus;
+    i2c::Analog_noise_filter analog_noise_filter;
+    i2c::General_call general_call;
+    i2c::Wakeup_from_stop wakeup_from_stop;
+    i2c::Address_kind address_kind;
+    std::uint16_t address;
+    std::uint32_t timing;
+    std::uint8_t digital_noise_filter;
 };
 
-template<> class i2c::Peripheral<i2c::master> : private ll::i2c::Peripheral
+constexpr std::uint16_t operator|(std::uint16_t address_value_a, i2c::Address_kind kind_a)
 {
-public:
-    void set_descriptor(const i2c::Descriptor<i2c::master>& descriptor_a) {}
-
-    void enable(std::chrono::milliseconds timeout_a) {}
-    void disable() {}
-
-    template<typename Type_t> Type_t* view() const = delete;
-};
-
-template<> class i2c::Peripheral<i2c::slave> : private ll::i2c::Peripheral
-{
-public:
-    void set_descriptor(const i2c::Descriptor<i2c::slave>& descriptor_a) {}
-
-    void enable(std::chrono::milliseconds timeout_a) {}
-    void disable() {}
-
-    template<typename Type_t> Type_t* view() const = delete;
-};
+    return static_cast<std::uint16_t>(kind_a) | address_value_a;
+}
 
 #if defined XMCU_I2C1_PRESENT
 template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_1, i2c::master>()
@@ -438,7 +458,6 @@ template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peri
 {
     return reinterpret_cast<i2c::Peripheral<i2c::slave>*>(I2C3_BASE);
 }
-
 #endif
 #if defined XMCU_I2C4_PRESENT
 template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::master>* i2c::peripheral<i2c::_4, i2c::master>()
@@ -451,14 +470,56 @@ template<> [[nodiscard]] inline constexpr i2c::Peripheral<i2c::slave>* i2c::peri
 }
 #endif
 
+template<> class i2c::Peripheral<i2c::master> : private ll::i2c::Peripheral
+{
+public:
+    void set_descriptor(const i2c::Descriptor<i2c::master>& descriptor_a);
+
+    void enable(std::chrono::milliseconds timeout_a)
+    {
+        xmcu::bit::flag::set(&(this->cr1), I2C_CR1_PE);
+        xmcu::bit::wait_for::all_set(this->cr1, I2C_CR1_PE);
+    }
+    void disable()
+    {
+        xmcu::bit::flag::clear(&(this->cr1), I2C_CR1_PE);
+    }
+
+    template<typename Type_t> Type_t* view() const = delete;
+};
+
+template<> class i2c::Peripheral<i2c::slave> : private ll::i2c::Peripheral
+{
+public:
+    void set_descriptor(const i2c::Descriptor<i2c::slave>& descriptor_a);
+
+    void enable(std::chrono::milliseconds timeout_a)
+    {
+        xmcu::bit::flag::set(&(this->cr1), I2C_CR1_PE);
+        xmcu::bit::wait_for::all_set(this->cr1, I2C_CR1_PE);
+    }
+    void disable()
+    {
+        xmcu::bit::flag::clear(&(this->cr1), I2C_CR1_PE);
+    }
+
+    template<typename Type_t> Type_t* view() const = delete;
+};
+
 template<> class i2c::Transceiver<api::traits::sync, i2c::master> : private ll::i2c::Peripheral
 {
 public:
-    std::size_t transmit(std::uint8_t address_a, const std::span<std::uint8_t> data_a);
-    std::size_t transmit(std::uint8_t address_a, const std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a);
+    std::size_t transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a)
+    {
+        return 0u;
+    }
+    std::size_t transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
+    {
+        return 0u;
+    }
 
-    std::size_t receive(std::uint8_t address_a, std::span<std::uint8_t> data_a) const;
-    std::size_t receive(std::uint8_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const;
+    std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a) const;
+    std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const;
 };
 template<> class i2c::Transceiver<api::traits::sync, i2c::slave> : private ll::i2c::Peripheral
 {

@@ -159,6 +159,9 @@ int main()
 
         auto i2c_transc = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
 
+        std::uint8_t data[3];
+        i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
+
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
         // transmission configuration

@@ -24,7 +24,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 struct gpio_base : private xmcu::non_constructible
 {
 protected:
-    enum class a : std::uint8_t
+    enum class A : std::uint8_t
     {
         _0,
         _1,
@@ -43,7 +43,7 @@ protected:
         _14,
         _15
     };
-    enum class b : std::uint8_t
+    enum class B : std::uint8_t
     {
         _0,
         _1,
@@ -62,7 +62,7 @@ protected:
         _14,
         _15
     };
-    enum class c : std::uint8_t
+    enum class C : std::uint8_t
     {
         _0,
         _1,
@@ -81,11 +81,11 @@ protected:
         _14,
         _15
     };
-    enum class d : std::uint8_t
+    enum class D : std::uint8_t
     {
         _2 = 2u
     };
-    enum class f : std::uint8_t
+    enum class F : std::uint8_t
     {
         _0,
         _1,
@@ -93,54 +93,54 @@ protected:
     };
 
 public:
-    friend constexpr bool operator==(gpio_base::a, gpio_base::b)
+    friend constexpr bool operator==(gpio_base::A, gpio_base::B)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::a, gpio_base::c)
+    friend constexpr bool operator==(gpio_base::A, gpio_base::C)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::a, gpio_base::d)
-    {
-        return false;
-    }
-
-    friend constexpr bool operator==(gpio_base::b, gpio_base::a)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::b, gpio_base::c)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::b, gpio_base::d)
+    friend constexpr bool operator==(gpio_base::A, gpio_base::D)
     {
         return false;
     }
 
-    friend constexpr bool operator==(gpio_base::c, gpio_base::a)
+    friend constexpr bool operator==(gpio_base::B, gpio_base::A)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::c, gpio_base::b)
+    friend constexpr bool operator==(gpio_base::B, gpio_base::C)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::c, gpio_base::d)
+    friend constexpr bool operator==(gpio_base::B, gpio_base::D)
     {
         return false;
     }
 
-    friend constexpr bool operator==(gpio_base::d, gpio_base::a)
+    friend constexpr bool operator==(gpio_base::C, gpio_base::A)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::d, gpio_base::b)
+    friend constexpr bool operator==(gpio_base::C, gpio_base::B)
     {
         return false;
     }
-    friend constexpr bool operator==(gpio_base::d, gpio_base::c)
+    friend constexpr bool operator==(gpio_base::C, gpio_base::D)
+    {
+        return false;
+    }
+
+    friend constexpr bool operator==(gpio_base::D, gpio_base::A)
+    {
+        return false;
+    }
+    friend constexpr bool operator==(gpio_base::D, gpio_base::B)
+    {
+        return false;
+    }
+    friend constexpr bool operator==(gpio_base::D, gpio_base::C)
     {
         return false;
     }

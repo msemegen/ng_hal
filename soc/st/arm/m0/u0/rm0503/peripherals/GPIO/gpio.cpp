@@ -10,10 +10,31 @@
 // soc
 #include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio.hpp>
 
+namespace {
+using namespace soc::st::arm::m0::u0::rm0503::peripherals;
+extern "C" {
+void EXTI0_1_IRQn()
+{
+    gpio::handler::on_rise();
+    gpio::handler::on_fall();
+}
+void EXTI2_3_IRQn()
+{
+    gpio::handler::on_rise();
+    gpio::handler::on_fall();
+}
+void EXTI4_15_IRQn()
+{
+    gpio::handler::on_rise();
+    gpio::handler::on_fall();
+}
+}
+} // namespace
+
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 using namespace xmcu;
 
-void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
+void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
     const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
 
@@ -23,22 +44,22 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio:
     bit::flag::set(&(p_port_a->otyper), 0x1u << pin_a, static_cast<std::uint32_t>(desc_a.type) << pin_a);
 }
 
-void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
+void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
     bit::flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit::flag::clear(&(p_port_a->moder), 0x3u << (pin_a * 2u));
 }
 
-void gpio::enable_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
+void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
     bit::flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
     bit::flag::set(&(p_port_a->moder), 0x3u << (pin_a * 2u), 0x3u << (pin_a * 2u));
 }
 
-void gpio::enable_pin(ll::gpio::Port* p_port_a,
-                      std::uint32_t pin_a,
-                      std::uint8_t function_a,
-                      const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
+void gpio::configure_pin(ll::gpio::Port* p_port_a,
+                         std::uint32_t pin_a,
+                         std::uint8_t function_a,
+                         const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
     const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
 
@@ -55,5 +76,8 @@ void gpio::enable_pin(ll::gpio::Port* p_port_a,
 
     p_port_a->afr[af_register_index] = af_register;
 }
+
+__WEAK void gpio::handler::on_rise() {}
+__WEAK void gpio::handler::on_fall() {}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

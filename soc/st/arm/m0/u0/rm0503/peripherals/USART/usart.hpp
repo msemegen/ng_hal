@@ -611,7 +611,10 @@ struct usart : public usart_base
         bool disable(std::chrono::milliseconds timeout_a);
 
         std::pair<bool, Mode> is_enabled() const;
-        Id get_id() const;
+        Id get_id() const
+        {
+            return static_cast<Id>(reinterpret_cast<std::uintptr_t>(this));
+        }
 
         template<typename Type_t> Type_t* view() const = delete;
     };

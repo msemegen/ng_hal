@@ -256,39 +256,6 @@ bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
     return bit::wait_for::all_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
 }
 
-usart::Id usart::Peripheral::get_id() const
-{
-    std::uintptr_t address = reinterpret_cast<std::uintptr_t>(this);
-
-#if defined XMCU_USART1_PRESENT
-    if (address == USART1_BASE)
-    {
-        return Id::_1;
-    }
-#endif
-#if defined XMCU_USART2_PRESENT
-    if (address == USART2_BASE)
-    {
-        return Id::_2;
-    }
-#endif
-#if defined XMCU_USART3_PRESENT
-    if (address == USART3_BASE)
-    {
-        return Id::_3;
-    }
-#endif
-#if defined XMCU_USART3_PRESENT
-    if (address == USART4_BASE)
-    {
-        return Id::_4;
-    }
-#endif
-
-    assert(false);
-    return static_cast<Id>(std::numeric_limits<std::underlying_type<Id>::type>::max());
-}
-
 #if 1 == XMCU_ISR_CONTEXT
 void usart::Transceiver<api::traits::async>::enable(const IRQ_priority& priority_a, void* p_context_a)
 #endif

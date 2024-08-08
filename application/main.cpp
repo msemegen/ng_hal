@@ -50,7 +50,7 @@ void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context
 volatile std::uint32_t flag = 0x0u;
 char c[5];
 volatile std::size_t i = 0;
-gpio::Pad led;
+//gpio::Pad led;
 void usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a,
                                                                  usart::Error errors_a,
                                                                  usart::Transceiver<api::traits::async>* p_this)
@@ -84,9 +84,13 @@ void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event even
     }
     if (usart::Event::idle == (events_a & usart::Event::idle))
     {
-        led.toggle();
+       // led.toggle();
+
+        gpio::port<gpio::A>()->toggle(gpio::A::Pin::_5);
     }
 }
+
+void gpio::handler::on_fall() {}
 
 int main()
 {
@@ -179,10 +183,11 @@ int main()
 
         //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
 
-        gpio::port<gpio::A>()->enable(
+        gpio::port<gpio::A>()->set_pin_descriptor(
             gpio::A::Pin::_5,
-            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low },
-            &led);
+            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low });
+
+       // led = gpio::pad<gpio::A>(gpio::A::Pin::_5);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
@@ -198,7 +203,8 @@ int main()
             usart_async->receive_start();
             usart_async->events_start(usart::Event::transfer_complete | usart::Event::idle);
 
-            led.write(gpio::Level::high);
+            //led.write(gpio::Level::high);
+            gpio::port<gpio::A>()->write(gpio::A::Pin::_5, gpio::Level::high);
 
             // echo
             c[0] = 'A';
@@ -223,7 +229,7 @@ int main()
         {
             while (true)
             {
-                led.toggle();
+                gpio::port<gpio::A>()->toggle(gpio::A::Pin::_5);
                 std::this_thread::sleep_for(1s);
             }
         }

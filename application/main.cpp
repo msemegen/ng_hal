@@ -50,7 +50,7 @@ void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context
 volatile std::uint32_t flag = 0x0u;
 char c[5];
 volatile std::size_t i = 0;
-//gpio::Pad led;
+// gpio::Pad<api::traits::sync> led;
 void usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a,
                                                                  usart::Error errors_a,
                                                                  usart::Transceiver<api::traits::async>* p_this)
@@ -84,13 +84,24 @@ void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event even
     }
     if (usart::Event::idle == (events_a & usart::Event::idle))
     {
-       // led.toggle();
+        // led.toggle();
 
-        gpio::port<gpio::A>()->toggle(gpio::A::Pin::_5);
     }
 }
 
-void gpio::handler::on_fall() {}
+void gpio::async::handler::on_fall(std::uint32_t pin_a)
+{
+    if (13u == pin_a)
+    {
+        gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
+    }
+}
+//void gpio::async::handler::on_rise(std::uint32_t pin_a)
+//{
+//    auto x = 0;
+//    x = x;
+//    gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
+//}
 
 int main()
 {
@@ -113,7 +124,7 @@ int main()
     while (false == sysclk::is_trait<sysclk::traits::source<hsi16>>()) continue;
 
     msi::disable();
-    hse::set_traits<hse::traits::xtal<gpio::F::Pin::_0, gpio::F::Pin::_1>>();
+    hse::set_traits<hse::traits::xtal<gpio::F::_0, gpio::F::_1>>();
     hse::enable(4'000'000u);
 
     pll::r.set_descriptor({});
@@ -138,35 +149,38 @@ int main()
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Stop_mode_activity::disable);
         usart::set_traits<
             usart::_2,
-            usart::traits::full_duplex<gpio::A::Pin::_3,
+            usart::traits::full_duplex<gpio::A::_3,
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::up, .speed = gpio::Speed::low },
-                                       gpio::A::Pin::_2,
+                                       gpio::A::_2,
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
         i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
         i2c::set_traits<
             i2c::_1,
-            i2c::traits::half_duplex<gpio::A::Pin::_10,
+            i2c::traits::half_duplex<gpio::A::_10,
                                      gpio::Descriptor<gpio::Mode::alternate> {
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
-                                     gpio::A::Pin::_9,
+                                     gpio::A::_9,
                                      gpio::Descriptor<gpio::Mode::alternate> {
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
-        auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::master>>();
+        // i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
+        // auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::master>>();
 
-        p_i2c_bus->set_descriptor({});
-        p_i2c_bus->enable(10ms);
+        // p_i2c_bus->set_descriptor({});
+        // p_i2c_bus->enable(10ms);
 
-        auto i2c_transc = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
+        // auto i2c_transc = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
 
-        std::uint8_t data[3];
-        i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
+        // std::uint8_t data[3];
+        // i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
 
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
+
+        auto xyz = gpio::port<gpio::A, api::traits::sync>();
+        xyz->set_pin_descriptor(gpio::A::_0, gpio::Descriptor<gpio::Mode::analog> {});
 
         // transmission configuration
         p_usart2->set_descriptor(usart::Descriptor { .prescaler = usart::Prescaler::_1,
@@ -183,11 +197,31 @@ int main()
 
         //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
 
-        gpio::port<gpio::A>()->set_pin_descriptor(
-            gpio::A::Pin::_5,
+        gpio::port<gpio::A, api::traits::sync>()->set_pin_descriptor(
+            gpio::A::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low });
 
-       // led = gpio::pad<gpio::A>(gpio::A::Pin::_5);
+        gpio::clock::enable<gpio::C>();
+        gpio::port<gpio::C, api::traits::sync>()->set_pin_descriptor(gpio::C::_13,
+                                                                     gpio::Descriptor<gpio::Mode::in> { .pull = gpio::Pull::up });
+
+        gpio::async::enable({});
+
+        if (false == gpio::port<gpio::C, api::traits::async>()->is_taken(gpio::C::_13))
+        {
+            gpio::port<gpio::C, api::traits::async>()->start(gpio::C::_13, gpio::Edge::falling);
+        }
+
+       // gpio::Pad pad = gpio::port<gpio::C, api::traits::sync>()->view<gpio::Pad>(gpio::C::_1);
+
+         //auto pp = EXTI;
+         //bit::set(&(EXTI->EXTICR[3]), 9u);
+         //bit::set(&(EXTI->RTSR1), 13u);
+         //bit::set(&(EXTI->FTSR1), 13u);
+         //EXTI->IMR1 = 4290781184u;
+         //EXTI->IMR2 = 63u;
+
+        // led = gpio::pad<gpio::A>(gpio::A::Pin::_5);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
@@ -203,8 +237,8 @@ int main()
             usart_async->receive_start();
             usart_async->events_start(usart::Event::transfer_complete | usart::Event::idle);
 
-            //led.write(gpio::Level::high);
-            gpio::port<gpio::A>()->write(gpio::A::Pin::_5, gpio::Level::high);
+            // led.write(gpio::Level::high);
+            gpio::port<gpio::A, api::traits::sync>()->write(gpio::A::_5, gpio::Level::high);
 
             // echo
             c[0] = 'A';
@@ -229,7 +263,7 @@ int main()
         {
             while (true)
             {
-                gpio::port<gpio::A>()->toggle(gpio::A::Pin::_5);
+                gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
                 std::this_thread::sleep_for(1s);
             }
         }

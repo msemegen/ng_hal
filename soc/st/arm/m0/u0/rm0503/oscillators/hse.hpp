@@ -30,8 +30,8 @@ template<auto... pins_t> struct HSE_pins
     }
 };
 #if XMCU_SOC_STM32_MODEL == stm32l0u083rct6u
-constexpr HSE_pins<peripherals::gpio::F::Pin::_0> osc_in;
-constexpr HSE_pins<peripherals::gpio::F::Pin::_1> osc_out;
+constexpr HSE_pins<peripherals::gpio::F::_0> osc_in;
+constexpr HSE_pins<peripherals::gpio::F::_1> osc_out;
 #endif
 } // namespace details
 

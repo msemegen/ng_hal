@@ -28,8 +28,8 @@ template<auto... pins_t> struct LSE_pins
 };
 
 #if XMCU_SOC_STM32_MODEL == stm32l0u083rct6u
-constexpr LSE_pins<peripherals::gpio::C::Pin::_14> osc_in;
-constexpr LSE_pins<peripherals::gpio::C::Pin::_15> osc_out;
+constexpr LSE_pins<peripherals::gpio::C::_14> osc_in;
+constexpr LSE_pins<peripherals::gpio::C::_15> osc_out;
 #endif
 } // namespace deatils
 } // namespace soc::st::arm::m0::u0::rm0503::oscillators

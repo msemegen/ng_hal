@@ -23,7 +23,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 
 struct gpio_base : private xmcu::non_constructible
 {
-protected:
+public:
     enum class A : std::uint8_t
     {
         _0,

@@ -604,6 +604,7 @@ struct usart : public usart_base
         void set_descriptor(const Descriptor& descriptor_a);
         Descriptor get_descriptor() const
         {
+            // TODO implement
             return {};
         }
 

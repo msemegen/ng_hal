@@ -364,6 +364,15 @@ struct i2c : public i2c_base
         enable = 0x0u
     };
 
+    enum class Error : std::uint32_t
+    {
+        none = 0x0u,
+        arbitration_lost = I2C_ISR_ARLO,
+        frame_misplaced = I2C_ISR_BERR,
+        nack = I2C_ISR_NACKF,
+        overrun = I2C_ISR_OVR
+    };
+
     template<Kind kind_t> struct Descriptor : private xmcu::non_constructible
     {
     };
@@ -509,17 +518,62 @@ public:
 template<> class i2c::Transceiver<api::traits::sync, i2c::master> : private ll::i2c::Peripheral
 {
 public:
-    std::size_t transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a)
+    std::pair<std::size_t, i2c::Error> transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a)
     {
-        return 0u;
+        std::size_t reaming = data_a.size();
+
+        xmcu::bit::flag::set(&(this->cr2),
+                             I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
+                             (address_a & I2C_CR2_SADD) | data_length_mask(reaming) | I2C_CR2_START);
+
+        while (reaming != 0u && false == xmcu::bit::flag::is(this->isr, I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR))
+        {
+            const std::size_t i = data_a.size() - reaming;
+            if (true == xmcu::bit::flag::is(this->isr, I2C_ISR_TXE))
+            {
+                this->txdr = data_a[i];
+                reaming--;
+            }
+
+            if (i > 255u && xmcu::bit::flag::is(this->cr2, I2C_CR2_RELOAD))
+            {
+                xmcu::bit::flag::set(&(this->cr2),
+                                     I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
+                                     (address_a & I2C_CR2_SADD) | data_length_mask(reaming) | I2C_CR2_START);
+            }
+        }
+
+        xmcu::bit::wait_for::all_set(this->isr, I2C_ISR_STOPF);
+
+        const Error err = static_cast<Error>(this->isr & (I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR));
+
+        if (Error::none != err)
+        {
+            xmcu::bit::set(&(this->icr), I2C_ICR_NACKCF | I2C_ICR_ARLOCF | I2C_ICR_BERRCF | I2C_ICR_OVRCF);
+        }
+
+        return { data_a.size() - reaming, err };
     }
     std::size_t transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
     {
+        const std::chrono::steady_clock::time_point end_point = std::chrono::steady_clock::now() + timeout_a;
+
+        for (std::size_t i = 0; i < data_a.size() && std::chrono::steady_clock::now() < end_point; i++)
+        {
+        }
+
         return 0u;
     }
 
     std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a) const;
     std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const;
+
+private:
+    std::uint32_t data_length_mask(std::size_t length_a)
+    {
+        return length_a <= 255u ? ((length_a << I2C_CR2_NBYTES_Pos) & I2C_CR2_NBYTES_Msk) | I2C_CR2_AUTOEND :
+                                  0x1FF0000u /*255u << I2C_CR2_NBYTES_Pos | I2C_CR2_RELOAD*/;
+    }
 };
 template<> class i2c::Transceiver<api::traits::sync, i2c::slave> : private ll::i2c::Peripheral
 {

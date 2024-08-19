@@ -49,17 +49,17 @@ struct i2c : public i2c_base
 
     struct Peripheral : private xmcu::non_copyable
     {
-        volatile std::uint32_t cr1;     // control register 1
-        volatile std::uint32_t cr2;     // control register 2
-        volatile std::uint32_t oar1;    // own address 1 register
-        volatile std::uint32_t oar2;    // own address 2 register
-        volatile std::uint32_t timingr; // timing register
+        volatile std::uint32_t cr1;         // control register 1
+        volatile mutable std::uint32_t cr2; // control register 2
+        volatile std::uint32_t oar1;        // own address 1 register
+        volatile std::uint32_t oar2;        // own address 2 register
+        volatile std::uint32_t timingr;     // timing register
     private:
         volatile std::uint32_t reserved;
 
     public:
-        volatile std::uint32_t isr; // interrupt and status register
-        volatile std::uint32_t icr; // interrupt clear register
+        volatile std::uint32_t isr;         // interrupt and status register
+        volatile mutable std::uint32_t icr; // interrupt clear register
     private:
         volatile std::uint32_t reserved0;
 
@@ -518,13 +518,13 @@ public:
 template<> class i2c::Transceiver<api::traits::sync, i2c::master> : private ll::i2c::Peripheral
 {
 public:
-    std::pair<std::size_t, i2c::Error> transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a)
+    std::pair<std::size_t, i2c::Error> transmit(std::uint16_t address_a, std::span<const std::uint8_t> data_a)
     {
         std::size_t remaining = data_a.size();
 
         xmcu::bit::flag::set(&(this->cr2),
-                             I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
-                             (address_a & I2C_CR2_SADD) | data_length_mask(remaining) | I2C_CR2_START);
+                             I2C_CR2_SADD | I2C_CR2_NBYTES,
+                             ((address_a) & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_START);
 
         while (remaining != 0u && false == xmcu::bit::flag::is(this->isr, I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR))
         {
@@ -538,12 +538,13 @@ public:
             if (i > 255u && xmcu::bit::flag::is(this->cr2, I2C_CR2_RELOAD))
             {
                 xmcu::bit::flag::set(&(this->cr2),
-                                     I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
-                                     (address_a & I2C_CR2_SADD) | data_length_mask(remaining) | I2C_CR2_START);
+                                     I2C_CR2_SADD | I2C_CR2_NBYTES,
+                                     ((address_a) & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_START);
             }
         }
 
         xmcu::bit::wait_for::all_set(this->isr, I2C_ISR_STOPF);
+        xmcu::bit::flag::set(&(this->icr), I2C_ICR_STOPCF);
 
         const Error err = static_cast<Error>(this->isr & (I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR));
 
@@ -555,15 +556,15 @@ public:
         return { data_a.size() - remaining, err };
     }
     std::pair<std::size_t, i2c::Error>
-    transmit(std::uint16_t address_a, const std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
+    transmit(std::uint16_t address_a, std::span<const std::uint8_t> data_a, std::chrono::milliseconds timeout_a)
     {
         const std::chrono::steady_clock::time_point end_time_point = std::chrono::steady_clock::now() + timeout_a;
 
         std::size_t remaining = data_a.size();
 
         xmcu::bit::flag::set(&(this->cr2),
-                             I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
-                             (address_a & I2C_CR2_SADD) | data_length_mask(remaining) | I2C_CR2_START);
+                             I2C_CR2_SADD | I2C_CR2_NBYTES,
+                             ((address_a) & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_START);
 
         while (remaining != 0u && false == xmcu::bit::flag::is(this->isr, I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR) &&
                std::chrono::steady_clock::now() < end_time_point)
@@ -578,12 +579,13 @@ public:
             if (i > 255u && xmcu::bit::flag::is(this->cr2, I2C_CR2_RELOAD))
             {
                 xmcu::bit::flag::set(&(this->cr2),
-                                     I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RD_WRN,
-                                     (address_a & I2C_CR2_SADD) | data_length_mask(remaining) | I2C_CR2_START);
+                                     I2C_CR2_SADD | I2C_CR2_NBYTES,
+                                     (address_a & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_START);
             }
         }
 
-        xmcu::bit::wait_for::all_set(this->isr, I2C_ISR_STOPF);
+        xmcu::bit::wait_for::all_set(this->isr, I2C_ISR_STOPF /*TODO: timeout*/);
+        xmcu::bit::flag::set(&(this->icr), I2C_ICR_STOPCF);
 
         const Error err = static_cast<Error>(this->isr & (I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR));
 
@@ -595,11 +597,52 @@ public:
         return { data_a.size() - remaining, err };
     }
 
-    std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a) const;
-    std::size_t receive(std::uint16_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const;
+    std::pair<std::size_t, i2c::Error> receive(std::uint16_t address_a, std::span<std::uint8_t> data_a) const
+    {
+        std::size_t remaining = data_a.size();
+
+        xmcu::bit::flag::set(&(this->cr2),
+                             I2C_CR2_SADD | I2C_CR2_NBYTES,
+                             ((address_a) & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_RD_WRN | I2C_CR2_START);
+
+        while (remaining != 0u && false == xmcu::bit::flag::is(this->isr, I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR))
+        {
+            const std::size_t i = data_a.size() - remaining;
+
+            if (true == xmcu::bit::flag::is(this->isr, I2C_ISR_RXNE))
+            {
+                data_a[i] = this->rxdr;
+                remaining--;
+            }
+
+            if (i > 255u && xmcu::bit::flag::is(this->cr2, I2C_CR2_RELOAD))
+            {
+                xmcu::bit::flag::set(&(this->cr2),
+                                     I2C_CR2_SADD | I2C_CR2_NBYTES,
+                                     (address_a & I2C_CR2_SADD) | this->data_length_mask(remaining) | I2C_CR2_RD_WRN | I2C_CR2_START);
+            }
+        }
+
+        xmcu::bit::wait_for::all_set(this->isr, I2C_ISR_STOPF);
+        xmcu::bit::flag::set(&(this->icr), I2C_ICR_STOPCF);
+
+        const Error err = static_cast<Error>(this->isr & (I2C_ISR_NACKF | I2C_ISR_ARLO | I2C_ISR_BERR | I2C_ISR_OVR));
+
+        if (Error::none != err)
+        {
+            xmcu::bit::flag::set(&(this->icr), I2C_ICR_NACKCF | I2C_ICR_ARLOCF | I2C_ICR_BERRCF | I2C_ICR_OVRCF);
+        }
+
+        return { data_a.size() - remaining, err };
+    }
+    std::pair<std::size_t, i2c::Error>
+    receive(std::uint16_t address_a, std::span<std::uint8_t> data_a, std::chrono::milliseconds timeout_a) const
+    {
+        return {};
+    }
 
 private:
-    std::uint32_t data_length_mask(std::size_t length_a)
+    std::uint32_t data_length_mask(std::size_t length_a) const
     {
         return length_a <= 255u ? ((length_a << I2C_CR2_NBYTES_Pos) & I2C_CR2_NBYTES_Msk) | I2C_CR2_AUTOEND :
                                   0x1FF0000u /*255u << I2C_CR2_NBYTES_Pos | I2C_CR2_RELOAD*/;

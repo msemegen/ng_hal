@@ -85,7 +85,6 @@ void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event even
     if (usart::Event::idle == (events_a & usart::Event::idle))
     {
         // led.toggle();
-
     }
 }
 
@@ -96,12 +95,12 @@ void gpio::async::handler::on_fall(std::uint32_t pin_a)
         gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
     }
 }
-//void gpio::async::handler::on_rise(std::uint32_t pin_a)
+// void gpio::async::handler::on_rise(std::uint32_t pin_a)
 //{
-//    auto x = 0;
-//    x = x;
-//    gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
-//}
+//     auto x = 0;
+//     x = x;
+//     gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
+// }
 
 int main()
 {
@@ -144,6 +143,9 @@ int main()
         stdglue::steady_clock::set_source(p_async_systick);
 
         gpio::clock::enable<gpio::A>();
+        gpio::port<gpio::A, api::traits::sync>()->set_pin_descriptor(
+            gpio::A::_5,
+            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low });
 
         // compile time chceck for pins and basic configuration
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Stop_mode_activity::disable);
@@ -166,8 +168,43 @@ int main()
                                      gpio::Descriptor<gpio::Mode::alternate> {
                                          .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        // i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
-        // auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::async, i2c::master>>();
+        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
+        p_i2c_bus->set_descriptor({ .fast_mode_plus = i2c::Fast_mode_plus::disable,
+                                    .analog_noise_filter = i2c::Analog_noise_filter::disable,
+                                    .wakeup_from_stop = i2c::Wakeup_from_stop::disable,
+                                    .address_kind = i2c::Address_kind::_7bit,
+                                    .timing = 0x00503D5Au,
+                                    .digital_noise_filter = 0x0u });
+
+        p_i2c_bus->enable(10ms);
+
+        auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
+
+        const std::uint8_t d = 0x75;
+        auto i2c_ret = i2c_transceview->transmit(0xD0u, std::span<const std::uint8_t> { &d, 1u });
+
+        if (i2c::Error::none == i2c_ret.second)
+        {
+            std::uint8_t r = 0;
+            i2c_ret = i2c_transceview->receive(0xD0u, std::span<std::uint8_t> { &r, 1 });
+
+            if (0xD0u == (r << 1u))
+            {
+                gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
+            }
+            else
+            {
+                while (true)
+                    ;
+            }
+        }
+        else
+        {
+            while (true)
+                ;
+        }
+
+        i2c_ret = i2c_ret;
 
         // p_i2c_bus->set_descriptor({});
         // p_i2c_bus->enable(10ms);
@@ -197,10 +234,6 @@ int main()
 
         //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
 
-        gpio::port<gpio::A, api::traits::sync>()->set_pin_descriptor(
-            gpio::A::_5,
-            gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low });
-
         gpio::clock::enable<gpio::C>();
         gpio::port<gpio::C, api::traits::sync>()->set_pin_descriptor(gpio::C::_13,
                                                                      gpio::Descriptor<gpio::Mode::in> { .pull = gpio::Pull::up });
@@ -211,17 +244,6 @@ int main()
         {
             gpio::port<gpio::C, api::traits::async>()->start(gpio::C::_13, gpio::Edge::falling);
         }
-
-       // gpio::Pad pad = gpio::port<gpio::C, api::traits::sync>()->view<gpio::Pad>(gpio::C::_1);
-
-         //auto pp = EXTI;
-         //bit::set(&(EXTI->EXTICR[3]), 9u);
-         //bit::set(&(EXTI->RTSR1), 13u);
-         //bit::set(&(EXTI->FTSR1), 13u);
-         //EXTI->IMR1 = 4290781184u;
-         //EXTI->IMR2 = 63u;
-
-        // led = gpio::pad<gpio::A>(gpio::A::Pin::_5);
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 

@@ -32,7 +32,7 @@ void i2c::Peripheral<i2c::slave>::set_descriptor(const i2c::Descriptor<i2c::slav
     this->timingr = descriptor_a.timing;
     this->cr1 = static_cast<std::uint32_t>(descriptor_a.analog_noise_filter) | static_cast<std::uint32_t>(descriptor_a.fast_mode_plus) |
                 static_cast<std::uint32_t>(descriptor_a.general_call) | static_cast<std::uint32_t>(descriptor_a.wakeup_from_stop) |
-                static_cast<std::uint32_t>(descriptor_a.address_kind) | (descriptor_a.digital_noise_filter << I2C_CR1_DNF_Pos);
+                (descriptor_a.digital_noise_filter << I2C_CR1_DNF_Pos);
     this->oar1 =
         I2C_OAR1_OA1EN | (Address_kind::_10bit == descriptor_a.address_kind ? ((descriptor_a.address & 0x3FFu) | I2C_OAR1_OA1MODE) :
                                                                               ((descriptor_a.address << 1u) & 0x7Fu));

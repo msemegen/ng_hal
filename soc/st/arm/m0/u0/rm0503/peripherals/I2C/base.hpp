@@ -265,6 +265,104 @@ template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sd
     }
 };
 
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_2, descriptor_t, gpio::B::_4>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_4, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_3, descriptor_t, gpio::B::_4>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_4, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_1, descriptor_t, gpio::B::_7>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_7, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_2, descriptor_t, gpio::B::_7>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_7, 0x5u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_4, descriptor_t, gpio::B::_7>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_7, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_1, descriptor_t, gpio::B::_9>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_9, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_2, descriptor_t, gpio::B::_9>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_9, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_2, descriptor_t, gpio::B::_11>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_11, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_4, descriptor_t, gpio::B::_11>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_11, 0x3u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_2, descriptor_t, gpio::B::_14>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::B>());
+        gpio::port<gpio::B, api::traits::sync>()->set_pin_descriptor(gpio::B::_14, 0x4u, descriptor_t);
+    }
+};
+
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_3, descriptor_t, gpio::C::_1>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::C>());
+        gpio::port<gpio::C, api::traits::sync>()->set_pin_descriptor(gpio::C::_1, 0x4u, descriptor_t);
+    }
+};
+template<gpio::Descriptor<gpio::Mode::alternate> descriptor_t> struct detail::sda_pin<i2c_base::_4, descriptor_t, gpio::C::_1>
+{
+    static void configure()
+    {
+        assert(gpio::clock::is_enabled<gpio::C>());
+        gpio::port<gpio::C, api::traits::sync>()->set_pin_descriptor(gpio::C::_1, 0x2u, descriptor_t);
+    }
+};
+
 template<i2c_base::Id id_t> constexpr auto get_allowed_sda_pins()
 {
     if constexpr (i2c_base::_1 == id_t)

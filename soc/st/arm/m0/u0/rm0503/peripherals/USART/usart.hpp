@@ -424,11 +424,6 @@ struct usart : public usart_base
         wake_on_idle_line = USART_CR1_MME,
         wake_on_address = USART_CR1_MME | USART_CR1_WAKE,
     };
-    enum class Auto_baudrate : std::uint64_t
-    {
-        _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
-        _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
-    };
     enum class Prescaler : std::uint32_t
     {
         _1 = 0x0u,
@@ -486,13 +481,19 @@ struct usart : public usart_base
 
     struct Baudrate
     {
+        enum class Auto : std::uint64_t
+        {
+            _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
+            _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
+        };
+
         Baudrate() {}
         Baudrate(std::uint32_t value_a)
             : v(static_cast<std::uint64_t>(value_a) << 32u)
         {
         }
-        Baudrate(Auto_baudrate flag_a)
-            : v(static_cast<std::uint32_t>(flag_a))
+        Baudrate(Auto value_a)
+            : v(static_cast<std::uint32_t>(value_a))
         {
         }
 

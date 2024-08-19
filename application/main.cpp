@@ -50,7 +50,7 @@ void xmcu::stdglue::assert::handler::output(std::int32_t line_a, void* p_context
 volatile std::uint32_t flag = 0x0u;
 char c[5];
 volatile std::size_t i = 0;
-// gpio::Pad<api::traits::sync> led;
+gpio::Pad led;
 void usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a,
                                                                  usart::Error errors_a,
                                                                  usart::Transceiver<api::traits::async>* p_this)
@@ -92,7 +92,7 @@ void gpio::async::handler::on_fall(std::uint32_t pin_a)
 {
     if (13u == pin_a)
     {
-        gpio::port<gpio::A, api::traits::sync>()->toggle(gpio::A::_5);
+        led.toggle();
     }
 }
 // void gpio::async::handler::on_rise(std::uint32_t pin_a)
@@ -142,10 +142,34 @@ int main()
 #endif
         stdglue::steady_clock::set_source(p_async_systick);
 
+        // enabling GPIO A and C clock
         gpio::clock::enable<gpio::A>();
-        gpio::port<gpio::A, api::traits::sync>()->set_pin_descriptor(
+        gpio::clock::enable<gpio::C>();
+
+        // enabling global GPIO interrupts
+        gpio::async::enable({ .preempt_priority = 0x1u, .sub_priority = 0x1u });
+
+        // getting access to GPIO A port
+        gpio::Port<gpio::A, api::traits::sync>* p_gpio_A = gpio::port<gpio::A, api::traits::sync>();
+
+        // enabling PA5
+        p_gpio_A->set_pin_descriptor(
             gpio::A::_5,
             gpio::Descriptor<gpio::Mode::out> { .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low });
+
+        // view for PA5 pad
+        led = p_gpio_A->view<gpio::Pad>(gpio::A::_5);
+
+        // setting PC13 properties (no need for creating separate port object)
+        gpio::port<gpio::C, api::traits::async>()->set_pin_descriptor(gpio::C::_13,
+                                                                      gpio::Descriptor<gpio::Mode::in> { .pull = gpio::Pull::up });
+
+        // checking if EXTI line for PC13 is free
+        if (false == gpio::port<gpio::C, api::traits::async>()->is_taken(gpio::C::_13))
+        {
+            // enabling interrupt handling for falling edge
+            gpio::port<gpio::C, api::traits::async>()->start(gpio::C::_13, gpio::Edge::falling);
+        }
 
         // compile time chceck for pins and basic configuration
         usart::clock::enable<usart::_2, sysclk>(usart::clock::Stop_mode_activity::disable);
@@ -233,17 +257,6 @@ int main()
                                                               .inversion = usart::Frame::Inversion::disable } });
 
         //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
-
-        gpio::clock::enable<gpio::C>();
-        gpio::port<gpio::C, api::traits::sync>()->set_pin_descriptor(gpio::C::_13,
-                                                                     gpio::Descriptor<gpio::Mode::in> { .pull = gpio::Pull::up });
-
-        gpio::async::enable({});
-
-        if (false == gpio::port<gpio::C, api::traits::async>()->is_taken(gpio::C::_13))
-        {
-            gpio::port<gpio::C, api::traits::async>()->start(gpio::C::_13, gpio::Edge::falling);
-        }
 
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 

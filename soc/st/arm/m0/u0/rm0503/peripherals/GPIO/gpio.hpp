@@ -229,7 +229,7 @@ struct gpio : public gpio_base
         {
         }
 
-        Level read() const
+        [[nodiscard]] Level read() const
         {
             return static_cast<Level>(gpio::read(this->p_port, this->pin));
         }

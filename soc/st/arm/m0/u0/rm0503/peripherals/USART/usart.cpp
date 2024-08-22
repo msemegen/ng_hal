@@ -321,16 +321,13 @@ void usart::Transceiver<api::traits::async>::events_stop()
 }
 
 __WEAK void
-usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a, Error errors_a, Transceiver<api::traits::async>* p_this)
+usart::Transceiver<api::traits::async>::handler::on_receive(std::uint32_t word_a, Error errors_a, Transceiver<api::traits::async>*)
 {
 }
-__WEAK std::uint32_t usart::Transceiver<api::traits::async>::handler::on_transmit(Transceiver<api::traits::async>* p_this)
+__WEAK std::uint32_t usart::Transceiver<api::traits::async>::handler::on_transmit(Transceiver<api::traits::async>*)
 {
     return 0;
 }
-__WEAK void
-usart::Transceiver<api::traits::async>::handler::on_event(Event events_a, Error errors_a, Transceiver<api::traits::async>* p_this)
-{
-}
+__WEAK void usart::Transceiver<api::traits::async>::handler::on_event(Event events_a, Error errors_a, Transceiver<api::traits::async>*) {}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

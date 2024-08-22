@@ -1087,10 +1087,10 @@ public:
 
     struct handler : private xmcu::non_constructible
     {
-        static void on_receive(std::uint32_t word_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this);
-        static std::uint32_t on_transmit(usart::Transceiver<api::traits::async>* p_this);
+        static void on_receive(std::uint32_t word_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this_a);
+        static std::uint32_t on_transmit(usart::Transceiver<api::traits::async>* p_this_a);
 
-        static void on_event(Event events_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this);
+        static void on_event(Event events_a, Error errors_a, usart::Transceiver<api::traits::async>* p_this_a);
     };
 
 private:

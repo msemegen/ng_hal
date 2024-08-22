@@ -667,6 +667,22 @@ template<> class i2c::Transceiver<api::traits::sync, i2c::slave> : private ll::i
 
 template<> class i2c::Transceiver<api::traits::async, i2c::master> : private ll::i2c::Peripheral
 {
+public:
+#if 1 == XMCU_ISR_CONTEXT
+    void enable(const IRQ_priority& priority_a, void* p_context_a);
+#endif
+
+#if 0 == XMCU_ISR_CONTEXT
+    void enable(const IRQ_priority& priority_a);
+#endif
+    void disable();
+
+    struct handler : private xmcu::non_constructible
+    {
+        static void on_receive(Transceiver<api::traits::async, i2c::master>* p_this_a);
+        static void on_transmit(Transceiver<api::traits::async, i2c::master>* p_this_a);
+        static void on_event(Transceiver<api::traits::async, i2c::master>* p_this_a);
+    };
 };
 template<> class i2c::Transceiver<api::traits::async, i2c::slave> : private ll::i2c::Peripheral
 {

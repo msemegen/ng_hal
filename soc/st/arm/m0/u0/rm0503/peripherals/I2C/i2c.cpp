@@ -37,5 +37,9 @@ void i2c::Peripheral<i2c::slave>::set_descriptor(const i2c::Descriptor<i2c::slav
         I2C_OAR1_OA1EN | (Address_kind::_10bit == descriptor_a.address_kind ? ((descriptor_a.address & 0x3FFu) | I2C_OAR1_OA1MODE) :
                                                                               ((descriptor_a.address << 1u) & 0x7Fu));
 }
+
+__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_transmit(Transceiver<api::traits::async, i2c::master>*) {}
+__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_receive(Transceiver<api::traits::async, i2c::master>*) {}
+__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_event(Transceiver<api::traits::async, i2c::master>*) {}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

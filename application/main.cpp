@@ -245,6 +245,14 @@ int main()
         // std::uint8_t data[3];
         // i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
 
+        using ll_gpio = peripherals::ll::gpio;
+
+        ll_gpio::Port p;
+
+        p.otyper.set(ll_gpio::Otyper::open_drain << ll_gpio::A::_1);
+
+        ll_gpio::Pupdr::Value v;
+
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
         // auto xyz = gpio::port<gpio::A, api::traits::sync>();

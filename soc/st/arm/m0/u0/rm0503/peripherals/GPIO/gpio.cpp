@@ -114,6 +114,8 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gp
 {
     p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
     p_port_a->moder.set(ll::gpio::Moder::analog << pin_a);
+
+    p_port_a->moder.get(gpio::A::_1);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a,

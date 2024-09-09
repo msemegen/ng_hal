@@ -88,7 +88,6 @@ void EXTI4_15_IRQHandler()
             gpio::async::handler::on_rise(i);
             bit::set(&(EXTI->RPR1), i);
         }
-
     }
 }
 }
@@ -99,24 +98,22 @@ using namespace xmcu;
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
-    const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
-
-    bit::flag::set(&(p_port_a->ospeedr), clear_flag_2bit, static_cast<std::uint32_t>(desc_a.speed) << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->pupdr), clear_flag_2bit, static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->moder), clear_flag_2bit, 0x1u << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->otyper), 0x1u << pin_a, static_cast<std::uint32_t>(desc_a.type) << pin_a);
+    p_port_a->ospeedr.set(static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
+    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->otyper.set(static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::output << pin_a);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
-    bit::flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
-    bit::flag::clear(&(p_port_a->moder), 0x3u << (pin_a * 2u));
+    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::input << pin_a);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
-    bit::flag::set(&(p_port_a->pupdr), 0x3u << (pin_a * 2u), static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->moder), 0x3u << (pin_a * 2u), 0x3u << (pin_a * 2u));
+    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::analog << pin_a);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a,
@@ -124,12 +121,9 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a,
                          std::uint8_t function_a,
                          const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
-    const std::uint32_t clear_flag_2bit = 0x3u << (pin_a * 2);
-
-    bit::flag::set(&(p_port_a->ospeedr), clear_flag_2bit, static_cast<std::uint32_t>(desc_a.speed) << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->pupdr), clear_flag_2bit, static_cast<std::uint32_t>(desc_a.pull) << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->moder), clear_flag_2bit, 0x2u << (pin_a * 2u));
-    bit::flag::set(&(p_port_a->otyper), 0x1u << pin_a, static_cast<std::uint32_t>(desc_a.type) << pin_a);
+    p_port_a->ospeedr.set(static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
+    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->otyper.set(static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
 
     const std::uint32_t af_register_index = pin_a >> 3u;
     std::uint32_t af_register = p_port_a->afr[af_register_index];
@@ -138,6 +132,8 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a,
     af_register |= static_cast<std::uint32_t>(function_a) << ((pin_a - (af_register_index * 8u)) * 4u);
 
     p_port_a->afr[af_register_index] = af_register;
+
+    p_port_a->moder.set(ll::gpio::Moder::af << pin_a);
 }
 
 void gpio::async::enable(const IRQ_priority& priority_a)

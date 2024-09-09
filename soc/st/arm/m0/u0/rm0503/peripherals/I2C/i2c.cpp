@@ -38,8 +38,17 @@ void i2c::Peripheral<i2c::slave>::set_descriptor(const i2c::Descriptor<i2c::slav
                                                                               ((descriptor_a.address << 1u) & 0x7Fu));
 }
 
-__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_transmit(Transceiver<api::traits::async, i2c::master>*) {}
-__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_receive(Transceiver<api::traits::async, i2c::master>*) {}
-__WEAK void i2c::Transceiver<api::traits::async, i2c::master>::handler::on_event(Transceiver<api::traits::async, i2c::master>*) {}
+__WEAK void
+i2c::Transceiver<api::traits::async, i2c::master>::handler::on_receive(std::uint8_t, Error, Transceiver<api::traits::async, i2c::master>*)
+{
+}
+__WEAK std::uint16_t i2c::Transceiver<api::traits::async, i2c::master>::handler::on_transmit(Transceiver<api::traits::async, i2c::master>*)
+{
+    return no_data_to_transmit;
+}
+__WEAK void
+i2c::Transceiver<api::traits::async, i2c::master>::handler::on_event(Event, Error, Transceiver<api::traits::async, i2c::master>*)
+{
+}
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals
 #endif

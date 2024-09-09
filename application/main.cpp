@@ -10,7 +10,7 @@
 #include <xmcu/hal/oscillators/hsi16.hpp>
 #include <xmcu/hal/oscillators/msi.hpp>
 #include <xmcu/hal/oscillators/pll.hpp>
-#include <xmcu/hal/peripherals/GPIO.hpp>
+#include <xmcu/hal/peripherals/gpio.hpp>
 #include <xmcu/hal/peripherals/i2c.hpp>
 #include <xmcu/hal/peripherals/usart.hpp>
 #include <xmcu/stdglue.hpp>
@@ -84,7 +84,7 @@ void usart::Transceiver<api::traits::async>::handler::on_event(usart::Event even
     }
     if (usart::Event::idle == (events_a & usart::Event::idle))
     {
-        // led.toggle();
+        led.toggle();
     }
 }
 
@@ -146,6 +146,11 @@ int main()
         gpio::clock::enable<gpio::A>();
         gpio::clock::enable<gpio::C>();
 
+        // using ll_gpio = peripherals::ll::gpio;
+        //
+        // ll_gpio::Port* p_port = ll_gpio::port<ll_gpio::A>();
+        // p_port->moder.set(ll_gpio::Moder::analog << 3u, ll_gpio::Moder::analog << 4u, ll_gpio::Moder::analog << 6u);
+
         // enabling global GPIO interrupts
         gpio::async::enable({ .preempt_priority = 0x1u, .sub_priority = 0x1u });
 
@@ -159,6 +164,8 @@ int main()
 
         // view for PA5 pad
         led = p_gpio_A->view<gpio::Pad>(gpio::A::_5);
+
+        gpio::Port<gpio::C, api::traits::sync>* p_gpio_C = gpio::port<gpio::C, api::traits::sync>();
 
         // setting PC13 properties (no need for creating separate port object)
         gpio::port<gpio::C, api::traits::async>()->set_pin_descriptor(gpio::C::_13,
@@ -182,25 +189,25 @@ int main()
                                        gpio::Descriptor<gpio::Mode::alternate> {
                                            .type = gpio::Type::push_pull, .pull = gpio::Pull::none, .speed = gpio::Speed::low }>>();
 
-        i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
-        i2c::set_traits<
-            i2c::_1,
-            i2c::traits::half_duplex<gpio::A::_10,
-                                     gpio::Descriptor<gpio::Mode::alternate> {
-                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
-                                     gpio::A::_9,
-                                     gpio::Descriptor<gpio::Mode::alternate> {
-                                         .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
+        // i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
+        // i2c::set_traits<
+        //     i2c::_1,
+        //     i2c::traits::half_duplex<gpio::A::_10,
+        //                              gpio::Descriptor<gpio::Mode::alternate> {
+        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
+        //                              gpio::A::_9,
+        //                              gpio::Descriptor<gpio::Mode::alternate> {
+        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
-        i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
-        p_i2c_bus->set_descriptor({ .fast_mode_plus = i2c::Fast_mode_plus::disable,
-                                    .analog_noise_filter = i2c::Analog_noise_filter::disable,
-                                    .wakeup_from_stop = i2c::Wakeup_from_stop::disable,
-                                    .address_kind = i2c::Address_kind::_7bit,
-                                    .timing = 0x00503D5Au,
-                                    .digital_noise_filter = 0x0u });
+        // i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
+        // p_i2c_bus->set_descriptor({ .fast_mode_plus = i2c::Fast_mode_plus::disable,
+        //                             .analog_noise_filter = i2c::Analog_noise_filter::disable,
+        //                             .wakeup_from_stop = i2c::Wakeup_from_stop::disable,
+        //                             .address_kind = i2c::Address_kind::_7bit,
+        //                             .timing = 0x00503D5Au,
+        //                             .digital_noise_filter = 0x0u });
 
-        p_i2c_bus->enable(10ms);
+        /*p_i2c_bus->enable(10ms);
 
         auto i2c_transceview = p_i2c_bus->view<i2c::Transceiver<api::traits::sync, i2c::master>>();
 
@@ -228,7 +235,7 @@ int main()
                 ;
         }
 
-        i2c_ret = i2c_ret;
+        i2c_ret = i2c_ret;*/
 
         // p_i2c_bus->set_descriptor({});
         // p_i2c_bus->enable(10ms);
@@ -240,8 +247,8 @@ int main()
 
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
-        auto xyz = gpio::port<gpio::A, api::traits::sync>();
-        xyz->set_pin_descriptor(gpio::A::_0, gpio::Descriptor<gpio::Mode::analog> {});
+        // auto xyz = gpio::port<gpio::A, api::traits::sync>();
+        // xyz->set_pin_descriptor(gpio::A::_0, gpio::Descriptor<gpio::Mode::analog> {});
 
         // transmission configuration
         p_usart2->set_descriptor(usart::Descriptor { .prescaler = usart::Prescaler::_1,
@@ -273,7 +280,7 @@ int main()
             usart_async->events_start(usart::Event::transfer_complete | usart::Event::idle);
 
             // led.write(gpio::Level::high);
-            gpio::port<gpio::A, api::traits::sync>()->write(gpio::A::_5, gpio::Level::high);
+            // gpio::port<gpio::A, api::traits::sync>()->write(gpio::A::_5, gpio::Level::high);
 
             // echo
             c[0] = 'A';

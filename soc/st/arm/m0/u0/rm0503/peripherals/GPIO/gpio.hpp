@@ -14,6 +14,7 @@
 #include <stm32u0xx.h>
 
 // xmcu
+#include <xmcu/Limited.hpp>
 #include <xmcu/bit.hpp>
 #include <xmcu/non_constructible.hpp>
 #include <xmcu/non_copyable.hpp>
@@ -36,6 +37,61 @@ struct gpio_clock : private xmcu::non_constructible
 
 struct gpio : public gpio_base
 {
+private:
+    template<typename Flag_t, std::uint32_t m_t, std::uint32_t clear_t> struct Register
+    {
+        void set(Flag_t flag_a)
+        {
+            const std::uint32_t mode = (static_cast<std::uint32_t>(flag_a) & 0xFFFF);
+            const std::uint32_t pin = (static_cast<std::uint32_t>(flag_a) >> 16u) * m_t;
+            xmcu::bit::flag::set(&(this->v), clear_t << (pin), mode << (pin));
+        }
+        template<typename... Args_t> void set(Flag_t flag_a, Args_t... args_a)
+        {
+            this->set(flag_a);
+            this->set(args_a...);
+        }
+
+        void zero()
+        {
+            this->v = 0x0u;
+        }
+        operator std::uint32_t() const
+        {
+            return this->v;
+        }
+
+    private:
+        volatile std::uint32_t v;
+    };
+
+    enum class Moder_flag : std::uint32_t
+    {
+        input = 0x0u,
+        output = 0x1u,
+        af = 0x2u,
+        analog = 0x3u
+    };
+    enum class Otyper_flag : std::uint32_t
+    {
+        push_pull = 0x0u,
+        open_drain = 0x1u,
+    };
+    enum class Ospeedr_flag : std::uint32_t
+    {
+        low = 0x0u,
+        medium = 0x1u,
+        high = 0x2u,
+        ultra = 0x3u
+    };
+    enum class Pupdr_flag : std::uint32_t
+    {
+        none = 0x0u,
+        pull_up = 0x1u,
+        pull_down = 0x2u,
+    };
+
+public:
 #if defined XMCU_GPIOA_PRESENT
     using A = gpio_base::A;
 #endif
@@ -58,23 +114,63 @@ struct gpio : public gpio_base
 
     using clock = gpio_clock;
 
+    struct Moder : public Register<Moder_flag, 2u, 0x3u>
+    {
+        using enum Moder_flag;
+        using Flag = Moder_flag;
+    };
+    struct Otyper : public Register<Otyper_flag, 1u, 0x1u>
+    {
+        using enum Otyper_flag;
+        using Flag = Otyper_flag;
+    };
+    struct Ospeedr : public Register<Ospeedr_flag, 2u, 0x3u>
+    {
+        using enum Ospeedr_flag;
+        using Flag = Ospeedr_flag;
+    };
+    struct Pupdr : public Register<Pupdr_flag, 2u, 0x3u>
+    {
+        using enum Pupdr_flag;
+        using Flag = Pupdr_flag;
+    };
+
     struct Port : private xmcu::non_copyable
     {
-        volatile std::uint32_t moder;   // port mode register
-        volatile std::uint32_t otyper;  // port output type register
-        volatile std::uint32_t ospeedr; // port output speed register
-        volatile std::uint32_t pupdr;   // port pull-up/pull-down register
-        volatile std::uint32_t idr;     // port input data register
-        volatile std::uint32_t odr;     // port output data register
-        volatile std::uint32_t bsrr;    // port bit set/reset  register
-        volatile std::uint32_t lckr;    // port configuration lock register
-        volatile std::uint32_t afr[2];  // alternate function registers
-        volatile std::uint32_t brr;     // bit reset register
+        Moder moder;                   // port mode register
+        Otyper otyper;                 // port output type register
+        Ospeedr ospeedr;               // port output speed register
+        Pupdr pupdr;                   // port pull-up/pull-down register
+        volatile std::uint32_t idr;    // port input data register
+        volatile std::uint32_t odr;    // port output data register
+        volatile std::uint32_t bsrr;   // port bit set/reset  register
+        volatile std::uint32_t lckr;   // port configuration lock register
+        volatile std::uint32_t afr[2]; // alternate function registers
+        volatile std::uint32_t brr;    // bit reset register
     };
 
     template<typename Port_t> [[nodiscard]] static constexpr Port* port() = delete;
+
+private:
+    template<typename Flag_t, std::uint32_t m_t, std::uint32_t clear_t> friend struct Register;
 };
 
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, xmcu::Limited<std::uint8_t, 0u, 15u> pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (pin_a << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, xmcu::Limited<std::uint8_t, 0u, 15u> pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (pin_a << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, xmcu::Limited<std::uint8_t, 0u, 15u> pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (pin_a << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, xmcu::Limited<std::uint8_t, 0u, 15u> pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (pin_a << 16u));
+}
 #if defined XMCU_GPIOA_PRESENT
 template<> [[nodiscard]] constexpr gpio::Port* gpio::port<gpio::A>()
 {
@@ -92,6 +188,23 @@ template<> inline void gpio_clock::disable<gpio::A>()
 template<> inline bool gpio_clock::is_enabled<gpio::A>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
+}
+
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, gpio::A pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, gpio::A pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, gpio::A pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, gpio::A pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
 }
 #endif
 #if defined XMCU_GPIOB_PRESENT
@@ -112,6 +225,23 @@ template<> inline bool gpio_clock::is_enabled<gpio::B>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
 }
+
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, gpio::B pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, gpio::B pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, gpio::B pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, gpio::B pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
 #endif
 #if defined XMCU_GPIOC_PRESENT
 template<> [[nodiscard]] constexpr gpio::Port* gpio::port<gpio::C>()
@@ -130,6 +260,23 @@ template<> inline void gpio_clock::disable<gpio::C>()
 template<> inline bool gpio_clock::is_enabled<gpio::C>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
+}
+
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, gpio::C pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, gpio::C pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, gpio::C pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, gpio::C pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
 }
 #endif
 #if defined XMCU_GPIOD_PRESENT
@@ -150,6 +297,23 @@ template<> inline bool gpio_clock::is_enabled<gpio::D>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
 }
+
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, gpio::D pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, gpio::D pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, gpio::D pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, gpio::D pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
 #endif
 #if defined XMCU_GPIOF_PRESENT
 template<> [[nodiscard]] constexpr gpio::Port* gpio::port<gpio::F>()
@@ -169,6 +333,23 @@ template<> inline bool gpio_clock::is_enabled<gpio::F>()
 {
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOFEN);
 }
+
+constexpr gpio::Moder::Flag operator<<(gpio::Moder::Flag flag_a, gpio::F pin_a)
+{
+    return static_cast<gpio::Moder::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Otyper::Flag operator<<(gpio::Otyper::Flag flag_a, gpio::F pin_a)
+{
+    return static_cast<gpio::Otyper::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Ospeedr::Flag operator<<(gpio::Ospeedr::Flag flag_a, gpio::F pin_a)
+{
+    return static_cast<gpio::Ospeedr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
+constexpr gpio::Pupdr::Flag operator<<(gpio::Pupdr::Flag flag_a, gpio::F pin_a)
+{
+    return static_cast<gpio::Pupdr::Flag>((static_cast<std::uint32_t>(flag_a) & 0xFFFF) | (static_cast<std::uint32_t>(pin_a) << 16u));
+}
 #endif
 } // namespace ll
 
@@ -183,21 +364,21 @@ struct gpio : public gpio_base
     };
     enum class Type : std::uint32_t
     {
-        push_pull = 0x0u,
-        open_drain = 0x1u,
+        push_pull = static_cast<std::uint32_t>(ll::gpio::Otyper::push_pull),
+        open_drain = static_cast<std::uint32_t>(ll::gpio::Otyper::open_drain),
     };
     enum class Pull : std::uint32_t
     {
-        none = 0x0u,
-        up = 0x1u,
-        down = 0x2u,
+        none = static_cast<std::uint32_t>(ll::gpio::Pupdr::none),
+        up = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_up),
+        down = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_down),
     };
     enum class Speed : std::uint32_t
     {
-        low = 0x0u,
-        medium = 0x1u,
-        high = 0x2u,
-        ultra = 0x3u,
+        low = static_cast<std::uint32_t>(ll::gpio::Ospeedr::low),
+        medium = static_cast<std::uint32_t>(ll::gpio::Ospeedr::medium),
+        high = static_cast<std::uint32_t>(ll::gpio::Ospeedr::high),
+        ultra = static_cast<std::uint32_t>(ll::gpio::Ospeedr::ultra),
     };
     enum class Level : std::uint32_t
     {

@@ -325,13 +325,24 @@ struct i2c : public i2c_base
 {
     using clock = ll::i2c_clock;
 
+    enum class Error : std::uint32_t
+    {
+        none = 0x0u,
+        arbitration_lost = I2C_ISR_ARLO,
+        frame_misplaced = I2C_ISR_BERR,
+        nack = I2C_ISR_NACKF,
+        overrun = I2C_ISR_OVR
+    };
+    enum class Event : std::uint32_t
+    {
+
+    };
+
     enum class Kind : std::uint64_t
     {
         master = 0x1u,
         slave = 0x2u
     };
-
-    using enum Kind;
 
     enum class Fast_mode_plus : std::uint32_t
     {
@@ -364,14 +375,7 @@ struct i2c : public i2c_base
         enable = 0x0u
     };
 
-    enum class Error : std::uint32_t
-    {
-        none = 0x0u,
-        arbitration_lost = I2C_ISR_ARLO,
-        frame_misplaced = I2C_ISR_BERR,
-        nack = I2C_ISR_NACKF,
-        overrun = I2C_ISR_OVR
-    };
+    using enum Kind;
 
     template<Kind kind_t> struct Descriptor : private xmcu::non_constructible
     {
@@ -677,12 +681,24 @@ public:
 #endif
     void disable();
 
+    void receive_start();
+    void receive_stop();
+
+    void transmit_start();
+    void transmit_stop();
+
+    void events_start(Event events_a);
+    void events_stop();
+
     struct handler : private xmcu::non_constructible
     {
-        static void on_receive(Transceiver<api::traits::async, i2c::master>* p_this_a);
-        static void on_transmit(Transceiver<api::traits::async, i2c::master>* p_this_a);
-        static void on_event(Transceiver<api::traits::async, i2c::master>* p_this_a);
+        static void on_receive(std::uint8_t word_a, Error errors_a, Transceiver<api::traits::async, i2c::master>* p_this_a);
+        static std::uint16_t on_transmit(Transceiver<api::traits::async, i2c::master>* p_this_a);
+        static void on_event(Event events_a, Error errors_a, Transceiver<api::traits::async, i2c::master>* p_this_a);
     };
+
+private:
+    constexpr static std::uint16_t no_data_to_transmit = 0x200u;
 };
 template<> class i2c::Transceiver<api::traits::async, i2c::slave> : private ll::i2c::Peripheral
 {

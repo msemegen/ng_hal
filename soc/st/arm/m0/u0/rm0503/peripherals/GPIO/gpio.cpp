@@ -120,7 +120,7 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gp
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a,
                          std::uint32_t pin_a,
-                         std::uint8_t function_a,
+                         std::uint32_t function_a,
                          const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
     p_port_a->ospeedr.set(static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
@@ -128,12 +128,9 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a,
     p_port_a->otyper.set(static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
 
     const std::uint32_t af_register_index = pin_a >> 3u;
-    std::uint32_t af_register = p_port_a->afr[af_register_index];
+    const std::uint32_t shift = ((pin_a - (af_register_index * 8u)) * 4u);
 
-    af_register &= ~(0xFu << ((pin_a - (af_register_index * 8u)) * 4u));
-    af_register |= static_cast<std::uint32_t>(function_a) << ((pin_a - (af_register_index * 8u)) * 4u);
-
-    p_port_a->afr[af_register_index] = af_register;
+    p_port_a->afr[af_register_index].set(ll::gpio::Afr::mask << shift, static_cast<ll::gpio::Afr::Flag>(function_a) << shift);
 
     p_port_a->moder.set(ll::gpio::Moder::af << pin_a);
 }

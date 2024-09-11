@@ -24,7 +24,7 @@ namespace soc::st::arm::m0::u0::rm0503::peripherals {
 struct gpio_base : private xmcu::non_constructible
 {
 public:
-    enum class A : std::uint8_t
+    enum class A : std::uint32_t
     {
         _0,
         _1,
@@ -43,7 +43,7 @@ public:
         _14,
         _15
     };
-    enum class B : std::uint8_t
+    enum class B : std::uint32_t
     {
         _0,
         _1,
@@ -62,7 +62,7 @@ public:
         _14,
         _15
     };
-    enum class C : std::uint8_t
+    enum class C : std::uint32_t
     {
         _0,
         _1,
@@ -81,69 +81,104 @@ public:
         _14,
         _15
     };
-    enum class D : std::uint8_t
+    enum class D : std::uint32_t
     {
         _2 = 2u
     };
-    enum class F : std::uint8_t
+    enum class F : std::uint32_t
     {
         _0,
         _1,
         _2
     };
 
-public:
-    friend constexpr bool operator==(gpio_base::A, gpio_base::B)
+    enum class Moder_flag : std::uint32_t
     {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::A, gpio_base::C)
+        input = 0x0u,
+        output = 0x1u,
+        af = 0x2u,
+        analog = 0x3u
+    };
+    enum class Otyper_flag : std::uint32_t
     {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::A, gpio_base::D)
+        push_pull = 0x0u,
+        open_drain = 0x1u,
+    };
+    enum class Ospeedr_flag : std::uint32_t
     {
-        return false;
-    }
-
-    friend constexpr bool operator==(gpio_base::B, gpio_base::A)
+        low = 0x0u,
+        medium = 0x1u,
+        high = 0x2u,
+        ultra = 0x3u
+    };
+    enum class Pupdr_flag : std::uint32_t
     {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::B, gpio_base::C)
+        none = 0x0u,
+        pull_up = 0x1u,
+        pull_down = 0x2u,
+    };
+    enum class Idr_flag : std::uint32_t
     {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::B, gpio_base::D)
+        low,
+        high
+    };
+    enum class Odr_flag : std::uint32_t
     {
-        return false;
-    }
-
-    friend constexpr bool operator==(gpio_base::C, gpio_base::A)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::C, gpio_base::B)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::C, gpio_base::D)
-    {
-        return false;
-    }
-
-    friend constexpr bool operator==(gpio_base::D, gpio_base::A)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::D, gpio_base::B)
-    {
-        return false;
-    }
-    friend constexpr bool operator==(gpio_base::D, gpio_base::C)
-    {
-        return false;
-    }
+        low,
+        high
+    };
 };
+
+constexpr bool operator==(gpio_base::A, gpio_base::B)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::A, gpio_base::C)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::A, gpio_base::D)
+{
+    return false;
+}
+
+constexpr bool operator==(gpio_base::B, gpio_base::A)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::B, gpio_base::C)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::B, gpio_base::D)
+{
+    return false;
+}
+
+constexpr bool operator==(gpio_base::C, gpio_base::A)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::C, gpio_base::B)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::C, gpio_base::D)
+{
+    return false;
+}
+
+constexpr bool operator==(gpio_base::D, gpio_base::A)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::D, gpio_base::B)
+{
+    return false;
+}
+constexpr bool operator==(gpio_base::D, gpio_base::C)
+{
+    return false;
+}
 #endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals

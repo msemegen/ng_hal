@@ -24,6 +24,9 @@
 #include <sys/time.h>
 #include <thread>
 
+// test
+#include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/ll_gpio.hpp>
+
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
 using namespace xmcu::hal::oscillators;
@@ -255,8 +258,26 @@ int main()
 
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
+        using ll_gpio2 = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio2;
+
+        ll_gpio2::Port* p_a_port = ll_gpio2::port<ll_gpio2::A>();
+        p_a_port->moder.set((ll_gpio2::Moder::mask << ll_gpio2::A::_11) | (ll_gpio2::Moder::mask << ll_gpio2::A::_12),
+                            (ll_gpio2::Moder::af << ll_gpio2::A::_11) | (ll_gpio2::Moder::af << ll_gpio2::A::_12));
+        ll_gpio2::Moder::Value rreg = p_a_port->moder;
+        p_a_port->moder.set(rreg);
+        p_a_port->moder.toggle(ll_gpio2::A::_1);
+
+        p_a_port->lckr.set((ll_gpio2::Lckr::lock << ll_gpio::A::_0) | ll_gpio2::Lckr::key);
+
+        // ll_gpio2::Moder::Value v = port2.moder.get(ll_gpio2::A::_1);
+
         // auto xyz = gpio::port<gpio::A, api::traits::sync>();
         // xyz->set_pin_descriptor(gpio::A::_0, gpio::Descriptor<gpio::Mode::analog> {});
+
+        constexpr ll_gpio2::Moder::Value vxx = (ll_gpio2::Moder::af << ll_gpio2::A::_11) | (ll_gpio2::Moder::af << ll_gpio2::A::_12);
+
+        constexpr auto res = vxx & (ll_gpio2::Moder::af << ll_gpio2::A::_11);
+        constexpr bool bb = res == ll_gpio2::Moder::af << ll_gpio2::A::_11;
 
         // transmission configuration
         p_usart2->set_descriptor(usart::Descriptor { .prescaler = usart::Prescaler::_1,

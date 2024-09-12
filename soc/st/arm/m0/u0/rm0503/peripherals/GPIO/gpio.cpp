@@ -98,22 +98,22 @@ using namespace xmcu;
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
-    p_port_a->ospeedr.set(static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
-    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->otyper.set(static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::output << pin_a);
+    p_port_a->ospeedr.set(ll::gpio::Ospeedr::mask << pin_a, static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
+    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->otyper.set(ll::gpio::Otyper::mask << pin_a, static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::output << pin_a);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
-    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::input << pin_a);
+    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::input << pin_a);
 }
 
 void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
-    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::analog << pin_a);
+    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::analog << pin_a);
 
     p_port_a->moder.get(gpio::A::_1);
 }
@@ -123,16 +123,16 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a,
                          std::uint32_t function_a,
                          const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
-    p_port_a->ospeedr.set(static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
-    p_port_a->pupdr.set(static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->otyper.set(static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
+    p_port_a->ospeedr.set(ll::gpio::Ospeedr::mask << pin_a, static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
+    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
+    p_port_a->otyper.set(ll::gpio::Otyper::mask << pin_a, static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
 
-    const std::uint32_t af_register_index = pin_a >> 3u;
-    const std::uint32_t shift = ((pin_a - (af_register_index * 8u)) * 4u);
+    const std::uint32_t index = pin_a >> 3u;
+    const std::uint32_t shift = pin_a - (index * 8u);
 
-    p_port_a->afr[af_register_index].set(ll::gpio::Afr::mask << shift, static_cast<ll::gpio::Afr::Flag>(function_a) << shift);
+    p_port_a->afr[index].set(ll::gpio::Afr::mask << shift, static_cast<ll::gpio::Afr::Flag>(function_a) << shift);
 
-    p_port_a->moder.set(ll::gpio::Moder::af << pin_a);
+    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::af << pin_a);
 }
 
 void gpio::async::enable(const IRQ_priority& priority_a)
@@ -154,7 +154,7 @@ void gpio::async::disable()
     NVIC_DisableIRQ(IRQn_Type::EXTI4_15_IRQn);
 }
 
-bool gpio::is_irq_slot_enabled(std::uint32_t port_a, std::uint32_t pin_a)
+bool gpio::is_irq_slot_enabled(std::uint32_t port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     const std::uint32_t idx = pin_a >> 2u;
     const std::uint32_t pos = pin_a % 4u;
@@ -181,7 +181,7 @@ void gpio::disable_irq_slot(std::uint32_t port_a, std::uint32_t pin_a, volatile 
 
     p_array_a[idx] &= ~((0xFFu) << (pos * 8u));
 }
-void gpio::set_irq_edge(std::uint32_t pin_a, Edge edge_a)
+void gpio::set_irq_edge(xmcu::Limited<std::uint32_t, 0u, 15u> pin_a, Edge edge_a)
 {
     bit::clear(&(EXTI->RTSR1), pin_a);
     bit::clear(&(EXTI->FTSR1), pin_a);

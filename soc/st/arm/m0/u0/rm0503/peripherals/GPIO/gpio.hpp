@@ -137,19 +137,19 @@ private:
     {
         return p_port_a->idr.get(pin_a);
     }
-    static void write(ll::gpio::Port* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a, ll::gpio::Odr::Flag level_a)
+    static void write(ll::gpio::Port* p_port_a, std::uint32_t pin_a, ll::gpio::Odr::Flag level_a)
     {
         p_port_a->odr.set(static_cast<ll::gpio::Odr::Flag>(level_a) << pin_a);
     }
-    static void toggle(ll::gpio::Port* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+    static void toggle(ll::gpio::Port* p_port_a, std::uint32_t pin_a)
     {
-        p_port_a->odr.toggle(pin_a);
+        p_port_a->odr.toggle(xmcu::Limited<std::uint32_t, 0u, 15u>(pin_a));
     }
 
-    static bool is_irq_slot_enabled(std::uint32_t port_a, std::uint32_t pin_a);
+    static bool is_irq_slot_enabled(std::uint32_t port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a);
     static void enable_irq_slot(std::uint32_t port_a, std::uint32_t pin_a, volatile std::uint32_t* p_array_a, std::size_t array_length_a);
     static void disable_irq_slot(std::uint32_t port_a, std::uint32_t pin_a, volatile std::uint32_t* p_array_a, std::size_t array_length_a);
-    static void set_irq_edge(std::uint32_t port_a, Edge edge_a);
+    static void set_irq_edge(xmcu::Limited<std::uint32_t, 0u, 15u> pin_a, Edge edge_a);
 
     static inline std::uint32_t enabled_slots[4] = { 0x0u, 0x0u, 0x0u, 0x0u };
 };

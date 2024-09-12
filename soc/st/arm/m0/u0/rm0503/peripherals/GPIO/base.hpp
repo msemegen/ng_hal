@@ -91,42 +91,6 @@ public:
         _1,
         _2
     };
-
-    enum class Moder_flag : std::uint32_t
-    {
-        input = 0x0u,
-        output = 0x1u,
-        af = 0x2u,
-        analog = 0x3u
-    };
-    enum class Otyper_flag : std::uint32_t
-    {
-        push_pull = 0x0u,
-        open_drain = 0x1u,
-    };
-    enum class Ospeedr_flag : std::uint32_t
-    {
-        low = 0x0u,
-        medium = 0x1u,
-        high = 0x2u,
-        ultra = 0x3u
-    };
-    enum class Pupdr_flag : std::uint32_t
-    {
-        none = 0x0u,
-        pull_up = 0x1u,
-        pull_down = 0x2u,
-    };
-    enum class Idr_flag : std::uint32_t
-    {
-        low,
-        high
-    };
-    enum class Odr_flag : std::uint32_t
-    {
-        low,
-        high
-    };
 };
 
 constexpr bool operator==(gpio_base::A, gpio_base::B)

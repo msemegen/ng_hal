@@ -1477,15 +1477,15 @@ constexpr usart::ISR::Flag operator&(usart::ISR::Flag left_a, usart::ISR::Flag r
 }
 constexpr usart::ISR::Flag operator&(usart::ISR::Flag flag_a, usart::ISR::Data value_a)
 {
-    return static_cast<usart_isr_descriptor::Flag>(static_cast<std::uint32_t>(flag_a) | static_cast<std::uint32_t>(value_a));
+    return static_cast<usart_isr_descriptor::Flag>(static_cast<std::uint32_t>(flag_a) & static_cast<std::uint32_t>(value_a));
 }
 constexpr usart::ISR::Flag operator&(usart::ISR::Data value_a, usart::ISR::Flag flag_a)
 {
-    return static_cast<usart_isr_descriptor::Flag>(static_cast<std::uint32_t>(flag_a) | static_cast<std::uint32_t>(value_a));
+    return static_cast<usart_isr_descriptor::Flag>(static_cast<std::uint32_t>(flag_a) & static_cast<std::uint32_t>(value_a));
 }
 constexpr usart::ISR::Data operator&(usart::ISR::Data value_a, usart::ISR::Data flag_a)
 {
-    return static_cast<usart::ISR::Data>(static_cast<std::uint32_t>(flag_a) | static_cast<std::uint32_t>(value_a));
+    return static_cast<usart::ISR::Data>(static_cast<std::uint32_t>(flag_a) & static_cast<std::uint32_t>(value_a));
 }
 constexpr usart::ISR::Flag operator~(usart::ISR::Flag flag_a)
 {

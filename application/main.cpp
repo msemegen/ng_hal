@@ -248,18 +248,18 @@ int main()
         // std::uint8_t data[3];
         // i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
 
-        //using ll_usart2 = soc::st::arm::m0::u0::rm0503::peripherals::ll::usart2;
+        // using ll_usart2 = soc::st::arm::m0::u0::rm0503::peripherals::ll::usart2;
 
-        //ll_usart2::Registers ll_usart;
+        // ll_usart2::Registers ll_usart;
 
-        //constexpr auto clear_mask = ll_usart2::CR1::mask::deat << ll_usart2::CR1::shift::deat;
-        //constexpr auto set_mask = ll_usart2::CR1::ue | ll_usart2::CR1::re | ll_usart2::CR1::te;
+        // constexpr auto clear_mask = ll_usart2::CR1::mask::deat << ll_usart2::CR1::shift::deat;
+        // constexpr auto set_mask = ll_usart2::CR1::ue | ll_usart2::CR1::re | ll_usart2::CR1::te;
 
-        //ll_usart.cr1.set(clear_mask, set_mask | (0x20u << ll_usart2::CR1::shift::deat));
-        //ll_usart.brr = 12847u;
+        // ll_usart.cr1.set(clear_mask, set_mask | (0x20u << ll_usart2::CR1::shift::deat));
+        // ll_usart.brr = 12847u;
 
-        //ll_usart.cr2.set(ll_usart2::CR2::addm7 | (ll_usart2::CR2::value::abrmod_0x55 << ll_usart2::CR2::shift::abrdmod) |
-        //                 (0x15u << ll_usart2::CR2::shift::add) | (ll_usart2::CR2::value::stop_0_5_bit << ll_usart2::CR2::shift::stop));
+        // ll_usart.cr2.set(ll_usart2::CR2::addm7 | (ll_usart2::CR2::value::abrmod_0x55 << ll_usart2::CR2::shift::abrdmod) |
+        //                  (0x15u << ll_usart2::CR2::shift::add) | (ll_usart2::CR2::value::stop_0_5_bit << ll_usart2::CR2::shift::stop));
 
         // ll_gpio2::Port* p_a_port = ll_gpio2::port<ll_gpio2::A>();
         // p_a_port->moder.set((ll_gpio2::Moder::mask << ll_gpio2::A::_11) | (ll_gpio2::Moder::mask << ll_gpio2::A::_12),
@@ -286,6 +286,8 @@ int main()
         //
         // constexpr auto res = vxx & (ll_gpio2::Moder::af << ll_gpio2::A::_11);
         // constexpr bool bb = res == ll_gpio2::Moder::af << ll_gpio2::A::_11;
+
+        volatile USART_TypeDef* p_raw_usart2 = USART2;
 
         usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 

@@ -96,7 +96,7 @@ void EXTI4_15_IRQHandler()
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 using namespace xmcu;
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
     p_port_a->ospeedr.set(ll::gpio::Ospeedr::mask << pin_a, static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
     p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
@@ -104,21 +104,19 @@ void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gp
     p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::output << pin_a);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
     p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
     p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::input << pin_a);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
     p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
     p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::analog << pin_a);
-
-    p_port_a->moder.get(gpio::A::_1);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a,
+void gpio::configure_pin(ll::gpio::Registers* p_port_a,
                          std::uint32_t pin_a,
                          std::uint32_t function_a,
                          const gpio::Descriptor<gpio::Mode::alternate>& desc_a)

@@ -25,7 +25,7 @@
 #include <thread>
 
 // test
-#include <soc/st/arm/m0/u0/rm0503/peripherals/GPIO/gpio_ll.hpp>
+#include <soc/st/arm/m0/u0/rm0503/peripherals/USART/usart_ll.hpp>
 
 using namespace xmcu::hal;
 using namespace xmcu::hal::clocks;
@@ -194,13 +194,13 @@ int main()
 
         // i2c::clock::enable<i2c::_1, sysclk>(i2c::clock::Stop_mode_activity::disable);
         // i2c::set_traits<
-        //     i2c::_1,
-        //     i2c::traits::half_duplex<gpio::A::_10,
-        //                              gpio::Descriptor<gpio::Mode::alternate> {
-        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
-        //                              gpio::A::_9,
-        //                              gpio::Descriptor<gpio::Mode::alternate> {
-        //                                  .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
+        //    i2c::_1,
+        //    i2c::traits::half_duplex<gpio::A::_10,
+        //                             gpio::Descriptor<gpio::Mode::alternate> {
+        //                                 .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high },
+        //                             gpio::A::_9,
+        //                             gpio::Descriptor<gpio::Mode::alternate> {
+        //                                 .type = gpio::Type::open_drain, .pull = gpio::Pull::up, .speed = gpio::Speed::high }>>();
 
         // i2c::Peripheral<i2c::master>* p_i2c_bus = i2c::peripheral<i2c::_1, i2c::master>();
         // p_i2c_bus->set_descriptor({ .fast_mode_plus = i2c::Fast_mode_plus::disable,
@@ -248,7 +248,18 @@ int main()
         // std::uint8_t data[3];
         // i2c_transc->transmit(0x11u | i2c::Address_kind::_7bit, data);
 
-        usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
+        //using ll_usart2 = soc::st::arm::m0::u0::rm0503::peripherals::ll::usart2;
+
+        //ll_usart2::Registers ll_usart;
+
+        //constexpr auto clear_mask = ll_usart2::CR1::mask::deat << ll_usart2::CR1::shift::deat;
+        //constexpr auto set_mask = ll_usart2::CR1::ue | ll_usart2::CR1::re | ll_usart2::CR1::te;
+
+        //ll_usart.cr1.set(clear_mask, set_mask | (0x20u << ll_usart2::CR1::shift::deat));
+        //ll_usart.brr = 12847u;
+
+        //ll_usart.cr2.set(ll_usart2::CR2::addm7 | (ll_usart2::CR2::value::abrmod_0x55 << ll_usart2::CR2::shift::abrdmod) |
+        //                 (0x15u << ll_usart2::CR2::shift::add) | (ll_usart2::CR2::value::stop_0_5_bit << ll_usart2::CR2::shift::stop));
 
         // ll_gpio2::Port* p_a_port = ll_gpio2::port<ll_gpio2::A>();
         // p_a_port->moder.set((ll_gpio2::Moder::mask << ll_gpio2::A::_11) | (ll_gpio2::Moder::mask << ll_gpio2::A::_12),
@@ -261,6 +272,13 @@ int main()
 
         // ll_gpio2::Moder::Value v = port2.moder.get(ll_gpio2::A::_1);
 
+        // using ll_gpio = peripherals::ll::gpio;
+        // ll_gpio::Registers regs;
+        //
+        // auto vbn = (ll_gpio::Moder::analog << ll_gpio::A::_11);
+        //
+        // regs.moder = vbn;
+
         // auto xyz = gpio::port<gpio::A, api::traits::sync>();
         // xyz->set_pin_descriptor(gpio::A::_0, gpio::Descriptor<gpio::Mode::analog> {});
 
@@ -268,6 +286,8 @@ int main()
         //
         // constexpr auto res = vxx & (ll_gpio2::Moder::af << ll_gpio2::A::_11);
         // constexpr bool bb = res == ll_gpio2::Moder::af << ll_gpio2::A::_11;
+
+        usart::Peripheral* p_usart2 = usart::peripheral<usart::_2>();
 
         // transmission configuration
         p_usart2->set_descriptor(usart::Descriptor { .prescaler = usart::Prescaler::_1,

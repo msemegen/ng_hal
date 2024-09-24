@@ -1043,6 +1043,10 @@ constexpr usart::CR1::Data operator~(usart::CR1::Data flag_a)
 {
     return static_cast<usart::CR1::Data>((~static_cast<std::uint32_t>(flag_a)));
 }
+constexpr void operator|=(usart::CR1::Flag& left_a, usart::CR1::Flag right_a)
+{
+    reinterpret_cast<std::uint32_t&>(left_a) |= static_cast<std::uint32_t>(right_a);
+}
 
 constexpr usart::CR2::Data operator|(usart::CR2::Flag left_a, usart::CR2::Flag right_a)
 {

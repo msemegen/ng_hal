@@ -17,7 +17,7 @@
 namespace xmcu {
 struct bit : private non_constructible
 {
-    template<typename Register_t> [[nodiscard]] constexpr static bool is(Register_t a_register, uint32_t a_index)
+    template<typename Register_t> [[nodiscard]] constexpr static bool is(Register_t a_register, std::uint32_t a_index)
     {
         const Register_t flag = static_cast<Register_t>(0x1u) << a_index;
         return flag == (a_register & flag);
@@ -28,19 +28,19 @@ struct bit : private non_constructible
         return static_cast<Mask_t>(0u) != (a_register & a_mask);
     }
 
-    template<typename Register_t> constexpr static void set(Register_t* a_p_register, uint32_t a_index)
+    template<typename Register_t> constexpr static void set(Register_t* a_p_register, std::uint32_t a_index)
     {
-        (*a_p_register) = (*a_p_register) | (static_cast<Register_t>(0x1u) << a_index);
+        (*a_p_register) = (*a_p_register) | (0x1u << a_index);
     }
 
-    template<typename Register_t> constexpr static void clear(Register_t* a_p_register, uint32_t a_index)
+    template<typename Register_t> constexpr static void clear(Register_t* a_p_register, std::uint32_t a_index)
     {
-        (*a_p_register) = (*a_p_register) & ~(static_cast<Register_t>(0x1u) << a_index);
+        (*a_p_register) = (*a_p_register) & ~(0x1u << a_index);
     }
 
-    template<typename Register_t> constexpr static void toggle(Register_t* a_p_register, uint32_t a_index)
+    template<typename Register_t> constexpr static void toggle(Register_t* a_p_register, std::uint32_t a_index)
     {
-        (*a_p_register) = (*a_p_register) ^ (static_cast<Register_t>(0x1u) << a_index);
+        (*a_p_register) = (*a_p_register) ^ (0x1u << a_index);
     }
 
     struct flag : private non_constructible

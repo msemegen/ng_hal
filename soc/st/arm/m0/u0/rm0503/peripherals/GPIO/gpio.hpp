@@ -38,21 +38,21 @@ struct gpio : public gpio_base
     };
     enum class Type : std::uint32_t
     {
-        push_pull = static_cast<std::uint32_t>(ll::gpio::Otyper::push_pull),
-        open_drain = static_cast<std::uint32_t>(ll::gpio::Otyper::open_drain),
+        push_pull = static_cast<std::uint32_t>(ll::gpio::OTYPER::push_pull),
+        open_drain = static_cast<std::uint32_t>(ll::gpio::OTYPER::open_drain),
     };
     enum class Pull : std::uint32_t
     {
-        none = static_cast<std::uint32_t>(ll::gpio::Pupdr::none),
-        up = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_up),
-        down = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_down),
+        none = static_cast<std::uint32_t>(ll::gpio::PUPDR::none),
+        up = static_cast<std::uint32_t>(ll::gpio::PUPDR::pull_up),
+        down = static_cast<std::uint32_t>(ll::gpio::PUPDR::pull_down),
     };
     enum class Speed : std::uint32_t
     {
-        low = static_cast<std::uint32_t>(ll::gpio::Ospeedr::low),
-        medium = static_cast<std::uint32_t>(ll::gpio::Ospeedr::medium),
-        high = static_cast<std::uint32_t>(ll::gpio::Ospeedr::high),
-        ultra = static_cast<std::uint32_t>(ll::gpio::Ospeedr::ultra),
+        low = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::low),
+        medium = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::medium),
+        high = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::high),
+        ultra = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::ultra),
     };
     enum class Level : std::uint32_t
     {
@@ -90,7 +90,7 @@ struct gpio : public gpio_base
         }
         void write(Level level_a)
         {
-            gpio::write(this->p_registers, this->pin, static_cast<ll::gpio::Odr::Flag>(level_a));
+            gpio::write(this->p_registers, this->pin, static_cast<ll::gpio::ODR::Flag>(level_a));
         }
         void toggle()
         {
@@ -133,17 +133,17 @@ private:
                               std::uint32_t function_a,
                               const gpio::Descriptor<gpio::Mode::alternate>& desc_a);
 
-    static ll::gpio::Idr::Flag read(const ll::gpio::Registers* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+    static ll::gpio::IDR::Flag read(const ll::gpio::Registers* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
     {
-        return p_port_a->idr.get(pin_a);
+        return p_port_a->idr >> pin_a;
     }
-    static void write(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, ll::gpio::Odr::Flag level_a)
+    static void write(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, ll::gpio::ODR::Flag level_a)
     {
-        p_port_a->odr.set(static_cast<ll::gpio::Odr::Flag>(level_a) << pin_a);
+        xmcu::bit::flag::set(&(p_port_a->odr), static_cast<ll::gpio::ODR::Flag>(level_a) << pin_a);
     }
     static void toggle(ll::gpio::Registers* p_port_a, std::uint32_t pin_a)
     {
-        p_port_a->odr.toggle(xmcu::Limited<std::uint32_t, 0u, 15u>(pin_a));
+        xmcu::bit::toggle(&(p_port_a->odr), xmcu::Limited<std::uint32_t, 0u, 15u>(pin_a));
     }
 
     static bool is_irq_slot_enabled(std::uint32_t port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a);

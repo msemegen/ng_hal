@@ -91,18 +91,12 @@ struct gpio_pupdr_descriptor : private xmcu::non_constructible
 };
 struct gpio_idr_descriptor : private xmcu::non_constructible
 {
-    static constexpr std::uint32_t mask = 0x1u;
     static constexpr std::uint32_t shift_multiplier = 1u;
 
     enum class Flag : std::uint32_t
     {
         low,
         high
-    };
-
-    enum class Mask : std::uint32_t
-    {
-        mask = mask
     };
 };
 struct gpio_odr_descriptor : private xmcu::non_constructible
@@ -123,18 +117,10 @@ struct gpio_odr_descriptor : private xmcu::non_constructible
 };
 struct gpio_bsrr_descriptor : private xmcu::non_constructible
 {
-    static constexpr std::uint32_t mask = 0x10001u;
-    static constexpr std::uint32_t shift_multiplier = 1u;
-
     enum class Flag : std::uint32_t
     {
-        low = 0x1u,
-        high = 0x1000u
-    };
-
-    enum class Mask : std::uint32_t
-    {
-        mask = mask
+        high = 0x1u,
+        low = 0x2u
     };
 };
 struct gpio_lckr_descriptor : private xmcu::non_constructible
@@ -185,18 +171,11 @@ struct gpio_afr_descriptor : private xmcu::non_constructible
 };
 struct gpio_brr_descriptor : private xmcu::non_constructible
 {
-    static constexpr std::uint32_t mask = 0x1u;
     static constexpr std::uint32_t shift_multiplier = 1u;
 
     enum class Flag : std::uint32_t
     {
         low = 0x0u,
-        high = 0x0u
-    };
-
-    enum class Mask : std::uint32_t
-    {
-        mask = mask
     };
 };
 
@@ -216,8 +195,6 @@ private:
      */
     template<typename desc_t> struct Reg_wrc
     {
-        using Flag = desc_t::Flag;
-        using Mask = desc_t::Mask;
         enum class Data;
 
         Reg_wrc(const volatile Reg_wrc& other_a)
@@ -244,8 +221,6 @@ private:
     };
     template<typename desc_t> struct Reg_r
     {
-        using Flag = desc_t::Flag;
-        using Mask = desc_t::Mask;
         enum class Data;
 
         Reg_r(const volatile Reg_r& other_a)
@@ -267,8 +242,6 @@ private:
     };
     template<typename desc_t> struct Reg_wc
     {
-        using Flag = desc_t::Flag;
-        using Mask = desc_t::Mask;
         enum class Data;
 
         Reg_wc(const volatile Reg_wc& other_a)
@@ -295,7 +268,6 @@ private:
     };
     template<typename desc_t> struct Reg_wr
     {
-        using Flag = desc_t::Flag;
         enum class Data;
 
         operator const Data() const
@@ -314,8 +286,12 @@ private:
 public:
     struct MODER : public Reg_wrc<gpio_moder_descriptor>
     {
-        using enum gpio_moder_descriptor::Flag;
-        using enum gpio_moder_descriptor::Mask;
+        using Flag = gpio_moder_descriptor::Flag;
+        using Mask = gpio_moder_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wrc<gpio_moder_descriptor>::Data;
 
         MODER& operator=(Data value_a)
@@ -326,8 +302,12 @@ public:
     };
     struct OTYPER : public Reg_wrc<gpio_otyper_descriptor>
     {
-        using enum gpio_otyper_descriptor::Flag;
-        using enum gpio_otyper_descriptor::Mask;
+        using Flag = gpio_otyper_descriptor::Flag;
+        using Mask = gpio_otyper_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wrc<gpio_otyper_descriptor>::Data;
 
         OTYPER& operator=(Data value_a)
@@ -338,8 +318,12 @@ public:
     };
     struct OSPEEDR : public Reg_wrc<gpio_ospeedr_descriptor>
     {
-        using enum gpio_ospeedr_descriptor::Flag;
-        using enum gpio_ospeedr_descriptor::Mask;
+        using Flag = gpio_ospeedr_descriptor::Flag;
+        using Mask = gpio_ospeedr_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wrc<gpio_ospeedr_descriptor>::Data;
 
         OSPEEDR& operator=(Data value_a)
@@ -350,8 +334,12 @@ public:
     };
     struct PUPDR : public Reg_wrc<gpio_pupdr_descriptor>
     {
-        using enum gpio_pupdr_descriptor::Flag;
-        using enum gpio_pupdr_descriptor::Mask;
+        using Flag = gpio_pupdr_descriptor::Flag;
+        using Mask = gpio_pupdr_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wrc<gpio_pupdr_descriptor>::Data;
 
         PUPDR& operator=(Data value_a)
@@ -362,14 +350,20 @@ public:
     };
     struct IDR : public Reg_r<gpio_idr_descriptor>
     {
-        using enum gpio_idr_descriptor::Flag;
-        using enum gpio_idr_descriptor::Mask;
+        using Flag = gpio_idr_descriptor::Flag;
+
+        using enum Flag;
+
         using Data = Reg_r<gpio_idr_descriptor>::Data;
     };
     struct ODR : public Reg_wc<gpio_odr_descriptor>
     {
-        using enum gpio_odr_descriptor::Flag;
-        using enum gpio_odr_descriptor::Mask;
+        using Flag = gpio_odr_descriptor::Flag;
+        using Mask = gpio_odr_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wc<gpio_odr_descriptor>::Data;
 
         ODR& operator=(Data value_a)
@@ -378,11 +372,13 @@ public:
             return *this;
         }
     };
-    struct BSRR : public Reg_wc<gpio_bsrr_descriptor>
+    struct BSRR : public Reg_wrc<gpio_bsrr_descriptor>
     {
-        using enum gpio_bsrr_descriptor::Flag;
-        using enum gpio_bsrr_descriptor::Mask;
-        using Data = Reg_wc<gpio_bsrr_descriptor>::Data;
+        using Flag = gpio_bsrr_descriptor::Flag;
+
+        using enum Flag;
+
+        using Data = Reg_wrc<gpio_bsrr_descriptor>::Data;
 
         BSRR& operator=(Data value_a)
         {
@@ -392,13 +388,20 @@ public:
     };
     struct LCKR : public Reg_wr<gpio_lckr_descriptor>
     {
-        using enum gpio_lckr_descriptor::Flag;
+        using Flag = gpio_lckr_descriptor::Flag;
+
+        using enum Flag;
+
         using Data = Reg_wr<gpio_lckr_descriptor>::Data;
     };
     struct AFR : public Reg_wrc<gpio_afr_descriptor>
     {
-        using enum gpio_afr_descriptor::Flag;
-        using enum gpio_afr_descriptor::Mask;
+        using Flag = gpio_afr_descriptor::Flag;
+        using Mask = gpio_afr_descriptor::Mask;
+
+        using enum Flag;
+        using enum Mask;
+
         using Data = Reg_wrc<gpio_afr_descriptor>::Data;
 
         AFR& operator=(Data value_a)
@@ -409,8 +412,10 @@ public:
     };
     struct BRR : public Reg_wrc<gpio_brr_descriptor>
     {
-        using enum gpio_brr_descriptor::Flag;
-        using enum gpio_brr_descriptor::Mask;
+        using Flag = gpio_brr_descriptor::Flag;
+
+        using enum Flag;
+
         using Data = Reg_wrc<gpio_brr_descriptor>::Data;
 
         BRR& operator=(Data value_a)
@@ -438,6 +443,22 @@ public:
 };
 
 // MODER
+constexpr bool operator==(std::uint32_t left_a, gpio::MODER::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::MODER::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::MODER::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::MODER::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::MODER::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_moder_descriptor::shift_multiplier));
@@ -446,13 +467,10 @@ constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, xmcu::Limited<s
 {
     return static_cast<gpio::MODER::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_moder_descriptor::shift_multiplier));
 }
-constexpr gpio::MODER::Data operator>>(gpio::MODER::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::MODER::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_moder_descriptor::shift_multiplier));
-}
-constexpr gpio::MODER::Data operator>>(gpio::MODER::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::MODER::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_moder_descriptor::shift_multiplier));
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_moder_descriptor::shift_multiplier) & gpio_moder_descriptor::mask));
 }
 constexpr gpio::MODER::Data operator|(gpio::MODER::Data left_a, gpio::MODER::Data right_a)
 {
@@ -480,6 +498,22 @@ constexpr gpio::MODER::Data operator^(gpio::MODER::Data left_a, std::uint32_t ri
 }
 
 // OTYPER
+constexpr bool operator==(std::uint32_t left_a, gpio::OTYPER::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::OTYPER::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::OTYPER::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::OTYPER::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::OTYPER::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_otyper_descriptor::shift_multiplier));
@@ -488,13 +522,10 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, xmcu::Limited
 {
     return static_cast<gpio::OTYPER::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_otyper_descriptor::shift_multiplier));
 }
-constexpr gpio::OTYPER::Data operator>>(gpio::OTYPER::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::OTYPER::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_otyper_descriptor::shift_multiplier));
-}
-constexpr gpio::OTYPER::Data operator>>(gpio::OTYPER::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::OTYPER::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_otyper_descriptor::shift_multiplier));
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_otyper_descriptor::shift_multiplier) & gpio_otyper_descriptor::mask));
 }
 constexpr gpio::OTYPER::Data operator|(gpio::OTYPER::Data left_a, gpio::OTYPER::Data right_a)
 {
@@ -522,6 +553,22 @@ constexpr gpio::OTYPER::Data operator^(gpio::OTYPER::Data left_a, std::uint32_t 
 }
 
 // OSPEEDR
+constexpr bool operator==(std::uint32_t left_a, gpio::OSPEEDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::OSPEEDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::OSPEEDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::OSPEEDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_ospeedr_descriptor::shift_multiplier));
@@ -530,13 +577,10 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, xmcu::Limit
 {
     return static_cast<gpio::OSPEEDR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_ospeedr_descriptor::shift_multiplier));
 }
-constexpr gpio::OSPEEDR::Data operator>>(gpio::OSPEEDR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::OSPEEDR::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_ospeedr_descriptor::shift_multiplier));
-}
-constexpr gpio::OSPEEDR::Data operator>>(gpio::OSPEEDR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::OSPEEDR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_ospeedr_descriptor::shift_multiplier));
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_ospeedr_descriptor::shift_multiplier) & gpio_ospeedr_descriptor::mask));
 }
 constexpr gpio::OSPEEDR::Data operator|(gpio::OSPEEDR::Data left_a, gpio::OSPEEDR::Data right_a)
 {
@@ -564,6 +608,22 @@ constexpr gpio::OSPEEDR::Data operator^(gpio::OSPEEDR::Data left_a, std::uint32_
 }
 
 // PUPDR
+constexpr bool operator==(std::uint32_t left_a, gpio::PUPDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::PUPDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::PUPDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::PUPDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::PUPDR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_pupdr_descriptor::shift_multiplier));
@@ -572,9 +632,10 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, xmcu::Limited<s
 {
     return static_cast<gpio::PUPDR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_pupdr_descriptor::shift_multiplier));
 }
-constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::PUPDR::Flag>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_otyper_descriptor::shift_multiplier) & gpio_otyper_descriptor::mask));
 }
 constexpr gpio::PUPDR::Data operator|(gpio::PUPDR::Data left_a, gpio::PUPDR::Data right_a)
 {
@@ -602,17 +663,33 @@ constexpr gpio::PUPDR::Data operator^(gpio::PUPDR::Data left_a, std::uint32_t ri
 }
 
 // IDR
+constexpr bool operator==(std::uint32_t left_a, gpio::IDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::IDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::IDR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::IDR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::IDR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_idr_descriptor::shift_multiplier));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::IDR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_idr_descriptor::shift_multiplier));
-}
 constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::IDR::Flag>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_idr_descriptor::shift_multiplier));
+    return static_cast<gpio::IDR::Flag>((static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_idr_descriptor::shift_multiplier) & 0x1u));
+}
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 0xFFFFu> pins_a)
+{
+    return static_cast<gpio::IDR::Data>((static_cast<std::uint32_t>(mask_a) & (pins_a)));
 }
 constexpr gpio::IDR::Data operator|(gpio::IDR::Data left_a, gpio::IDR::Data right_a)
 {
@@ -626,10 +703,6 @@ constexpr gpio::IDR::Flag operator~(gpio::IDR::Flag flag_a)
 {
     return static_cast<gpio::IDR::Flag>(~static_cast<std::uint32_t>(flag_a));
 }
-constexpr gpio::IDR::Mask operator~(gpio::IDR::Mask flag_a)
-{
-    return static_cast<gpio::IDR::Mask>(~static_cast<std::uint32_t>(flag_a));
-}
 constexpr gpio::IDR::Data operator~(gpio::IDR::Data flag_a)
 {
     return static_cast<gpio::IDR::Data>(~static_cast<std::uint32_t>(flag_a));
@@ -640,6 +713,22 @@ constexpr gpio::IDR::Data operator^(gpio::IDR::Data left_a, std::uint32_t right_
 }
 
 // ODR
+constexpr bool operator==(std::uint32_t left_a, gpio::ODR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::ODR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::ODR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::ODR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::ODR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_odr_descriptor::shift_multiplier));
@@ -647,18 +736,6 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, xmcu::Limited<std::
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::ODR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_odr_descriptor::shift_multiplier));
-}
-constexpr gpio::ODR::Data operator>>(gpio::ODR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::ODR::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
-}
-constexpr gpio::ODR::Data operator>>(gpio::ODR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::ODR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
-}
-constexpr gpio::ODR::Data operator>>(gpio::ODR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::ODR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_odr_descriptor::shift_multiplier));
 }
 constexpr gpio::ODR::Data operator|(gpio::ODR::Data left_a, gpio::ODR::Data right_a)
 {
@@ -686,21 +763,25 @@ constexpr gpio::ODR::Data operator^(gpio::ODR::Data left_a, std::uint32_t right_
 }
 
 // BSRR
+constexpr bool operator==(std::uint32_t left_a, gpio::BSRR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::BSRR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::BSRR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::BSRR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::BSRR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_bsrr_descriptor::shift_multiplier));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BSRR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_bsrr_descriptor::shift_multiplier));
-}
-constexpr gpio::BSRR::Data operator>>(gpio::BSRR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BSRR::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
-}
-constexpr gpio::BSRR::Data operator>>(gpio::BSRR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BSRR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
+    return static_cast<gpio::BSRR::Data>(0x1u << (pin_a * static_cast<std::uint32_t>(flag_a)));
 }
 constexpr gpio::BSRR::Data operator|(gpio::BSRR::Data left_a, gpio::BSRR::Data right_a)
 {
@@ -714,10 +795,6 @@ constexpr gpio::BSRR::Flag operator~(gpio::BSRR::Flag flag_a)
 {
     return static_cast<gpio::BSRR::Flag>(~static_cast<std::uint32_t>(flag_a));
 }
-constexpr gpio::BSRR::Mask operator~(gpio::BSRR::Mask flag_a)
-{
-    return static_cast<gpio::BSRR::Mask>(~static_cast<std::uint32_t>(flag_a));
-}
 constexpr gpio::BSRR::Data operator~(gpio::BSRR::Data flag_a)
 {
     return static_cast<gpio::BSRR::Data>(~static_cast<std::uint32_t>(flag_a));
@@ -728,6 +805,22 @@ constexpr gpio::BSRR::Data operator^(gpio::BSRR::Data left_a, std::uint32_t righ
 }
 
 // LCKR
+constexpr bool operator==(std::uint32_t left_a, gpio::LCKR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::LCKR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::LCKR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::LCKR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::LCKR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_lckr_descriptor::shift_multiplier));
@@ -760,6 +853,22 @@ constexpr gpio::LCKR::Data operator~(gpio::LCKR::Data flag_a)
 }
 
 // AFR
+constexpr bool operator==(std::uint32_t left_a, gpio::AFR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::AFR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::AFR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::AFR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::AFR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_afr_descriptor::shift_multiplier));
@@ -768,13 +877,10 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, xmcu::Limited<std::
 {
     return static_cast<gpio::AFR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_afr_descriptor::shift_multiplier));
 }
-constexpr gpio::AFR::Data operator>>(gpio::AFR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
-    return static_cast<gpio::AFR::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
-}
-constexpr gpio::AFR::Data operator>>(gpio::AFR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::AFR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_afr_descriptor::shift_multiplier) & gpio_afr_descriptor::mask));
 }
 constexpr gpio::AFR::Data operator|(gpio::AFR::Data left_a, gpio::AFR::Data right_a)
 {
@@ -802,21 +908,25 @@ constexpr gpio::AFR::Data operator^(gpio::AFR::Data left_a, std::uint32_t right_
 }
 
 // BRR
+constexpr bool operator==(std::uint32_t left_a, gpio::BRR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator==(gpio::BRR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
+constexpr bool operator!=(std::uint32_t left_a, gpio::BRR::Data right_a)
+{
+    return left_a == static_cast<std::uint32_t>(right_a);
+}
+constexpr bool operator!=(gpio::BRR::Data left_a, std::uint32_t right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == right_a;
+}
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::BRR::Data>(static_cast<std::uint32_t>(flag_a) << (pin_a * gpio_brr_descriptor::shift_multiplier));
-}
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BRR::Data>(static_cast<std::uint32_t>(mask_a) << (pin_a * gpio_brr_descriptor::shift_multiplier));
-}
-constexpr gpio::BRR::Data operator>>(gpio::BRR::Flag flag_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BRR::Data>(static_cast<std::uint32_t>(flag_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
-}
-constexpr gpio::BRR::Data operator>>(gpio::BRR::Mask mask_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
-{
-    return static_cast<gpio::BRR::Data>(static_cast<std::uint32_t>(mask_a) >> (pin_a * gpio_pupdr_descriptor::shift_multiplier));
 }
 constexpr gpio::BRR::Data operator|(gpio::BRR::Data left_a, gpio::BRR::Data right_a)
 {
@@ -829,10 +939,6 @@ constexpr gpio::BRR::Data operator&(gpio::BRR::Data value_a, gpio::BRR::Data mas
 constexpr gpio::BRR::Flag operator~(gpio::BRR::Flag flag_a)
 {
     return static_cast<gpio::BRR::Flag>(~static_cast<std::uint32_t>(flag_a));
-}
-constexpr gpio::BRR::Mask operator~(gpio::BRR::Mask flag_a)
-{
-    return static_cast<gpio::BRR::Mask>(~static_cast<std::uint32_t>(flag_a));
 }
 constexpr gpio::BRR::Data operator~(gpio::BRR::Data flag_a)
 {
@@ -862,15 +968,25 @@ template<> inline bool gpio_clock::is_enabled<gpio::A>()
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOAEN);
 }
 
+// MODER
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, gpio::A pin_a)
 {
-    return static_cast<gpio::MODER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
+    return static_cast<gpio::MODER::Data>(
+        (static_cast<std::uint32_t>(flag_a) << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
 }
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, gpio::A pin_a)
 {
-    return static_cast<gpio::MODER::Data>(mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier));
+    return static_cast<gpio::MODER::Data>(static_cast<std::uint32_t>(mask_a)
+                                          << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier));
+}
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier) &
+         gpio_moder_descriptor::mask));
 }
 
+// OTYPER
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::OTYPER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
@@ -879,7 +995,14 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, gpio::A pin_a
 {
     return static_cast<gpio::OTYPER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
 }
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier) &
+         gpio_otyper_descriptor::mask));
+}
 
+// OSPEEDR
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
@@ -888,7 +1011,14 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, gpio::A pin
 {
     return static_cast<gpio::OSPEEDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
 }
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier) &
+         gpio_ospeedr_descriptor::mask));
+}
 
+// PUPDR
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
@@ -897,16 +1027,30 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, gpio::A pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
 }
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier) &
+         gpio_pupdr_descriptor::mask));
+}
 
+// IDR
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, gpio::A pin_a)
 {
-    return static_cast<gpio::IDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return static_cast<gpio::IDR::Data>(
+        (static_cast<std::uint32_t>(flag_a) << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, gpio::A pin_a)
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, gpio::A pin_a)
 {
-    return static_cast<gpio::IDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return (mask_a & (0x1u << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+}
+constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::IDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier) & 0x1u));
 }
 
+// ODR
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::ODR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
@@ -916,20 +1060,19 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, gpio::A pin_a)
     return static_cast<gpio::ODR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// BSRR
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, gpio::A pin_a)
 {
-    return static_cast<gpio::BSRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, gpio::A pin_a)
-{
-    return static_cast<gpio::BSRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
+    return static_cast<gpio::BSRR::Data>(0x1u << (static_cast<std::uint32_t>(pin_a) * static_cast<std::uint32_t>(flag_a)));
 }
 
+// LCKR
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::LCKR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_lckr_descriptor::shift_multiplier)));
 }
 
+// AFR
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::AFR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
@@ -938,15 +1081,17 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, gpio::A pin_a)
 {
     return static_cast<gpio::AFR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, gpio::A pin_a)
+{
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier) &
+         gpio_afr_descriptor::mask));
+}
 
+// BRR
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, gpio::A pin_a)
 {
     return static_cast<gpio::BRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, gpio::A pin_a)
-{
-    return static_cast<gpio::BRR::Data>(
-        (static_cast<std::uint32_t>(mask_a) << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
 #endif
 #if defined XMCU_GPIOB_PRESENT
@@ -968,6 +1113,7 @@ template<> inline bool gpio_clock::is_enabled<gpio::B>()
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOBEN);
 }
 
+// MODER
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::MODER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
@@ -976,7 +1122,14 @@ constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, gpio::B pin_a)
 {
     return static_cast<gpio::MODER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
 }
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier) &
+         gpio_moder_descriptor::mask));
+}
 
+// OTYPER
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::OTYPER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
@@ -985,7 +1138,14 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, gpio::B pin_a
 {
     return static_cast<gpio::OTYPER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
 }
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier) &
+         gpio_otyper_descriptor::mask));
+}
 
+// OSPEEDR
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
@@ -994,7 +1154,14 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, gpio::B pin
 {
     return static_cast<gpio::OSPEEDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
 }
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier) &
+         gpio_ospeedr_descriptor::mask));
+}
 
+// PUPDR
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
@@ -1003,16 +1170,29 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, gpio::B pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
 }
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier) &
+         gpio_pupdr_descriptor::mask));
+}
 
+// IDR
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::IDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, gpio::B pin_a)
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, gpio::B pin_a)
 {
-    return static_cast<gpio::IDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return (mask_a & (0x1u << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+}
+constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::IDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier) & 0x1u));
 }
 
+// ODR
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::ODR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
@@ -1022,20 +1202,19 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, gpio::B pin_a)
     return static_cast<gpio::ODR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// BSRR
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, gpio::B pin_a)
 {
-    return static_cast<gpio::BSRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, gpio::B pin_a)
-{
-    return static_cast<gpio::BSRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
+    return static_cast<gpio::BSRR::Data>(0x1u << (static_cast<std::uint32_t>(pin_a) * static_cast<std::uint32_t>(flag_a)));
 }
 
+// LCKR
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::LCKR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_lckr_descriptor::shift_multiplier)));
 }
 
+// AFR
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::AFR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
@@ -1044,14 +1223,17 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, gpio::B pin_a)
 {
     return static_cast<gpio::AFR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, gpio::B pin_a)
+{
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier) &
+         gpio_afr_descriptor::mask));
+}
 
+// BRR
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, gpio::B pin_a)
 {
     return static_cast<gpio::BRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, gpio::B pin_a)
-{
-    return static_cast<gpio::BRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
 #endif
 #if defined XMCU_GPIOC_PRESENT
@@ -1073,6 +1255,7 @@ template<> inline bool gpio_clock::is_enabled<gpio::C>()
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOCEN);
 }
 
+// MODER
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::MODER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
@@ -1081,7 +1264,14 @@ constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, gpio::C pin_a)
 {
     return static_cast<gpio::MODER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
 }
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier) &
+         gpio_moder_descriptor::mask));
+}
 
+// OTYPER
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::OTYPER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
@@ -1090,7 +1280,14 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, gpio::C pin_a
 {
     return static_cast<gpio::OTYPER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
 }
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier) &
+         gpio_otyper_descriptor::mask));
+}
 
+// OSPEEDR
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
@@ -1099,7 +1296,14 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, gpio::C pin
 {
     return static_cast<gpio::OSPEEDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
 }
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier) &
+         gpio_ospeedr_descriptor::mask));
+}
 
+// PUPDR
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
@@ -1108,16 +1312,29 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, gpio::C pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
 }
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier) &
+         gpio_pupdr_descriptor::mask));
+}
 
+// IDR
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::IDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, gpio::C pin_a)
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, gpio::C pin_a)
 {
-    return static_cast<gpio::IDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return (mask_a & (0x1u << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+}
+constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::IDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier) & 0x1u));
 }
 
+// ODR
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::ODR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
@@ -1128,20 +1345,19 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, gpio::C pin_a)
         (static_cast<std::uint32_t>(mask_a) << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// BSRR
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, gpio::C pin_a)
 {
-    return static_cast<gpio::BSRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, gpio::C pin_a)
-{
-    return static_cast<gpio::BSRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
+    return static_cast<gpio::BSRR::Data>(0x1u << (static_cast<std::uint32_t>(pin_a) * static_cast<std::uint32_t>(flag_a)));
 }
 
+// LCKR
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::LCKR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// AFR
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::AFR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
@@ -1151,14 +1367,17 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, gpio::C pin_a)
     return static_cast<gpio::AFR::Data>(
         (static_cast<std::uint32_t>(mask_a) << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, gpio::C pin_a)
+{
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier) &
+         gpio_afr_descriptor::mask));
+}
 
+// BRR
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, gpio::C pin_a)
 {
     return static_cast<gpio::BRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, gpio::C pin_a)
-{
-    return static_cast<gpio::BRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
 #endif
 #if defined XMCU_GPIOD_PRESENT
@@ -1180,6 +1399,7 @@ template<> inline bool gpio_clock::is_enabled<gpio::D>()
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIODEN);
 }
 
+// MODER
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::MODER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
@@ -1188,7 +1408,14 @@ constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, gpio::D pin_a)
 {
     return static_cast<gpio::MODER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
 }
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier) &
+         gpio_moder_descriptor::mask));
+}
 
+// OTYPER
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::OTYPER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
@@ -1197,7 +1424,14 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, gpio::D pin_a
 {
     return static_cast<gpio::OTYPER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
 }
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier) &
+         gpio_otyper_descriptor::mask));
+}
 
+// OSPEEDR
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
@@ -1206,7 +1440,14 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, gpio::D pin
 {
     return static_cast<gpio::OSPEEDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
 }
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier) &
+         gpio_ospeedr_descriptor::mask));
+}
 
+// PUPDR
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
@@ -1215,16 +1456,29 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, gpio::D pin_a)
 {
     return static_cast<gpio::PUPDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
 }
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier) &
+         gpio_pupdr_descriptor::mask));
+}
 
+// IDR
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::IDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, gpio::D pin_a)
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, gpio::D pin_a)
 {
-    return static_cast<gpio::IDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return (mask_a & (0x1u << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+}
+constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::IDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier) & 0x1u));
 }
 
+// ODR
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::ODR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
@@ -1234,21 +1488,19 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, gpio::D pin_a)
     return static_cast<gpio::ODR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// BSRR
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, gpio::D pin_a)
 {
-    return static_cast<gpio::BSRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_bsrr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, gpio::D pin_a)
-{
-    return static_cast<gpio::BSRR::Data>(
-        (static_cast<std::uint32_t>(mask_a) << (static_cast<std::uint32_t>(pin_a) * gpio_bsrr_descriptor::shift_multiplier)));
+    return static_cast<gpio::BSRR::Data>(0x1u << (static_cast<std::uint32_t>(pin_a) * static_cast<std::uint32_t>(flag_a)));
 }
 
+// LCKR
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::LCKR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_lckr_descriptor::shift_multiplier)));
 }
 
+// AFR
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::AFR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
@@ -1257,14 +1509,17 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, gpio::D pin_a)
 {
     return static_cast<gpio::AFR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, gpio::D pin_a)
+{
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier) &
+         gpio_afr_descriptor::mask));
+}
 
+// BRR
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, gpio::D pin_a)
 {
     return static_cast<gpio::BRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, gpio::D pin_a)
-{
-    return static_cast<gpio::BRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
 #endif
 #if defined XMCU_GPIOF_PRESENT
@@ -1286,6 +1541,7 @@ template<> inline bool gpio_clock::is_enabled<gpio::F>()
     return xmcu::bit::flag::is(RCC->IOPENR, RCC_IOPENR_GPIOFEN);
 }
 
+// MODER
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::MODER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
@@ -1294,7 +1550,14 @@ constexpr gpio::MODER::Data operator<<(gpio::MODER::Mask mask_a, gpio::F pin_a)
 {
     return static_cast<gpio::MODER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier)));
 }
+constexpr gpio::MODER::Flag operator>>(gpio::MODER::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::MODER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_moder_descriptor::shift_multiplier) &
+         gpio_moder_descriptor::mask));
+}
 
+// OTYPER
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::OTYPER::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
@@ -1303,7 +1566,14 @@ constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Mask mask_a, gpio::F pin_a
 {
     return static_cast<gpio::OTYPER::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier)));
 }
+constexpr gpio::OTYPER::Flag operator>>(gpio::OTYPER::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::OTYPER::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_otyper_descriptor::shift_multiplier) &
+         gpio_otyper_descriptor::mask));
+}
 
+// OSPEEDR
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::OSPEEDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
@@ -1312,7 +1582,14 @@ constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Mask mask_a, gpio::F pin
 {
     return static_cast<gpio::OSPEEDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier)));
 }
+constexpr gpio::OSPEEDR::Flag operator>>(gpio::OSPEEDR::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::OSPEEDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_ospeedr_descriptor::shift_multiplier) &
+         gpio_ospeedr_descriptor::mask));
+}
 
+// PUPDR
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::PUPDR::Data>(
@@ -1323,16 +1600,29 @@ constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Mask mask_a, gpio::F pin_a)
     return static_cast<gpio::PUPDR::Data>(
         (static_cast<std::uint32_t>(mask_a) << (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier)));
 }
+constexpr gpio::PUPDR::Flag operator>>(gpio::PUPDR::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::PUPDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_pupdr_descriptor::shift_multiplier) &
+         gpio_pupdr_descriptor::mask));
+}
 
+// IDR
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::IDR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
 }
-constexpr gpio::IDR::Data operator<<(gpio::IDR::Mask mask_a, gpio::F pin_a)
+constexpr gpio::IDR::Data operator&(gpio::IDR::Data mask_a, gpio::F pin_a)
 {
-    return static_cast<gpio::IDR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+    return (mask_a & (0x1u << (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier)));
+}
+constexpr gpio::IDR::Flag operator>>(gpio::IDR::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::IDR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_idr_descriptor::shift_multiplier) & 0x1u));
 }
 
+// ODR
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::ODR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
@@ -1342,20 +1632,19 @@ constexpr gpio::ODR::Data operator<<(gpio::ODR::Mask mask_a, gpio::F pin_a)
     return static_cast<gpio::ODR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
 }
 
+// BSRR
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag flag_a, gpio::F pin_a)
 {
-    return static_cast<gpio::BSRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
-}
-constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Mask mask_a, gpio::F pin_a)
-{
-    return static_cast<gpio::BSRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_odr_descriptor::shift_multiplier)));
+    return static_cast<gpio::BSRR::Data>(0x1u << (static_cast<std::uint32_t>(pin_a) * static_cast<std::uint32_t>(flag_a)));
 }
 
+// LCKR
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::LCKR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_lckr_descriptor::shift_multiplier)));
 }
 
+// AFR
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::AFR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
@@ -1364,14 +1653,318 @@ constexpr gpio::AFR::Data operator<<(gpio::AFR::Mask mask_a, gpio::F pin_a)
 {
     return static_cast<gpio::AFR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
+constexpr gpio::AFR::Flag operator>>(gpio::AFR::Data mask_a, gpio::F pin_a)
+{
+    return static_cast<gpio::AFR::Flag>(
+        (static_cast<std::uint32_t>(mask_a) >> (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier) &
+         gpio_afr_descriptor::mask));
+}
 
+// BRR
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag flag_a, gpio::F pin_a)
 {
     return static_cast<gpio::BRR::Data>((flag_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
 }
-constexpr gpio::BRR::Data operator<<(gpio::BRR::Mask mask_a, gpio::F pin_a)
-{
-    return static_cast<gpio::BRR::Data>((mask_a << (static_cast<std::uint32_t>(pin_a) * gpio_afr_descriptor::shift_multiplier)));
-}
 #endif
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals::ll
+
+namespace xmcu {
+template<>
+[[nodiscard]] constexpr bool bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, xmcu::Limited<std::uint32_t, 0u, 15u>>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    xmcu::Limited<std::uint32_t, 0u, 15u> a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, xmcu::Limited<std::uint32_t, 0x0u, 0xFFFFu>>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    xmcu::Limited<std::uint32_t, 0x0u, 0xFFFFu> a_mask)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    return 0u != static_cast<std::uint32_t>(static_cast<ll_gpio::IDR::Data>(a_register) & a_mask);
+}
+
+template<> constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, xmcu::Limited<std::uint32_t, 0u, 15u>>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    xmcu::Limited<std::uint32_t, 0u, 15u> a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<> constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, xmcu::Limited<std::uint32_t, 0u, 15u>>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    xmcu::Limited<std::uint32_t, 0u, 15u> a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, xmcu::Limited<std::uint32_t, 0u, 15u>>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    xmcu::Limited<std::uint32_t, 0u, 15u> a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+#if defined XMCU_GPIOA_PRESENT
+template<> [[nodiscard]] constexpr bool
+bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A a_mask)
+{
+    return 0u != static_cast<std::uint32_t>(a_register & a_mask);
+}
+
+template<>
+constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<>
+constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void
+bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::A a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+#endif
+#if defined XMCU_GPIOB_PRESENT
+template<> [[nodiscard]] constexpr bool
+bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B a_mask)
+{
+    return 0u != static_cast<std::uint32_t>(a_register & a_mask);
+}
+
+template<>
+constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<>
+constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void
+bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::B a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+#endif
+#if defined XMCU_GPIOC_PRESENT
+template<> [[nodiscard]] constexpr bool
+bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C a_mask)
+{
+    return 0u != static_cast<std::uint32_t>(a_register & a_mask);
+}
+
+template<>
+constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<>
+constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void
+bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::C a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+#endif
+#if defined XMCU_GPIOD_PRESENT
+template<> [[nodiscard]] constexpr bool
+bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D a_mask)
+{
+    return 0u != static_cast<std::uint32_t>(a_register & a_mask);
+}
+
+template<>
+constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<>
+constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void
+bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::D a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+#endif
+#if defined XMCU_GPIOF_PRESENT
+template<> [[nodiscard]] constexpr bool
+bit::is<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    const std::uint32_t flag = 0x1u << static_cast<std::uint32_t>(a_index);
+    return flag == (static_cast<ll_gpio::IDR::Data>(a_register) & flag);
+}
+
+template<> [[nodiscard]] constexpr bool
+bit::is_any<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::IDR a_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F a_mask)
+{
+    return 0u != static_cast<std::uint32_t>(a_register & a_mask);
+}
+
+template<>
+constexpr void bit::set<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) | static_cast<ll_gpio::ODR::Data>(0x1u << static_cast<std::uint32_t>(a_index));
+}
+
+template<>
+constexpr void bit::clear<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) & static_cast<ll_gpio::ODR::Data>(~(0x1u << static_cast<std::uint32_t>(a_index)));
+}
+
+template<> constexpr void
+bit::toggle<soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR, soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F>(
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::ODR* a_p_register,
+    soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio::F a_index)
+{
+    using ll_gpio = soc::st::arm::m0::u0::rm0503::peripherals::ll::gpio;
+
+    (*a_p_register) = (*a_p_register) ^ (0x1u << static_cast<std::uint32_t>(a_index));
+}
+#endif
+} // namespace xmcu

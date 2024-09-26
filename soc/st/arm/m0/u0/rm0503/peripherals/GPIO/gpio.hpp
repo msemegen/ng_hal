@@ -135,7 +135,7 @@ private:
 
     static ll::gpio::IDR::Flag read(const ll::gpio::Registers* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
     {
-        return p_port_a->idr >> pin_a;
+        return static_cast<ll::gpio::IDR::Flag>(xmcu::bit::is(p_port_a->idr, pin_a));
     }
     static void write(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, ll::gpio::ODR::Flag level_a)
     {
@@ -177,7 +177,7 @@ public:
     }
     void write(Pin pin_a, Level level_a)
     {
-        gpio::write(this, static_cast<std::uint32_t>(pin_a), static_cast<std::uint32_t>(level_a));
+        gpio::write(this, static_cast<std::uint32_t>(pin_a), static_cast<ll::gpio::ODR::Flag>(level_a));
     }
     void toggle(Pin pin_a)
     {
@@ -194,7 +194,19 @@ template<typename Port_t> class gpio::Port<Port_t, api::traits::async> : private
 public:
     using Pin = Port_t;
 
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::analog>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
     void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::in>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::out>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::alternate>& descriptor_a)
     {
         gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
     }

@@ -306,6 +306,17 @@ int main()
 
         //.clock { .clk_freq_Hz = sysclk::get_frequency_Hz(), .prescaler = usart::Clock::Prescaler::_1 },
 
+        // auto ll_gpioa_regs = peripherals::ll::gpio::registers<peripherals::ll::gpio::A>();
+        // peripherals::ll::gpio::IDR& idr = ll_gpioa_regs->idr;
+        // auto idr_f = peripherals::ll::gpio::IDR::high << 1u;
+        ////idr = peripherals::ll::gpio::IDR::high << 1u;
+        // auto f = idr >> 1u;
+
+        // peripherals::ll::gpio::MODER& moder = ll_gpioa_regs->moder;
+        // moder = peripherals::ll::gpio::MODER::af << 1u;
+
+
+
         bool usart1_enabled = p_usart2->enable(usart::Mode::rx | usart::Mode::tx, usart::Stop_mode_activity::disable, 10ms);
 
         if (true == usart1_enabled)

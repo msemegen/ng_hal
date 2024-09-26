@@ -128,6 +128,8 @@ void gpio::configure_pin(ll::gpio::Registers* p_port_a,
     const std::uint32_t index = pin_a >> 3u;
     const std::uint32_t shift = pin_a - (index * 8u);
 
+    assert(various::countof(p_port_a->afr) > index);
+
     bit::flag::set(&(p_port_a->afr[index]), ll::gpio::AFR::mask << shift, static_cast<ll::gpio::AFR::Flag>(function_a) << shift);
     bit::flag::set(&(p_port_a->moder), ll::gpio::MODER::mask << pin_a, ll::gpio::MODER::af << pin_a);
 }

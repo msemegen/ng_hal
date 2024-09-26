@@ -239,15 +239,6 @@ private:
             return &(this->v);
         }
 
-        operator volatile Data&()
-        {
-            return this->v;
-        }
-        operator volatile Data*()
-        {
-            return &(this->v);
-        }
-
     protected:
         volatile Data v;
     };
@@ -272,13 +263,18 @@ private:
         }
 
     protected:
-        volatile Data v;
+        const volatile Data v;
     };
     template<typename desc_t> struct Reg_wc
     {
         using Flag = desc_t::Flag;
         using Mask = desc_t::Mask;
         enum class Data;
+
+        Reg_wc(const volatile Reg_wc& other_a)
+            : v(other_a.v)
+        {
+        }
 
         void zero()
         {
@@ -294,15 +290,6 @@ private:
             return &(this->v);
         }
 
-        operator volatile Data&()
-        {
-            return this->v;
-        }
-        operator volatile Data*()
-        {
-            return &(this->v);
-        }
-
     protected:
         volatile Data v;
     };
@@ -311,9 +298,13 @@ private:
         using Flag = desc_t::Flag;
         enum class Data;
 
-        constexpr operator Data() const
+        operator const Data() const
         {
             return this->v;
+        }
+        operator const Data*() const
+        {
+            return &(this->v);
         }
 
     protected:

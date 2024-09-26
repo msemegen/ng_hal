@@ -380,15 +380,6 @@ private:
             return &(this->v);
         }
 
-        operator volatile Data&()
-        {
-            return this->v;
-        }
-        operator volatile Data*()
-        {
-            return &(this->v);
-        }
-
     protected:
         volatile Data v;
     };
@@ -411,9 +402,9 @@ private:
         }
 
     protected:
-        volatile Data v;
+        const volatile Data v;
     };
-    struct Reg_wc
+    template<typename desc_t> struct Reg_wc
     {
         enum class Data;
 
@@ -427,20 +418,11 @@ private:
             this->v = static_cast<Data>(0x0u);
         }
 
-        constexpr operator Data() volatile const
+        constexpr operator Data() const
         {
             return this->v;
         }
         operator const volatile Data*() const
-        {
-            return &(this->v);
-        }
-
-        operator volatile Data&()
-        {
-            return this->v;
-        }
-        operator volatile Data*()
         {
             return &(this->v);
         }
@@ -644,17 +626,22 @@ public:
 
         using Data = Reg_r<usart_isr_descriptor>::Data;
 
-        ISR(const volatile ISR& a)
-            : Reg_r<usart_isr_descriptor>(a)
+        ISR(const volatile ISR& other_a)
+            : Reg_r<usart_isr_descriptor>(other_a)
         {
         }
     };
-    struct ICR : public Reg_wc
+    struct ICR : public Reg_wc<usart_icr_descriptor>
     {
         using Flag = usart_icr_descriptor::Flag;
         using enum Flag;
 
-        using Data = Reg_wc::Data;
+        using Data = Reg_wc<usart_icr_descriptor>::Data;
+
+        ICR(const volatile ICR& other_a)
+            : Reg_wc<usart_icr_descriptor>(other_a)
+        {
+        }
 
         ICR& operator=(Data value_a)
         {
@@ -662,14 +649,13 @@ public:
             return *this;
         }
     };
-    struct RDR : public Reg_wrc<usart_rdr_descriptor>
+    struct RDR : public Reg_r<usart_rdr_descriptor>
     {
         using Data = Reg_wrc<usart_rdr_descriptor>::Data;
 
-        RDR& operator=(Data value_a)
+        RDR(const volatile RDR& other_a)
+            : Reg_r<usart_rdr_descriptor>(other_a)
         {
-            this->v = value_a;
-            return *this;
         }
 
         operator std::uint32_t() const
@@ -680,6 +666,11 @@ public:
     struct TDR : public Reg_wrc<usart_tdr_descriptor>
     {
         using Data = Reg_wrc<usart_tdr_descriptor>::Data;
+
+        TDR(const volatile TDR& other_a)
+            : Reg_wrc<usart_tdr_descriptor>(other_a)
+        {
+        }
 
         TDR& operator=(Data value_a)
         {
@@ -710,6 +701,11 @@ public:
         };
 
         using Data = Reg_wrc<usart_presc_descriptor>::Data;
+
+        PRESC(const volatile PRESC& other_a)
+            : Reg_wrc<usart_presc_descriptor>(other_a)
+        {
+        }
 
         PRESC& operator=(Data value_a)
         {

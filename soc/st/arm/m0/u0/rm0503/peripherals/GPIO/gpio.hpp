@@ -38,21 +38,21 @@ struct gpio : public gpio_base
     };
     enum class Type : std::uint32_t
     {
-        push_pull = static_cast<std::uint32_t>(ll::gpio::Otyper::push_pull),
-        open_drain = static_cast<std::uint32_t>(ll::gpio::Otyper::open_drain),
+        push_pull = static_cast<std::uint32_t>(ll::gpio::OTYPER::push_pull),
+        open_drain = static_cast<std::uint32_t>(ll::gpio::OTYPER::open_drain),
     };
     enum class Pull : std::uint32_t
     {
-        none = static_cast<std::uint32_t>(ll::gpio::Pupdr::none),
-        up = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_up),
-        down = static_cast<std::uint32_t>(ll::gpio::Pupdr::pull_down),
+        none = static_cast<std::uint32_t>(ll::gpio::PUPDR::none),
+        up = static_cast<std::uint32_t>(ll::gpio::PUPDR::pull_up),
+        down = static_cast<std::uint32_t>(ll::gpio::PUPDR::pull_down),
     };
     enum class Speed : std::uint32_t
     {
-        low = static_cast<std::uint32_t>(ll::gpio::Ospeedr::low),
-        medium = static_cast<std::uint32_t>(ll::gpio::Ospeedr::medium),
-        high = static_cast<std::uint32_t>(ll::gpio::Ospeedr::high),
-        ultra = static_cast<std::uint32_t>(ll::gpio::Ospeedr::ultra),
+        low = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::low),
+        medium = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::medium),
+        high = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::high),
+        ultra = static_cast<std::uint32_t>(ll::gpio::OSPEEDR::ultra),
     };
     enum class Level : std::uint32_t
     {
@@ -79,32 +79,32 @@ struct gpio : public gpio_base
     {
     public:
         constexpr Pad()
-            : p_port(nullptr)
+            : p_registers(nullptr)
             , pin(0u)
         {
         }
 
         [[nodiscard]] Level read() const
         {
-            return static_cast<Level>(gpio::read(this->p_port, this->pin));
+            return static_cast<Level>(gpio::read(this->p_registers, this->pin));
         }
         void write(Level level_a)
         {
-            gpio::write(this->p_port, this->pin, static_cast<ll::gpio::Odr::Flag>(level_a));
+            gpio::write(this->p_registers, this->pin, static_cast<ll::gpio::ODR::Flag>(level_a));
         }
         void toggle()
         {
-            gpio::toggle(this->p_port, this->pin);
+            gpio::toggle(this->p_registers, this->pin);
         }
 
     private:
-        Pad(ll::gpio::Port* p_port_a, std::uint32_t pin_a)
-            : p_port(p_port_a)
+        Pad(ll::gpio::Registers* p_registers_a, std::uint32_t pin_a)
+            : p_registers(p_registers_a)
             , pin(pin_a)
         {
         }
 
-        ll::gpio::Port* p_port = nullptr;
+        ll::gpio::Registers* p_registers = nullptr;
         std::uint32_t pin = std::numeric_limits<std::uint32_t>::max();
 
         friend gpio;
@@ -125,25 +125,25 @@ struct gpio : public gpio_base
     template<typename Port_t, api::traits traits_t> [[nodiscard]] constexpr static Port<Port_t, traits_t>* port() = delete;
 
 private:
-    static void configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a);
-    static void configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a);
-    static void configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a);
-    static void configure_pin(ll::gpio::Port* p_port_a,
+    static void configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a);
+    static void configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a);
+    static void configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a);
+    static void configure_pin(ll::gpio::Registers* p_port_a,
                               std::uint32_t pin_a,
                               std::uint32_t function_a,
                               const gpio::Descriptor<gpio::Mode::alternate>& desc_a);
 
-    static ll::gpio::Idr::Flag read(const ll::gpio::Port* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
+    static ll::gpio::IDR::Flag read(const ll::gpio::Registers* p_port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
     {
-        return p_port_a->idr.get(pin_a);
+        return static_cast<ll::gpio::IDR::Flag>(xmcu::bit::is(p_port_a->idr, pin_a));
     }
-    static void write(ll::gpio::Port* p_port_a, std::uint32_t pin_a, ll::gpio::Odr::Flag level_a)
+    static void write(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, ll::gpio::ODR::Flag level_a)
     {
-        p_port_a->odr.set(static_cast<ll::gpio::Odr::Flag>(level_a) << pin_a);
+        xmcu::bit::flag::set(&(p_port_a->odr), static_cast<ll::gpio::ODR::Flag>(level_a) << pin_a);
     }
-    static void toggle(ll::gpio::Port* p_port_a, std::uint32_t pin_a)
+    static void toggle(ll::gpio::Registers* p_port_a, std::uint32_t pin_a)
     {
-        p_port_a->odr.toggle(xmcu::Limited<std::uint32_t, 0u, 15u>(pin_a));
+        xmcu::bit::toggle(&(p_port_a->odr), xmcu::Limited<std::uint32_t, 0u, 15u>(pin_a));
     }
 
     static bool is_irq_slot_enabled(std::uint32_t port_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a);
@@ -163,7 +163,7 @@ constexpr gpio::Edge operator&(gpio::Edge left_a, gpio::Edge right_a)
     return static_cast<gpio::Edge>(static_cast<std::uint32_t>(left_a) & static_cast<std::uint32_t>(right_a));
 }
 
-template<typename Port_t> class gpio::Port<Port_t, api::traits::sync> : private ll::gpio::Port
+template<typename Port_t> class gpio::Port<Port_t, api::traits::sync> : private ll::gpio::Registers
 {
 public:
     using Pin = Port_t;
@@ -177,7 +177,7 @@ public:
     }
     void write(Pin pin_a, Level level_a)
     {
-        gpio::write(this, static_cast<std::uint32_t>(pin_a), static_cast<std::uint32_t>(level_a));
+        gpio::write(this, static_cast<std::uint32_t>(pin_a), static_cast<ll::gpio::ODR::Flag>(level_a));
     }
     void toggle(Pin pin_a)
     {
@@ -189,12 +189,24 @@ public:
 private:
     friend gpio;
 };
-template<typename Port_t> class gpio::Port<Port_t, api::traits::async> : private ll::gpio::Port
+template<typename Port_t> class gpio::Port<Port_t, api::traits::async> : private ll::gpio::Registers
 {
 public:
     using Pin = Port_t;
 
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::analog>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
     void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::in>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::out>& descriptor_a)
+    {
+        gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
+    }
+    void set_pin_descriptor(Pin pin_a, const gpio::Descriptor<gpio::Mode::alternate>& descriptor_a)
     {
         gpio::configure_pin(this, static_cast<std::uint32_t>(pin_a), descriptor_a);
     }
@@ -241,7 +253,7 @@ template<> [[nodiscard]] constexpr gpio::Port<gpio::A, api::traits::async>* gpio
 
 template<> template<> [[nodiscard]] constexpr gpio::Pad gpio::Port<gpio::A, api::traits::sync>::view<gpio::Pad>(gpio::A pin_a)
 {
-    return { ll::gpio::port<ll::gpio::A>(), static_cast<std::uint32_t>(pin_a) };
+    return { ll::gpio::registers<ll::gpio::A>(), static_cast<std::uint32_t>(pin_a) };
 }
 
 template<> template<> inline void gpio::Port<gpio::A, api::traits::sync>::set_pin_descriptor<gpio::Descriptor<gpio::Mode::analog>>(
@@ -305,7 +317,7 @@ template<> [[nodiscard]] constexpr gpio::Port<gpio::B, api::traits::async>* gpio
 
 template<> template<> [[nodiscard]] constexpr gpio::Pad gpio::Port<gpio::B, api::traits::sync>::view<gpio::Pad>(gpio::B pin_a)
 {
-    return { ll::gpio::port<ll::gpio::B>(), static_cast<std::uint32_t>(pin_a) };
+    return { ll::gpio::registers<ll::gpio::B>(), static_cast<std::uint32_t>(pin_a) };
 }
 
 template<> template<> inline void gpio::Port<gpio::B, api::traits::sync>::set_pin_descriptor<gpio::Descriptor<gpio::Mode::analog>>(
@@ -369,7 +381,7 @@ template<> [[nodiscard]] constexpr gpio::Port<gpio::C, api::traits::async>* gpio
 
 template<> template<> [[nodiscard]] constexpr gpio::Pad gpio::Port<gpio::C, api::traits::sync>::view<gpio::Pad>(gpio::C pin_a)
 {
-    return { ll::gpio::port<ll::gpio::C>(), static_cast<std::uint32_t>(pin_a) };
+    return { ll::gpio::registers<ll::gpio::C>(), static_cast<std::uint32_t>(pin_a) };
 }
 
 template<> template<> inline void gpio::Port<gpio::C, api::traits::sync>::set_pin_descriptor<gpio::Descriptor<gpio::Mode::analog>>(
@@ -433,7 +445,7 @@ template<> [[nodiscard]] constexpr gpio::Port<gpio::D, api::traits::async>* gpio
 
 template<> template<> [[nodiscard]] constexpr gpio::Pad gpio::Port<gpio::D, api::traits::sync>::view<gpio::Pad>(gpio::D pin_a)
 {
-    return { ll::gpio::port<ll::gpio::D>(), static_cast<std::uint32_t>(pin_a) };
+    return { ll::gpio::registers<ll::gpio::D>(), static_cast<std::uint32_t>(pin_a) };
 }
 
 template<> template<> inline void gpio::Port<gpio::D, api::traits::sync>::set_pin_descriptor<gpio::Descriptor<gpio::Mode::analog>>(
@@ -497,7 +509,7 @@ template<> [[nodiscard]] constexpr gpio::Port<gpio::F, api::traits::async>* gpio
 
 template<> template<> [[nodiscard]] constexpr gpio::Pad gpio::Port<gpio::F, api::traits::sync>::view<gpio::Pad>(gpio::F pin_a)
 {
-    return { ll::gpio::port<ll::gpio::F>(), static_cast<std::uint32_t>(pin_a) };
+    return { ll::gpio::registers<ll::gpio::F>(), static_cast<std::uint32_t>(pin_a) };
 }
 
 template<> template<> inline void gpio::Port<gpio::F, api::traits::sync>::set_pin_descriptor<gpio::Descriptor<gpio::Mode::analog>>(

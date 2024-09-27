@@ -96,43 +96,42 @@ void EXTI4_15_IRQHandler()
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
 using namespace xmcu;
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::out>& desc_a)
 {
-    p_port_a->ospeedr.set(ll::gpio::Ospeedr::mask << pin_a, static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
-    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->otyper.set(ll::gpio::Otyper::mask << pin_a, static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::output << pin_a);
+    bit::flag::set(&(p_port_a->ospeedr), ll::gpio::OSPEEDR::mask << pin_a, static_cast<ll::gpio::OSPEEDR::Flag>(desc_a.speed) << pin_a);
+    bit::flag::set(&(p_port_a->pupdr), ll::gpio::PUPDR::mask << pin_a, static_cast<ll::gpio::PUPDR::Flag>(desc_a.pull) << pin_a);
+    bit::flag::set(&(p_port_a->otyper), ll::gpio::OTYPER::mask << pin_a, static_cast<ll::gpio::OTYPER::Flag>(desc_a.type) << pin_a);
+    bit::flag::set(&(p_port_a->moder), ll::gpio::MODER::mask << pin_a, ll::gpio::MODER::output << pin_a);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::in>& desc_a)
 {
-    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::input << pin_a);
+    bit::flag::set(&(p_port_a->pupdr), ll::gpio::PUPDR::mask << pin_a, static_cast<ll::gpio::PUPDR::Flag>(desc_a.pull) << pin_a);
+    bit::flag::set(&(p_port_a->moder), ll::gpio::MODER::mask << pin_a, ll::gpio::MODER::input << pin_a);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
+void gpio::configure_pin(ll::gpio::Registers* p_port_a, std::uint32_t pin_a, const gpio::Descriptor<gpio::Mode::analog>& desc_a)
 {
-    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::analog << pin_a);
-
-    p_port_a->moder.get(gpio::A::_1);
+    bit::flag::set(&(p_port_a->pupdr), ll::gpio::PUPDR::mask << pin_a, static_cast<ll::gpio::PUPDR::Flag>(desc_a.pull) << pin_a);
+    bit::flag::set(&(p_port_a->moder), ll::gpio::MODER::mask << pin_a, ll::gpio::MODER::analog << pin_a);
 }
 
-void gpio::configure_pin(ll::gpio::Port* p_port_a,
+void gpio::configure_pin(ll::gpio::Registers* p_port_a,
                          std::uint32_t pin_a,
                          std::uint32_t function_a,
                          const gpio::Descriptor<gpio::Mode::alternate>& desc_a)
 {
-    p_port_a->ospeedr.set(ll::gpio::Ospeedr::mask << pin_a, static_cast<ll::gpio::Ospeedr::Flag>(desc_a.speed) << pin_a);
-    p_port_a->pupdr.set(ll::gpio::Pupdr::mask << pin_a, static_cast<ll::gpio::Pupdr::Flag>(desc_a.pull) << pin_a);
-    p_port_a->otyper.set(ll::gpio::Otyper::mask << pin_a, static_cast<ll::gpio::Otyper::Flag>(desc_a.type) << pin_a);
+    bit::flag::set(&(p_port_a->ospeedr), ll::gpio::OSPEEDR::mask << pin_a, static_cast<ll::gpio::OSPEEDR::Flag>(desc_a.speed) << pin_a);
+    bit::flag::set(&(p_port_a->pupdr), ll::gpio::PUPDR::mask << pin_a, static_cast<ll::gpio::PUPDR::Flag>(desc_a.pull) << pin_a);
+    bit::flag::set(&(p_port_a->otyper), ll::gpio::OTYPER::mask << pin_a, static_cast<ll::gpio::OTYPER::Flag>(desc_a.type) << pin_a);
 
     const std::uint32_t index = pin_a >> 3u;
     const std::uint32_t shift = pin_a - (index * 8u);
 
-    p_port_a->afr[index].set(ll::gpio::Afr::mask << shift, static_cast<ll::gpio::Afr::Flag>(function_a) << shift);
+    assert(various::countof(p_port_a->afr) > index);
 
-    p_port_a->moder.set(ll::gpio::Moder::mask << pin_a, ll::gpio::Moder::af << pin_a);
+    bit::flag::set(&(p_port_a->afr[index]), ll::gpio::AFR::mask << shift, static_cast<ll::gpio::AFR::Flag>(function_a) << shift);
+    bit::flag::set(&(p_port_a->moder), ll::gpio::MODER::mask << pin_a, ll::gpio::MODER::af << pin_a);
 }
 
 void gpio::async::enable(const IRQ_priority& priority_a)

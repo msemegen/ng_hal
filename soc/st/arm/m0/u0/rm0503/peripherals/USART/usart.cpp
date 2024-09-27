@@ -134,24 +134,25 @@ using namespace xmcu;
 
 void usart_isr_handler(usart::Transceiver<api::traits::async>* p_handler_a)
 {
-    const std::uint32_t isr = p_handler_a->isr;
-    const std::uint32_t cr1 = p_handler_a->cr1;
+    const ll::usart::ISR::Data isr = p_handler_a->isr;
+    const ll::usart::CR1::Data cr1 = p_handler_a->cr1;
 
     const usart::Error errors =
-        static_cast<usart::Error>(xmcu::bit::flag::get(isr, USART_ISR_FE | USART_ISR_NE | USART_ISR_ORE | USART_ISR_PE));
+        static_cast<usart::Error>(bit::flag::get(isr, ll::usart::ISR::fe | ll::usart::ISR::ne | ll::usart::ISR::ore | ll::usart::ISR::pe));
 
     if (usart::Error::none != errors)
     {
-        bit::flag::set(&(p_handler_a->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+        xmcu::bit::flag::set(&(p_handler_a->icr),
+                             ll::usart::ICR::fecf | ll::usart::ICR::necf | ll::usart::ICR::orecf | ll::usart::ICR::pecf);
     }
 
-    if (true == bit::flag::is(p_handler_a->cr1, USART_CR1_RXNEIE_RXFNEIE) &&
-        (true == bit::flag::is(p_handler_a->isr, USART_ISR_RXNE_RXFNE) || usart::Error::none != errors))
+    if (true == xmcu::bit::flag::is(cr1, ll::usart::CR1::rxneie) && true == xmcu::bit::flag::is(p_handler_a->isr, ll::usart::ISR::rxne) ||
+        usart::Error::none != errors)
     {
         usart::Transceiver<api::traits::async>::handler::on_receive(p_handler_a->rdr, errors, p_handler_a);
     }
 
-    if (true == bit::flag::is(p_handler_a->isr, USART_ISR_TXE_TXFNF) && true == bit::flag::is(p_handler_a->cr1, USART_CR1_TXEIE_TXFNFIE))
+    if (true == bit::flag::is(p_handler_a->isr, ll::usart::ISR::txe) && true == bit::flag::is(p_handler_a->cr1, ll::usart::CR1::txeie))
     {
         const std::uint32_t r = usart::Transceiver<api::traits::async>::handler::on_transmit(p_handler_a);
 
@@ -161,25 +162,25 @@ void usart_isr_handler(usart::Transceiver<api::traits::async>* p_handler_a)
         }
     }
 
-    if (true == bit::is_any(cr1, USART_CR1_IDLEIE | USART_CR1_TCIE | USART_CR1_CMIE) &&
-        (bit::is_any(isr, USART_ISR_IDLE | USART_ISR_TC | USART_ISR_CMF) || usart::Error::none != errors))
+    if (true == bit::is_any(cr1, ll::usart::CR1::idleie | ll::usart::CR1::tcie | ll::usart::CR1::cmie) &&
+        (bit::is_any(isr, ll::usart::ISR::idle | ll::usart::ISR::tc | ll::usart::ISR::cmf) || usart::Error::none != errors))
     {
         usart::Event events = usart::Event::none;
 
-        if (true == bit::flag::is(cr1, USART_CR1_IDLEIE) && true == bit::flag::is(isr, USART_ISR_IDLE))
+        if (true == bit::flag::is(cr1, ll::usart::CR1::idleie) && true == bit::flag::is(isr, ll::usart::ISR::idle))
         {
             events |= usart::Event::idle;
         }
-        if (true == bit::flag::is(cr1, USART_CR1_TCIE) && true == bit::flag::is(isr, USART_ISR_TC))
+        if (true == bit::flag::is(cr1, ll::usart::CR1::tcie) && true == bit::flag::is(isr, ll::usart::ISR::tc))
         {
             events |= usart::Event::transfer_complete;
         }
-        if (true == bit::flag::is(cr1, USART_CR1_CMIE) && true == bit::flag::is(isr, USART_ISR_CMF))
+        if (true == bit::flag::is(cr1, ll::usart::CR1::cmie) && true == bit::flag::is(isr, ll::usart::ISR::cmf))
         {
             events |= usart::Event::character_matched;
         }
 
-        bit::flag::set(&(p_handler_a->icr), USART_ICR_IDLECF | USART_ICR_TCCF | USART_ICR_CMCF);
+        bit::flag::set(&(p_handler_a->icr), ll::usart::ICR::idlecf | ll::usart::ICR::tccf | ll::usart::ICR::cmcf);
         usart::Transceiver<api::traits::async>::handler::on_event(events, errors, p_handler_a);
     }
 }
@@ -191,10 +192,10 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
     constexpr std::uint32_t brr_max = 0xFFFFu;
 #endif
 
-    this->cr1 = 0x0u;
-    this->cr2 = 0x0u;
-    this->cr3 = 0x0u;
-    this->presc = static_cast<std::uint32_t>(descriptor_a.prescaler);
+    this->cr1.zero();
+    this->cr2.zero();
+    this->cr3.zero();
+    this->presc = static_cast<ll::usart::PRESC::Data>(descriptor_a.prescaler);
 
     if (0x0u == (0xFFFFFFFFu & descriptor_a.baudrate))
     {
@@ -229,31 +230,34 @@ void usart::Peripheral::set_descriptor(const Descriptor& descriptor_a)
     }
 
     bit::flag::set(&(this->cr1),
-                   static_cast<std::uint32_t>(descriptor_a.fifo) | static_cast<std::uint32_t>(descriptor_a.oversampling) |
-                       static_cast<std::uint32_t>(descriptor_a.mute) | static_cast<std::uint32_t>(descriptor_a.frame.parity) |
-                       static_cast<std::uint32_t>(descriptor_a.frame.word_length));
+                   static_cast<ll::usart::CR1::Flag>(descriptor_a.fifo) | static_cast<ll::usart::CR1::Flag>(descriptor_a.oversampling) |
+                       static_cast<ll::usart::CR1::Flag>(descriptor_a.mute) | static_cast<ll::usart::CR1::Flag>(descriptor_a.frame.parity) |
+                       static_cast<ll::usart::CR1::Flag>(descriptor_a.frame.word_length));
+
     bit::flag::set(&(this->cr2),
-                   (static_cast<std::uint32_t>(descriptor_a.mute) & 0xFF) | static_cast<std::uint32_t>(descriptor_a.baudrate) |
-                       static_cast<std::uint32_t>(descriptor_a.frame.stop_bits) | static_cast<std::uint32_t>(descriptor_a.frame.msb_first) |
-                       static_cast<std::uint32_t>(descriptor_a.frame.inversion));
-    bit::flag::set(&(this->cr3), static_cast<std::uint32_t>(descriptor_a.sampling));
+                   static_cast<ll::usart::CR2::Flag>(descriptor_a.mute) |
+                       static_cast<ll::usart::CR2::Flag>(static_cast<std::uint64_t>(descriptor_a.baudrate)) |
+                       static_cast<ll::usart::CR2::Flag>(descriptor_a.frame.stop_bits) |
+                       static_cast<ll::usart::CR2::Flag>(descriptor_a.frame.msb_first) |
+                       static_cast<ll::usart::CR2::Flag>(descriptor_a.frame.inversion));
+    bit::flag::set(&(this->cr3), static_cast<ll::usart::CR3::Flag>(descriptor_a.sampling));
 }
 
 bool usart::Peripheral::enable(Mode mode_a, Stop_mode_activity stop_mode_activity, std::chrono::milliseconds timeout_a)
 {
-    bit::flag::set(&(this->cr1), USART_CR1_UESM, static_cast<std::uint32_t>(stop_mode_activity));
-    bit::flag::set(&(this->cr1), static_cast<std::uint32_t>(mode_a) | USART_CR1_UE);
-    bit::flag::set(&(this->icr), USART_ICR_TCCF | USART_ICR_IDLECF);
+    bit::flag::set(&(this->cr1), ll::usart::CR1::uesm, static_cast<ll::usart::CR1::Flag>(stop_mode_activity));
+    bit::flag::set(&(this->cr1), static_cast<ll::usart::CR1::Flag>(mode_a) | ll::usart::CR1::ue);
+    bit::flag::set(&(this->icr), ll::usart::ICR::tcbgtcf | ll::usart::ICR::idlecf);
 
     return bit::wait_for::all_set(this->isr,
-                                  (usart::Mode::rx == (mode_a & usart::Mode::rx) ? USART_ISR_REACK : 0x0u) |
-                                      (usart::Mode::tx == (mode_a & usart::Mode::tx) ? USART_ISR_TEACK : 0x0u),
+                                  (usart::Mode::rx == (mode_a & usart::Mode::rx) ? ll::usart::ISR::reack : ll::usart::ISR::none) |
+                                      (usart::Mode::tx == (mode_a & usart::Mode::tx) ? ll::usart::ISR::teack : ll::usart::ISR::none),
                                   timeout_a);
 }
 bool usart::Peripheral::disable(std::chrono::milliseconds timeout_a)
 {
-    bit::flag::clear(&(this->cr1), USART_CR1_TE | USART_CR1_RE | USART_CR1_UE | USART_CR1_UESM);
-    return bit::wait_for::all_cleared(this->isr, USART_ISR_REACK | USART_ISR_TEACK, timeout_a);
+    bit::flag::clear(&(this->cr1), ll::usart::CR1::te | ll::usart::CR1::re | ll::usart::CR1::ue | ll::usart::CR1::uesm);
+    return bit::wait_for::all_cleared(this->isr, ll::usart::ISR::reack | ll::usart::ISR::teack, timeout_a);
 }
 
 #if 1 == XMCU_ISR_CONTEXT
@@ -276,48 +280,48 @@ void usart::Transceiver<api::traits::async>::disable()
 
 void usart::Transceiver<api::traits::async>::receive_start()
 {
-    bit::flag::set(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE);
-    bit::flag::set(&(this->cr3), USART_CR3_EIE);
+    bit::flag::set(&(this->cr1), ll::usart::CR1::rxneie | ll::usart::CR1::peie);
+    bit::flag::set(&(this->cr3), ll::usart::CR3::eie);
 }
 void usart::Transceiver<api::traits::async>::receive_stop()
 {
-    bit::flag::clear(&(this->cr1), USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE);
-    bit::flag::clear(&(this->cr3), USART_CR3_EIE);
+    bit::flag::clear(&(this->cr1), ll::usart::CR1::rxneie | ll::usart::CR1::peie);
+    bit::flag::clear(&(this->cr3), ll::usart::CR3::eie);
 }
 
 void usart::Transceiver<api::traits::async>::transmit_start()
 {
-    bit::flag::set(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
+    bit::flag::set(&(this->cr1), ll::usart::CR1::txeie);
 }
 void usart::Transceiver<api::traits::async>::transmit_stop()
 {
-    bit::flag::clear(&(this->cr1), USART_CR1_TXEIE_TXFNFIE);
+    bit::flag::clear(&(this->cr1), ll::usart::CR1::txeie);
 }
 
 void usart::Transceiver<api::traits::async>::events_start(Event events_a)
 {
-    std::uint32_t enabled_events = 0x0u;
+    ll::usart::CR1::Flag enabled_events;
 
     if (Event::character_matched == (Event::character_matched & events_a))
     {
-        enabled_events |= USART_CR1_CMIE;
+        enabled_events |= ll::usart::CR1::cmie;
     }
     if (Event::idle == (Event::idle & events_a))
     {
-        enabled_events |= USART_CR1_IDLEIE;
+        enabled_events |= ll::usart::CR1::idleie;
     }
     if (Event::transfer_complete == (Event::transfer_complete & events_a))
     {
-        enabled_events |= USART_CR1_TCIE;
+        enabled_events |= ll::usart::CR1::tcie;
     }
 
-    bit::flag::set(&(this->cr1), enabled_events | USART_CR1_PEIE);
-    bit::flag::set(&(this->cr3), USART_CR3_EIE);
+    bit::flag::set(&(this->cr1), enabled_events | ll::usart::CR1::peie);
+    bit::flag::set(&(this->cr3), ll::usart::CR3::eie);
 }
 void usart::Transceiver<api::traits::async>::events_stop()
 {
-    bit::flag::clear(&(this->cr1), USART_CR1_IDLEIE | USART_CR1_CMIE | USART_CR1_TCIE | USART_CR1_PEIE);
-    bit::flag::clear(&(this->cr3), USART_CR3_EIE);
+    bit::flag::clear(&(this->cr1), ll::usart::CR1::idleie | ll::usart::CR1::cmie | ll::usart::CR1::tcie | ll::usart::CR1::peie);
+    bit::flag::clear(&(this->cr3), ll::usart::CR3::eie);
 }
 
 __WEAK void

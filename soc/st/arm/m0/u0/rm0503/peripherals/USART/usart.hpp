@@ -28,348 +28,9 @@
 #include <soc/st/arm/m0/u0/rm0503/oscillators/hsi16.hpp>
 #include <soc/st/arm/m0/u0/rm0503/oscillators/lse.hpp>
 #include <soc/st/arm/m0/u0/rm0503/peripherals/USART/base.hpp>
+#include <soc/st/arm/m0/u0/rm0503/peripherals/USART/usart_ll.hpp>
 
 namespace soc::st::arm::m0::u0::rm0503::peripherals {
-namespace ll {
-struct usart_clock : private xmcu::non_constructible
-{
-    enum class Stop_mode_activity
-    {
-        disable,
-        enable
-    };
-
-    template<usart_base::Id id_t, typename Source_t> static void enable(Stop_mode_activity stop_mode_a) = delete;
-    template<usart_base::Id id_t> static void disable() = delete;
-
-    template<usart_base::Id id_t> [[nodiscard]] static bool is_enabled() = delete;
-    template<usart_base::Id id_t, typename Source_t> [[nodiscard]] static bool is_source_selected() = delete;
-    template<usart_base::Id id_t> [[nodiscard]] static Stop_mode_activity get_stop_mode_activity() = delete;
-};
-
-struct usart : public usart_base
-{
-    using clock = usart_clock;
-
-    struct Peripheral : private xmcu::non_copyable
-    {
-        volatile std::uint32_t cr1;         // control register 1
-        volatile std::uint32_t cr2;         // control register 2
-        volatile std::uint32_t cr3;         // control register 3
-        volatile std::uint32_t brr;         // baud rate register
-        volatile std::uint32_t gtpr;        // guard time and prescaler register
-        volatile std::uint32_t rtor;        // receiver Time Out register
-        mutable volatile std::uint32_t rqr; // request register
-        volatile std::uint32_t isr;         // interrupt and status register
-        mutable volatile std::uint32_t icr; // interrupt flag Clear register
-        volatile std::uint32_t rdr;         // receive Data register
-        volatile std::uint32_t tdr;         // transmit Data register
-        volatile std::uint32_t presc;       // clock Prescaler register
-    };
-
-    template<usart::Id id_t> [[nodiscard]] constexpr static Peripheral* peripheral() = delete;
-};
-
-#if defined XMCU_USART1_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_1>()
-{
-    return reinterpret_cast<usart::Peripheral*>(USART1_BASE);
-}
-
-template<> inline void usart_clock::enable<usart_base::_1, oscillators::hsi16>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_1);
-    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, oscillators::hsi16>()
-{
-    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0) &&
-           true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_1, oscillators::lse>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
-    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, oscillators::lse>()
-{
-    return xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_1, clocks::pclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
-    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, clocks::pclk>()
-{
-    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0 | RCC_CCIPR_USART1SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_1, clocks::sysclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART1SEL, RCC_CCIPR_USART1SEL_0);
-    xmcu::bit::flag::set(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_1, clocks::sysclk>()
-{
-    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_0) &&
-           false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART1SEL_1);
-}
-template<> inline void usart_clock::disable<usart_base::_1>()
-{
-    xmcu::bit::flag::clear(&(RCC->APBSMENR2), RCC_APBSMENR2_USART1SMEN);
-    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART1SEL);
-    xmcu::bit::flag::clear(&(RCC->APBENR2), RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_1>()
-{
-    return xmcu::bit::flag::is(RCC->APBENR2, RCC_APBENR2_USART1EN);
-}
-template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_1>()
-{
-    return true == xmcu::bit::flag::is(RCC->APBSMENR2, RCC_APBSMENR2_USART1SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
-}
-#endif
-#if defined XMCU_USART2_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_2>()
-{
-    return reinterpret_cast<usart::Peripheral*>(USART2_BASE);
-}
-
-template<> inline void usart_clock::enable<usart_base::_2, oscillators::hsi16>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_1);
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, oscillators::hsi16>()
-{
-    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0) &&
-           true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_2, oscillators::lse>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, oscillators::lse>()
-{
-    return xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_2, clocks::pclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, clocks::pclk>()
-{
-    return false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0 | RCC_CCIPR_USART2SEL_1);
-}
-template<> inline void usart_clock::enable<usart_base::_2, clocks::sysclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->CCIPR), RCC_CCIPR_USART2SEL, RCC_CCIPR_USART2SEL_0);
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_2, clocks::sysclk>()
-{
-    return true == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_0) &&
-           false == xmcu::bit::flag::is(RCC->CCIPR, RCC_CCIPR_USART2SEL_1);
-}
-template<> inline void usart_clock::disable<usart_base::_2>()
-{
-    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART2SMEN);
-    xmcu::bit::flag::clear(&(RCC->CCIPR), RCC_CCIPR_USART2SEL);
-    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_2>()
-{
-    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART2EN);
-}
-template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_2>()
-{
-    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART2SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
-}
-#endif
-#if defined XMCU_USART3_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_3>()
-{
-    return reinterpret_cast<usart::Peripheral*>(USART3_BASE);
-}
-
-template<> inline void usart_clock::enable<usart_base::_3, clocks::pclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_3, clocks::pclk>()
-{
-    return true;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, oscillators::hsi16>()
-{
-    return false;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, oscillators::lse>()
-{
-    return false;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_3, clocks::sysclk>()
-{
-    return false;
-}
-template<> inline void usart_clock::disable<usart_base::_3>()
-{
-    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART3SMEN);
-    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART3EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_3>()
-{
-    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART3EN);
-}
-template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_3>()
-{
-    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART3SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
-}
-#endif
-#if defined XMCU_USART4_PRESENT
-template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<usart::_4>()
-{
-    return reinterpret_cast<usart::Peripheral*>(USART4_BASE);
-}
-
-template<> inline void usart_clock::enable<usart_base::_4, clocks::pclk>(Stop_mode_activity stop_mode_a)
-{
-    switch (stop_mode_a)
-    {
-        case Stop_mode_activity::disable:
-            xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
-            break;
-        case Stop_mode_activity::enable:
-            xmcu::bit::flag::set(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
-            break;
-    }
-
-    xmcu::bit::flag::set(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_source_selected<usart_base::_4, clocks::pclk>()
-{
-    return true;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, oscillators::hsi16>()
-{
-    return false;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, oscillators::lse>()
-{
-    return false;
-}
-template<> [[nodiscard]] inline constexpr bool usart_clock::is_source_selected<usart_base::_4, clocks::sysclk>()
-{
-    return false;
-}
-template<> inline void usart_clock::disable<usart_base::_4>()
-{
-    xmcu::bit::flag::clear(&(RCC->APBSMENR1), RCC_APBSMENR1_USART4SMEN);
-    xmcu::bit::flag::clear(&(RCC->APBENR1), RCC_APBENR1_USART4EN);
-}
-template<> [[nodiscard]] inline bool usart_clock::is_enabled<usart_base::_4>()
-{
-    return xmcu::bit::flag::is(RCC->APBENR1, RCC_APBENR1_USART4EN);
-}
-template<> [[nodiscard]] inline usart_clock::Stop_mode_activity usart_clock::get_stop_mode_activity<usart_base::_4>()
-{
-    return true == xmcu::bit::flag::is(RCC->APBSMENR1, RCC_APBSMENR1_USART4SMEN) ? Stop_mode_activity::enable : Stop_mode_activity::disable;
-}
-#endif
-} // namespace ll
-
 struct usart : public usart_base
 {
     using clock = ll::usart_clock;
@@ -379,97 +40,97 @@ struct usart : public usart_base
     enum class Error : std::uint32_t
     {
         none,
-        framing = USART_ISR_FE,
-        noise = USART_ISR_NE,
-        overrun = USART_ISR_ORE,
-        parity = USART_ISR_PE
+        framing = static_cast<std::uint32_t>(ll::usart::ISR::fe),
+        noise = static_cast<std::uint32_t>(ll::usart::ISR::ne),
+        overrun = static_cast<std::uint32_t>(ll::usart::ISR::ore),
+        parity = static_cast<std::uint32_t>(ll::usart::ISR::pe)
     };
     enum class Event : std::uint32_t
     {
         none,
-        idle = USART_ISR_IDLE,
-        transfer_complete = USART_ISR_TC,
-        character_matched = USART_ISR_CMF
+        idle = static_cast<std::uint32_t>(ll::usart::ISR::idle),
+        transfer_complete = static_cast<std::uint32_t>(ll::usart::ISR::tc),
+        character_matched = static_cast<std::uint32_t>(ll::usart::ISR::cmf)
     };
 
     enum class Mode : std::uint32_t
     {
-        tx = USART_CR1_TE,
-        rx = USART_CR1_RE
+        tx = static_cast<std::uint32_t>(ll::usart::CR1::te),
+        rx = static_cast<std::uint32_t>(ll::usart::CR1::re)
     };
     enum class Stop_mode_activity : std::uint32_t
     {
         disable,
-        enable = USART_CR1_UESM
+        enable = static_cast<std::uint32_t>(ll::usart::CR1::uesm)
     };
 
     enum class Fifo : std::uint32_t
     {
         disable = 0x0u,
-        enable = USART_CR1_FIFOEN
+        enable = static_cast<std::uint32_t>(ll::usart::CR1::fifoen)
     };
     enum class Oversampling : std::uint32_t
     {
         _16 = 0x0u,
-        _8 = USART_CR1_OVER8,
+        _8 = static_cast<std::uint32_t>(ll::usart::CR1::over8),
     };
     enum class Sampling : std::uint32_t
     {
         three_sample_bit = 0,
-        one_sample_bit = USART_CR3_ONEBIT,
+        one_sample_bit = static_cast<std::uint32_t>(ll::usart::CR3::onebit),
     };
     enum class Mute : std::uint32_t
     {
         disable = 0x0u,
-        wake_on_idle_line = USART_CR1_MME,
-        wake_on_address = USART_CR1_MME | USART_CR1_WAKE,
+        wake_on_idle_line = static_cast<std::uint32_t>(ll::usart::CR1::mme),
+        wake_on_address = static_cast<std::uint32_t>(ll::usart::CR1::mme | ll::usart::CR1::wake),
     };
     enum class Prescaler : std::uint32_t
     {
-        _1 = 0x0u,
-        _2 = 0x1u,
-        _4 = 0x2u,
-        _6 = 0x3u,
-        _8 = 0x4u,
-        _10 = 0x5u,
-        _12 = 0x6u,
-        _16 = 0x7u,
-        _32 = 0x8u,
-        _64 = 0x9u,
-        _128 = 0xAu,
-        _256 = 0xBu
+        _1 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_1 << ll::usart::PRESC::shift::presc),
+        _2 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_2 << ll::usart::PRESC::shift::presc),
+        _4 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_4 << ll::usart::PRESC::shift::presc),
+        _6 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_6 << ll::usart::PRESC::shift::presc),
+        _8 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_8 << ll::usart::PRESC::shift::presc),
+        _10 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_10 << ll::usart::PRESC::shift::presc),
+        _12 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_12 << ll::usart::PRESC::shift::presc),
+        _16 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_16 << ll::usart::PRESC::shift::presc),
+        _32 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_32 << ll::usart::PRESC::shift::presc),
+        _64 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_64 << ll::usart::PRESC::shift::presc),
+        _128 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_128 << ll::usart::PRESC::shift::presc),
+        _256 = static_cast<std::uint32_t>(ll::usart::PRESC::value::_256 << ll::usart::PRESC::shift::presc)
     };
 
     struct Frame
     {
         enum class Word_length : std::uint32_t
         {
-            _7_bit = USART_CR1_M1,
+            _7_bit = static_cast<std::uint32_t>(ll::usart::CR1::m1),
             _8_bit = 0x0u,
-            _9_bit = USART_CR1_M0,
+            _9_bit = static_cast<std::uint32_t>(ll::usart::CR1::m0),
         };
         enum class Parity : std::uint32_t
         {
             none = 0x0u,
-            even = USART_CR1_PCE,
-            odd = USART_CR1_PCE | USART_CR1_PS,
+            even = static_cast<std::uint32_t>(ll::usart::CR1::pce),
+            odd = static_cast<std::uint32_t>(ll::usart::CR1::pce | ll::usart::CR1::ps),
         };
         enum class Stop_bits : std::uint32_t
         {
-            _0_5 = USART_CR2_STOP_0,
-            _1 = 0x0u,
-            _1_5 = USART_CR2_STOP_0 | USART_CR2_STOP_1,
-            _2 = USART_CR2_STOP_1,
+            _0_5 = static_cast<std::uint32_t>(ll::usart::CR2::value::stop_0_5_bit << ll::usart::CR2::shift::stop),
+            _1 = static_cast<std::uint32_t>(ll::usart::CR2::value::stop_1_bit << ll::usart::CR2::shift::stop),
+            _1_5 = static_cast<std::uint32_t>(ll::usart::CR2::value::stop_1_5_bit << ll::usart::CR2::shift::stop),
+            _2 = static_cast<std::uint32_t>(ll::usart::CR2::value::stop_2_bit << ll::usart::CR2::shift::stop),
         };
         enum class MSB_first : std::uint32_t
         {
             disable = 0x0u,
-            enable = USART_CR2_MSBFIRST
+            enable = static_cast<std::uint32_t>(ll::usart::CR2::msbfirst)
         };
         enum class Inversion : std::uint32_t
         {
             disable = 0x0u,
-            enable = USART_CR2_DATAINV
+            enable = static_cast<std::uint32_t>(ll::usart::CR2::datainv)
         };
 
         Word_length word_length;
@@ -483,8 +144,10 @@ struct usart : public usart_base
     {
         enum class Auto : std::uint64_t
         {
-            _0x7f = USART_CR2_RTOEN | USART_CR2_ABRMODE_1,
-            _0x55 = USART_CR2_RTOEN | USART_CR2_ABRMODE_0 | USART_CR2_ABRMODE_1
+            _0x7f = static_cast<std::uint32_t>(ll::usart::CR2::roten |
+                                               (ll::usart::CR2::value::abrmode_0x7FF << ll::usart::CR2::shift::abrmode)),
+            _0x55 =
+                static_cast<std::uint32_t>(ll::usart::CR2::roten | (ll::usart::CR2::value::abrmode_0x55 << ll::usart::CR2::shift::abrmode))
         };
 
         Baudrate() {}
@@ -599,7 +262,7 @@ struct usart : public usart_base
         };
     };
 
-    class Peripheral : private ll::usart::Peripheral
+    class Peripheral : private ll::usart::Registers
     {
     public:
         void set_descriptor(const Descriptor& descriptor_a);
@@ -872,7 +535,7 @@ template<> [[nodiscard]] inline constexpr usart::Peripheral* usart::peripheral<u
 }
 #endif
 
-template<> class usart::Transceiver<api::traits::sync> : private ll::usart::Peripheral
+template<> class usart::Transceiver<api::traits::sync> : private ll::usart::Registers
 {
 public:
     std::pair<std::size_t, usart::Error> receive(std::span<std::uint8_t> out_a) const
@@ -936,59 +599,59 @@ public:
 private:
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a)
     {
-        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::teack));
 
         std::size_t sent = 0;
 
         while (sent < data_a.size())
         {
-            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_TXE_TXFNF))
+            if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::txe))
             {
                 this->tdr = data_a[sent];
                 sent++;
             }
         }
 
-        xmcu::bit::wait_for::all_set(this->isr, USART_ISR_TC);
-        xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
+        xmcu::bit::wait_for::all_set(this->isr, ll::usart::ISR::tc);
+        xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::tccf);
 
         return sent;
     }
     template<typename Word_t> std::size_t trasmit(std::span<const Word_t> data_a, std::chrono::milliseconds timeout_a)
     {
-        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_TEACK));
+        assert(true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::teack));
 
         std::size_t sent = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
 
         while (sent < data_a.size() && std::chrono::steady_clock::now() <= timeout)
         {
-            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_TXE_TXFNF))
+            if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::txe))
             {
                 this->tdr = data_a[sent];
                 sent++;
             }
         }
 
-        xmcu::bit::wait_for::all_set(this->isr, USART_ISR_TC);
-        xmcu::bit::flag::set(&(this->icr), USART_ICR_TCCF);
+        xmcu::bit::wait_for::all_set(this->isr, ll::usart::ISR::tc);
+        xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::tccf);
 
         return sent;
     }
 
     template<typename Word_t> std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a) const
     {
-        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_REACK));
+        assert(true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::reack));
 
         std::size_t received = 0;
-        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && Error::none == this->get_rx_error())
+        while (false == xmcu::bit::flag::is(this->isr, ll::usart::ISR::idle) && Error::none == this->get_rx_error())
         {
-            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
+            if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::rxne))
             {
-                if (true == xmcu::bit::flag::is(this->isr, USART_ISR_CMF) &&
-                    true == xmcu::bit::flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
+                if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::cmf) &&
+                    true == xmcu::bit::flag::is(this->cr1, ll::usart::CR1::mme | ll::usart::CR1::wake))
                 {
-                    xmcu::bit::flag::set(&(this->icr), USART_ICR_CMCF);
+                    xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::cmcf);
                 }
 
                 if (received < out_a.size())
@@ -997,18 +660,18 @@ private:
                 }
                 else
                 {
-                    xmcu::bit::flag::set(&(this->rqr), USART_RQR_RXFRQ);
+                    xmcu::bit::flag::set(&(this->rqr), ll::usart::RQR::rxfrq);
                 }
             }
         }
 
-        xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
+        xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::idlecf);
 
         const Error err = this->get_rx_error();
 
         if (Error::none != err)
         {
-            xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+            xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::fecf | ll::usart::ICR::necf | ll::usart::ICR::orecf | ll::usart::ICR::pecf);
 
             return { received, err };
         }
@@ -1018,20 +681,20 @@ private:
     template<typename Word_t>
     std::pair<std::size_t, usart::Error> receive(std::span<Word_t> out_a, std::chrono::milliseconds timeout_a) const
     {
-        assert(true == xmcu::bit::flag::is(this->isr, USART_ISR_REACK));
+        assert(true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::reack));
 
         std::size_t received = 0;
         const std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now() + timeout_a;
 
-        while (false == xmcu::bit::flag::is(this->isr, USART_ISR_IDLE) && Error::none == this->get_rx_error() &&
+        while (false == xmcu::bit::flag::is(this->isr, ll::usart::ISR::idle) && Error::none == this->get_rx_error() &&
                std::chrono::steady_clock::now() <= timeout)
         {
-            if (true == xmcu::bit::flag::is(this->isr, USART_ISR_RXNE_RXFNE))
+            if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::rxne))
             {
-                if (true == xmcu::bit::flag::is(this->isr, USART_ISR_CMF) &&
-                    true == xmcu::bit::flag::is(this->cr1, USART_CR1_MME | USART_CR1_WAKE))
+                if (true == xmcu::bit::flag::is(this->isr, ll::usart::ISR::cmf) &&
+                    true == xmcu::bit::flag::is(this->cr1, ll::usart::CR1::mme | ll::usart::CR1::wake))
                 {
-                    xmcu::bit::flag::set(&(this->icr), USART_ICR_CMCF);
+                    xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::cmcf);
                 }
 
                 if (received < out_a.size())
@@ -1040,18 +703,18 @@ private:
                 }
                 else
                 {
-                    xmcu::bit::flag::set(&(this->rqr), USART_RQR_RXFRQ);
+                    xmcu::bit::flag::set(&(this->rqr), ll::usart::RQR::rxfrq);
                 }
             }
         }
 
-        xmcu::bit::flag::set(&(this->icr), USART_ICR_IDLECF);
+        xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::idlecf);
 
         const Error err = this->get_rx_error();
 
         if (Error::none != err)
         {
-            xmcu::bit::flag::set(&(this->icr), USART_ICR_FECF | USART_ICR_NECF | USART_ICR_ORECF | USART_ICR_PECF);
+            xmcu::bit::flag::set(&(this->icr), ll::usart::ICR::fecf | ll::usart::ICR::necf | ll::usart::ICR::orecf | ll::usart::ICR::pecf);
 
             return { received, err };
         }
@@ -1061,10 +724,11 @@ private:
 
     Error get_rx_error() const
     {
-        return static_cast<Error>(xmcu::bit::flag::get(this->isr, USART_ISR_FE | USART_ISR_NE | USART_ISR_ORE | USART_ISR_PE));
+        return static_cast<Error>(
+            xmcu::bit::flag::get(this->isr, ll::usart::ISR::fe | ll::usart::ISR::ne | ll::usart::ISR::ore | ll::usart::ISR::pe));
     }
 };
-template<> class usart::Transceiver<api::traits::async> : private ll::usart::Peripheral
+template<> class usart::Transceiver<api::traits::async> : private ll::usart::Registers
 {
 public:
 #if 1 == XMCU_ISR_CONTEXT

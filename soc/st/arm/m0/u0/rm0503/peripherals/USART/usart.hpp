@@ -144,10 +144,10 @@ struct usart : public usart_base
     {
         enum class Auto : std::uint64_t
         {
-            _0x7f =
-                static_cast<std::uint32_t>(ll::usart::CR2::roten | (ll::usart::CR2::value::abrmod_0x7FF << ll::usart::CR2::shift::abrdmod)),
+            _0x7f = static_cast<std::uint32_t>(ll::usart::CR2::roten |
+                                               (ll::usart::CR2::value::abrmode_0x7FF << ll::usart::CR2::shift::abrmode)),
             _0x55 =
-                static_cast<std::uint32_t>(ll::usart::CR2::roten | (ll::usart::CR2::value::abrmod_0x55 << ll::usart::CR2::shift::abrdmod))
+                static_cast<std::uint32_t>(ll::usart::CR2::roten | (ll::usart::CR2::value::abrmode_0x55 << ll::usart::CR2::shift::abrmode))
         };
 
         Baudrate() {}

@@ -49,15 +49,22 @@ struct usart_cr1_descriptor : private xmcu::non_constructible
         rxffie = USART_CR1_RXFFIE
     };
 
-    enum class Shift_5_bit_value : std::uint32_t
+    enum class Shift_dedt_value : std::uint32_t
     {
         dedt = 16u,
+    };
+
+    enum class Shift_deat_value : std::uint32_t
+    {
         deat = 21u,
     };
 
-    enum class Mask_5_bit_value : std::uint32_t
+    enum class Mask_dedt_value : std::uint32_t
     {
         dedt = 0x1Fu,
+    };
+    enum class Mask_deat_value : std::uint32_t
+    {
         deat = 0x1Fu
     };
 };
@@ -88,9 +95,9 @@ struct usart_cr2_descriptor : private xmcu::non_constructible
     {
         stop = 12u
     };
-    enum class Shift_abrmod_value : std::uint32_t
+    enum class Shift_abrmode_value : std::uint32_t
     {
-        abrdmod = 21u
+        abrmode = 21u
     };
     enum class Shift_add_value : std::uint32_t
     {
@@ -104,25 +111,25 @@ struct usart_cr2_descriptor : private xmcu::non_constructible
         stop_2_bit = 0x2u,
         stop_1_5_bit = 0x3u
     };
-    enum class Value_abrmod : std::uint32_t
+    enum class Value_abrmode : std::uint32_t
     {
-        abrmod_start_bit = 0x0u,
-        abrmod_falling_edge = 0x1u,
-        abrmod_0x7FF = 0x2u,
-        abrmod_0x55 = 0x3u
+        abrmode_start_bit = 0x0u,
+        abrmode_falling_edge = 0x1u,
+        abrmode_0x7FF = 0x2u,
+        abrmode_0x55 = 0x3u
     };
 
-    enum class Mask_abrmod : std::uint32_t
+    enum class Mask_abrmode : std::uint32_t
     {
-        abrmod_mask = 0x3u
+        abrmode = 0x3u
     };
     enum class Mask_stop : std::uint32_t
     {
-        stop_mask = 0x3u
+        stop = 0x3u
     };
     enum class Mask_add : std::uint32_t
     {
-        add_mask = 0xFFu
+        add = 0xFFu
     };
 };
 struct usart_cr3_descriptor : private xmcu::non_constructible
@@ -175,7 +182,7 @@ struct usart_cr3_descriptor : private xmcu::non_constructible
         start_bit = 0x2u,
         rxne = 0x3u
     };
-    enum class Value_txftcfg_rxftcfg_value : std::uint32_t
+    enum class Value_txrxftcfg : std::uint32_t
     {
         _1_8 = 0x0u,
         _1_4,
@@ -207,10 +214,23 @@ struct usart_brr_descriptor : private xmcu::non_constructible
 };
 struct usart_gtpr_descriptor : private xmcu::non_constructible
 {
-    enum class Shift_psc_gt : std::uint32_t
+    enum class Shift_psc : std::uint32_t
     {
         psc = 0u,
+    };
+    enum class Shift_gt : std::uint32_t
+    {
         gt = 8u
+    };
+
+    enum class Mask_gt : std::uint32_t
+    {
+        gt = 0xFFu
+    };
+
+    enum class Mask_psc : std::uint32_t
+    {
+        psc = 0xFFu
     };
 };
 struct usart_rtor_descriptor : private xmcu::non_constructible
@@ -222,6 +242,15 @@ struct usart_rtor_descriptor : private xmcu::non_constructible
     enum class Shift_blen : std::uint32_t
     {
         blen = 24u
+    };
+
+    enum class Mask_rto : std::uint32_t
+    {
+        rto = 0xFFFFFF
+    };
+    enum class Mask_blen : std::uint32_t
+    {
+        blen = 0xFF
     };
 };
 struct usart_rqr_descriptor : private xmcu::non_constructible
@@ -439,11 +468,19 @@ public:
 
         struct mask : private xmcu::non_constructible
         {
-            using enum usart_cr1_descriptor::Mask_5_bit_value;
+            using DEAT = usart_cr1_descriptor::Mask_deat_value;
+            using DEDT = usart_cr1_descriptor::Mask_dedt_value;
+
+            using enum usart_cr1_descriptor::Mask_deat_value;
+            using enum usart_cr1_descriptor::Mask_dedt_value;
         };
         struct shift : private xmcu::non_constructible
         {
-            using enum usart_cr1_descriptor::Shift_5_bit_value;
+            using DEAT = usart_cr1_descriptor::Shift_deat_value;
+            using DEDT = usart_cr1_descriptor::Shift_dedt_value;
+
+            using enum usart_cr1_descriptor::Shift_deat_value;
+            using enum usart_cr1_descriptor::Shift_dedt_value;
         };
 
         using Data = Reg_wrc<usart_cr1_descriptor>::Data;
@@ -471,21 +508,32 @@ public:
 
         struct mask : private xmcu::non_constructible
         {
-            using enum usart_cr2_descriptor::Mask_abrmod;
+            using ABRMODE = usart_cr2_descriptor::Mask_abrmode;
+            using ADD = usart_cr2_descriptor::Mask_add;
+            using STOP = usart_cr2_descriptor::Mask_stop;
+
+            using enum usart_cr2_descriptor::Mask_abrmode;
             using enum usart_cr2_descriptor::Mask_add;
             using enum usart_cr2_descriptor::Mask_stop;
         };
 
         struct shift : private xmcu::non_constructible
         {
-            using enum usart_cr2_descriptor::Shift_abrmod_value;
+            using ABRMODE = usart_cr2_descriptor::Shift_abrmode_value;
+            using ADD = usart_cr2_descriptor::Shift_add_value;
+            using STOP = usart_cr2_descriptor::Shift_stop_value;
+
+            using enum usart_cr2_descriptor::Shift_abrmode_value;
             using enum usart_cr2_descriptor::Shift_add_value;
             using enum usart_cr2_descriptor::Shift_stop_value;
         };
 
         struct value : private xmcu::non_constructible
         {
-            using enum usart_cr2_descriptor::Value_abrmod;
+            using ABRMODE = usart_cr2_descriptor::Value_abrmode;
+            using STOP = usart_cr2_descriptor::Value_stop;
+
+            using enum usart_cr2_descriptor::Value_abrmode;
             using enum usart_cr2_descriptor::Value_stop;
         };
 
@@ -514,6 +562,11 @@ public:
 
         struct mask : private xmcu::non_constructible
         {
+            using RXFTCFG = usart_cr3_descriptor::Mask_rxftcfg;
+            using SCARCNT = usart_cr3_descriptor::Mask_scarcnt;
+            using TXFTCFG = usart_cr3_descriptor::Mask_txftcfg;
+            using WUS = usart_cr3_descriptor::Mask_wus;
+
             using enum usart_cr3_descriptor::Mask_rxftcfg;
             using enum usart_cr3_descriptor::Mask_scarcnt;
             using enum usart_cr3_descriptor::Mask_txftcfg;
@@ -522,6 +575,11 @@ public:
 
         struct shift : private xmcu::non_constructible
         {
+            using RXFTCFG = usart_cr3_descriptor::Shift_rxftcfg_value;
+            using SCARCNT = usart_cr3_descriptor::Shift_scarcnt_value;
+            using TXFTCFG = usart_cr3_descriptor::Shift_txftcfg_value;
+            using WUS = usart_cr3_descriptor::Shift_wus_value;
+
             using enum usart_cr3_descriptor::Shift_rxftcfg_value;
             using enum usart_cr3_descriptor::Shift_scarcnt_value;
             using enum usart_cr3_descriptor::Shift_txftcfg_value;
@@ -530,7 +588,11 @@ public:
 
         struct value : private xmcu::non_constructible
         {
-            using enum usart_cr3_descriptor::Value_txftcfg_rxftcfg_value;
+            using RXFTCFG = usart_cr3_descriptor::Value_txrxftcfg;
+            using TXFTCFG = usart_cr3_descriptor::Value_txrxftcfg;
+            using WUS = usart_cr3_descriptor::Value_wus;
+
+            using enum usart_cr3_descriptor::Value_txrxftcfg;
             using enum usart_cr3_descriptor::Value_wus;
         };
 
@@ -566,7 +628,20 @@ public:
 
         struct shift : private xmcu::non_constructible
         {
-            using enum usart_gtpr_descriptor::Shift_psc_gt;
+            using GT = usart_gtpr_descriptor::Shift_gt;
+            using PSC = usart_gtpr_descriptor::Shift_psc;
+
+            using enum usart_gtpr_descriptor::Shift_gt;
+            using enum usart_gtpr_descriptor::Shift_psc;
+        };
+
+        struct mask
+        {
+            using GT = usart_gtpr_descriptor::Mask_gt;
+            using PSC = usart_gtpr_descriptor::Mask_psc;
+
+            using enum usart_gtpr_descriptor::Mask_gt;
+            using enum usart_gtpr_descriptor::Mask_psc;
         };
 
         GTPR(const volatile GTPR& other_a)
@@ -584,8 +659,20 @@ public:
     {
         struct shift : private xmcu::non_constructible
         {
+            using BLEN = usart_rtor_descriptor::Shift_blen;
+            using RTO = usart_rtor_descriptor::Shift_rto;
+
             using enum usart_rtor_descriptor::Shift_blen;
             using enum usart_rtor_descriptor::Shift_rto;
+        };
+
+        struct mask : private xmcu::non_constructible
+        {
+            using BLEN = usart_rtor_descriptor::Mask_blen;
+            using RTO = usart_rtor_descriptor::Mask_rto;
+
+            using enum usart_rtor_descriptor::Mask_blen;
+            using enum usart_rtor_descriptor::Mask_rto;
         };
 
         using Data = Reg_wrc<usart_rtor_descriptor>::Data;
@@ -687,16 +774,19 @@ public:
     {
         struct mask : private xmcu::non_constructible
         {
+            using PRESCALER = usart_presc_descriptor::Mask;
             using enum usart_presc_descriptor::Mask;
         };
 
         struct shift : private xmcu::non_constructible
         {
+            using PRESCALER = usart_presc_descriptor::Shift_value;
             using enum usart_presc_descriptor::Shift_value;
         };
 
         struct value : private xmcu::non_constructible
         {
+            using PRESCALER = usart_presc_descriptor::Value;
             using enum usart_presc_descriptor::Value;
         };
 
@@ -1105,13 +1195,29 @@ constexpr void operator&=(usart::CR1::Data& left_a, usart::CR1::Data right_a)
 {
     reinterpret_cast<std::uint32_t&>(left_a) &= static_cast<std::uint32_t>(right_a);
 }
-constexpr usart::CR1::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x1Fu> left_a, usart_cr1_descriptor::Shift_5_bit_value right_a)
+constexpr usart::CR1::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x1Fu> left_a, usart::CR1::shift::DEAT right_a)
 {
     return static_cast<usart::CR1::Data>(left_a << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR1::Data operator<<(usart_cr1_descriptor::Mask_5_bit_value left_a, usart_cr1_descriptor::Shift_5_bit_value right_a)
+constexpr usart::CR1::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x1Fu> left_a, usart::CR1::shift::DEDT right_a)
+{
+    return static_cast<usart::CR1::Data>(left_a << static_cast<std::uint32_t>(right_a));
+}
+constexpr usart::CR1::Data operator<<(usart::CR1::mask::DEAT left_a, usart::CR1::shift::DEAT right_a)
 {
     return static_cast<usart::CR1::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
+}
+constexpr usart::CR1::Data operator<<(usart::CR1::mask::DEDT left_a, usart::CR1::shift::DEDT right_a)
+{
+    return static_cast<usart::CR1::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
+}
+constexpr std::uint32_t operator>>(usart::CR1::Data left_a, usart::CR1::shift::DEAT right_a)
+{
+    return static_cast<std::uint32_t>(left_a) >> (static_cast<std::uint32_t>(right_a) & 0x1F);
+}
+constexpr std::uint32_t operator>>(usart::CR1::Data left_a, usart::CR1::shift::DEDT right_a)
+{
+    return static_cast<std::uint32_t>(left_a) >> (static_cast<std::uint32_t>(right_a) & 0x1F);
 }
 
 // CR2
@@ -1187,29 +1293,39 @@ constexpr void operator&=(usart::CR2::Data& left_a, usart::CR2::Data right_a)
 {
     reinterpret_cast<std::uint32_t&>(left_a) &= static_cast<std::uint32_t>(right_a);
 }
-constexpr usart::CR2::Data operator<<(usart_cr2_descriptor::Value_abrmod left_a, usart_cr2_descriptor::Shift_abrmod_value right_a)
+constexpr usart::CR2::Data operator<<(usart::CR2::value::ABRMODE left_a, usart::CR2::shift::ABRMODE right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR2::Data operator<<(usart_cr2_descriptor::Value_stop left_a, usart_cr2_descriptor::Shift_stop_value right_a)
+constexpr usart::CR2::Data operator<<(usart::CR2::value::STOP left_a, usart::CR2::shift::STOP right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR2::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x1Fu> left_a, usart_cr2_descriptor::Shift_add_value right_a)
+constexpr usart::CR2::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x1Fu> left_a, usart::CR2::shift::ADD right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR2::Data operator<<(usart_cr2_descriptor::Mask_abrmod left_a, usart_cr2_descriptor::Shift_abrmod_value right_a)
+constexpr usart::CR2::Data operator<<(usart::CR2::mask::ABRMODE left_a, usart::CR2::shift::ABRMODE right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR2::Data operator<<(usart_cr2_descriptor::Mask_add left_a, usart_cr2_descriptor::Shift_abrmod_value right_a)
+constexpr usart::CR2::Data operator<<(usart::CR2::mask::ADD left_a, usart::CR2::shift::ABRMODE right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
 }
-constexpr usart::CR2::Data operator<<(usart_cr2_descriptor::Mask_stop left_a, usart_cr2_descriptor::Shift_abrmod_value right_a)
+constexpr usart::CR2::Data operator<<(usart::CR2::mask::STOP left_a, usart::CR2::shift::ABRMODE right_a)
 {
     return static_cast<usart::CR2::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(right_a));
+}
+constexpr usart::CR2::value::ABRMODE operator>>(usart::CR2::Data left_a, usart::CR2::shift::ABRMODE right_a)
+{
+    return static_cast<usart::CR2::value::ABRMODE>((static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(right_a)) &
+                                                   static_cast<std::uint32_t>(usart::CR2::mask::abrmode));
+}
+constexpr usart::CR2::value::STOP operator>>(usart::CR2::Data left_a, usart::CR2::shift::STOP right_a)
+{
+    return static_cast<usart::CR2::value::STOP>((static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(right_a)) &
+                                                static_cast<std::uint32_t>(usart::CR2::mask::abrmode));
 }
 
 // CR3
@@ -1285,39 +1401,57 @@ constexpr void operator&=(usart::CR3::Data& left_a, usart::CR3::Data right_a)
 {
     reinterpret_cast<std::uint32_t&>(left_a) &= static_cast<std::uint32_t>(right_a);
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Value_txftcfg_rxftcfg_value value_a,
-                                      usart_cr3_descriptor::Shift_rxftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::value::RXFTCFG left_a, usart::CR3::shift::RXFTCFG shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Value_txftcfg_rxftcfg_value value_a,
-                                      usart_cr3_descriptor::Shift_txftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::value::TXFTCFG left_a, usart::CR3::shift::TXFTCFG shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Value_wus value_a, usart_cr3_descriptor::Shift_wus_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::value::WUS left_a, usart::CR3::shift::WUS shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x7u> value_a, usart_cr3_descriptor::Shift_scarcnt_value shift_a)
+constexpr usart::CR3::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0x7u> left_a, usart::CR3::shift::SCARCNT shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Mask_rxftcfg value_a, usart_cr3_descriptor::Shift_rxftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::mask::RXFTCFG left_a, usart::CR3::shift::RXFTCFG shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Mask_scarcnt value_a, usart_cr3_descriptor::Shift_rxftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::mask::SCARCNT left_a, usart::CR3::shift::SCARCNT shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Mask_txftcfg value_a, usart_cr3_descriptor::Shift_rxftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::mask::TXFTCFG left_a, usart::CR3::shift::TXFTCFG shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::CR3::Data operator<<(usart_cr3_descriptor::Mask_wus value_a, usart_cr3_descriptor::Shift_rxftcfg_value shift_a)
+constexpr usart::CR3::Data operator<<(usart::CR3::mask::WUS left_a, usart::CR3::shift::WUS shift_a)
 {
-    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+    return static_cast<usart::CR3::Data>(static_cast<std::uint32_t>(left_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr usart::CR3::value::RXFTCFG operator>>(usart::CR3::Data left_a, usart::CR3::shift::RXFTCFG shift_a)
+{
+    return static_cast<usart::CR3::value::RXFTCFG>((static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) &
+                                                   static_cast<std::uint32_t>(usart::CR3::mask::rxftcfg));
+}
+constexpr usart::CR3::value::TXFTCFG operator>>(usart::CR3::Data left_a, usart::CR3::shift::TXFTCFG shift_a)
+{
+    return static_cast<usart::CR3::value::TXFTCFG>((static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) &
+                                                   static_cast<std::uint32_t>(usart::CR3::mask::txftcfg));
+}
+constexpr usart::CR3::value::WUS operator>>(usart::CR3::Data left_a, usart::CR3::shift::WUS shift_a)
+{
+    return static_cast<usart::CR3::value::WUS>((static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) &
+                                               static_cast<std::uint32_t>(usart::CR3::mask::wus));
+}
+constexpr std::uint32_t operator>>(usart::CR3::Data left_a, usart::CR3::shift::SCARCNT shift_a)
+{
+    return (static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) &
+           static_cast<std::uint32_t>(usart::CR3::mask::scarcnt);
 }
 
 // GTPR
@@ -1341,9 +1475,21 @@ constexpr void operator&=(usart::GTPR::Data& left_a, usart::GTPR::Data right_a)
 {
     reinterpret_cast<std::uint32_t&>(left_a) &= static_cast<std::uint32_t>(right_a);
 }
-constexpr usart::GTPR::Data operator<<(xmcu::Limited<std::uint32_t, 0x1u, 0xFFu> value_a, usart_gtpr_descriptor::Shift_psc_gt shift_a)
+constexpr usart::GTPR::Data operator<<(xmcu::Limited<std::uint32_t, 0x1u, 0xFFu> value_a, usart::GTPR::shift::GT shift_a)
 {
     return static_cast<usart::GTPR::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr usart::GTPR::Data operator<<(xmcu::Limited<std::uint32_t, 0x1u, 0xFFu> value_a, usart::GTPR::shift::PSC shift_a)
+{
+    return static_cast<usart::GTPR::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr std::uint32_t operator>>(usart::GTPR::Data left_a, usart::GTPR::shift::GT shift_a)
+{
+    return (static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) & static_cast<std::uint32_t>(usart::GTPR::mask::gt);
+}
+constexpr std::uint32_t operator>>(usart::GTPR::Data left_a, usart::GTPR::shift::PSC shift_a)
+{
+    return (static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(shift_a)) & static_cast<std::uint32_t>(usart::GTPR::mask::psc);
 }
 
 // RTOR
@@ -1367,13 +1513,30 @@ constexpr void operator&=(usart::RTOR::Data& left_a, usart::RTOR::Data right_a)
 {
     reinterpret_cast<std::uint32_t&>(left_a) &= static_cast<std::uint32_t>(right_a);
 }
-constexpr usart::RTOR::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0xFFFFFFu> value_a, usart_rtor_descriptor::Shift_rto)
+constexpr usart::RTOR::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0xFFFFFFu> value_a, usart::RTOR::shift::RTO shift_a)
 {
-    return static_cast<usart::RTOR::Data>(static_cast<std::uint32_t>(value_a));
+    return static_cast<usart::RTOR::Data>(value_a << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::RTOR::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0xFFu> value_a, usart_rtor_descriptor::Shift_blen shift_a)
+constexpr usart::RTOR::Data operator<<(xmcu::Limited<std::uint32_t, 0x0u, 0xFFu> value_a, usart::RTOR::shift::BLEN shift_a)
+{
+    return static_cast<usart::RTOR::Data>(value_a << static_cast<std::uint32_t>(shift_a));
+}
+constexpr usart::RTOR::Data operator<<(usart::RTOR::mask::RTO value_a, usart::RTOR::shift::RTO shift_a)
 {
     return static_cast<usart::RTOR::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr usart::RTOR::Data operator<<(usart::RTOR::mask::BLEN value_a, usart::RTOR::shift::BLEN shift_a)
+{
+    return static_cast<usart::RTOR::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr std::uint32_t operator>>(usart::RTOR::Data left_a, usart::RTOR::shift::RTO right_a)
+{
+    return (static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(right_a)) & static_cast<std::uint32_t>(usart::RTOR::mask::rto);
+}
+constexpr std::uint32_t operator>>(usart::RTOR::Data left_a, usart::RTOR::shift::BLEN right_a)
+{
+    return (static_cast<std::uint32_t>(left_a) >> static_cast<std::uint32_t>(right_a)) &
+           static_cast<std::uint32_t>(usart::RTOR::mask::blen);
 }
 
 // RQR
@@ -1591,12 +1754,17 @@ constexpr void operator&=(usart::ICR::Data& left_a, usart::ICR::Data right_a)
 }
 
 // PRESC
-constexpr usart::PRESC::Data operator<<(usart_presc_descriptor::Mask value_a, usart_presc_descriptor::Shift_value shift_a)
+constexpr usart::PRESC::Data operator<<(usart::PRESC::mask::PRESCALER value_a, usart::PRESC::shift::PRESCALER shift_a)
 {
     return static_cast<usart::PRESC::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
 }
-constexpr usart::PRESC::Data operator<<(usart_presc_descriptor::Value value_a, usart_presc_descriptor::Shift_value shift_a)
+constexpr usart::PRESC::Data operator<<(usart::PRESC::value::PRESCALER value_a, usart::PRESC::shift::PRESCALER shift_a)
 {
     return static_cast<usart::PRESC::Data>(static_cast<std::uint32_t>(value_a) << static_cast<std::uint32_t>(shift_a));
+}
+constexpr usart::PRESC::value::PRESCALER operator>>(usart::PRESC::Data value_a, usart::PRESC::shift::PRESCALER shift_a)
+{
+    return static_cast<usart::PRESC::value::PRESCALER>((static_cast<std::uint32_t>(value_a) >> static_cast<std::uint32_t>(shift_a) &
+                                                        static_cast<std::uint32_t>(usart::PRESC::mask::presc)));
 }
 } // namespace soc::st::arm::m0::u0::rm0503::peripherals::ll

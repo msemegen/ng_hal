@@ -453,11 +453,11 @@ constexpr bool operator==(gpio::MODER::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::MODER::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::MODER::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::MODER::Data operator<<(gpio::MODER::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -508,11 +508,11 @@ constexpr bool operator==(gpio::OTYPER::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::OTYPER::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::OTYPER::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::OTYPER::Data operator<<(gpio::OTYPER::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -563,11 +563,11 @@ constexpr bool operator==(gpio::OSPEEDR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::OSPEEDR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::OSPEEDR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::OSPEEDR::Data operator<<(gpio::OSPEEDR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -618,11 +618,11 @@ constexpr bool operator==(gpio::PUPDR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::PUPDR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::PUPDR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::PUPDR::Data operator<<(gpio::PUPDR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -673,11 +673,11 @@ constexpr bool operator==(gpio::IDR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::IDR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::IDR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::IDR::Data operator<<(gpio::IDR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -723,11 +723,11 @@ constexpr bool operator==(gpio::ODR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::ODR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::ODR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::ODR::Data operator<<(gpio::ODR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -773,11 +773,11 @@ constexpr bool operator==(gpio::BSRR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::BSRR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::BSRR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::BSRR::Data operator<<(gpio::BSRR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -872,11 +872,11 @@ constexpr bool operator==(gpio::AFR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::AFR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::AFR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::AFR::Data operator<<(gpio::AFR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
@@ -927,11 +927,11 @@ constexpr bool operator==(gpio::BRR::Data left_a, std::uint32_t right_a)
 }
 constexpr bool operator!=(std::uint32_t left_a, gpio::BRR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::BRR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
 constexpr gpio::BRR::Data operator<<(gpio::BRR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {

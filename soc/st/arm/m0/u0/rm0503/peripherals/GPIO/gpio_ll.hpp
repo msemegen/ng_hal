@@ -813,14 +813,23 @@ constexpr bool operator==(gpio::LCKR::Data left_a, std::uint32_t right_a)
 {
     return static_cast<std::uint32_t>(left_a) == right_a;
 }
+constexpr bool operator==(gpio::LCKR::Data left_a, gpio::LCKR::Flag right_a)
+{
+    return static_cast<std::uint32_t>(left_a) == static_cast<std::uint32_t>(right_a);
+}
 constexpr bool operator!=(std::uint32_t left_a, gpio::LCKR::Data right_a)
 {
-    return left_a == static_cast<std::uint32_t>(right_a);
+    return false == (left_a == right_a);
 }
 constexpr bool operator!=(gpio::LCKR::Data left_a, std::uint32_t right_a)
 {
-    return static_cast<std::uint32_t>(left_a) == right_a;
+    return false == (left_a == right_a);
 }
+constexpr bool operator!=(gpio::LCKR::Data left_a, gpio::LCKR::Flag right_a)
+{
+    return false == (left_a == right_a);
+}
+
 constexpr gpio::LCKR::Data operator<<(gpio::LCKR::Flag left_a, xmcu::Limited<std::uint32_t, 0u, 15u> pin_a)
 {
     return static_cast<gpio::LCKR::Data>(static_cast<std::uint32_t>(left_a) << (pin_a * gpio_lckr_descriptor::shift_multiplier));

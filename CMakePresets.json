@@ -1,0 +1,84 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "stm32u083rct6 - release XMCU_NOSTDLIB",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}\\out\\build\\stm32u083rct6 - release XMCU_NOSTDLIB",
+      "toolchainFile": "C:/ng_hal/arm-none-eabi-gcc.cmake",
+      "cacheVariables": {
+        "STM32_MODEL": "STM32U083RCT6U",
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}\\out\\install\\stm32u083rct6 - release XMCU_NOSTDLIB",
+        "XMCU_NOSTDLIB": "1",
+        "XMCU_ISR_CONTEXT": "0"
+
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "linux-gcc-arm"
+        }
+      }
+    },
+    {
+      "name": "stm32u083rct6 - release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}\\out\\build\\stm32u083rct6 - release",
+      "toolchainFile": "C:/ng_hal/arm-none-eabi-gcc.cmake",
+      "cacheVariables": {
+        "STM32_MODEL": "STM32U083RCT6U",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}\\out\\install\\stm32u083rct6 - release",
+        "CMAKE_BUILD_TYPE": "Release",
+        "XMCU_NOSTDLIB": "0",
+        "XMCU_ISR_CONTEXT": "1"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "linux-gcc-arm"
+        }
+      }
+    },
+    {
+      "name": "stm32u083rct6 - debug XMCU_NOSTDLIB",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}\\out\\build\\stm32u083rct6 - debug XMCU_NOSTDLIB",
+      "toolchainFile": "C:/ng_hal/arm-none-eabi-gcc.cmake",
+      "cacheVariables": {
+        "STM32_MODEL": "STM32U083RCT6U",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}\\out\\install\\stm32u083rct6 - debug XMCU_NOSTDLIB",
+        "XMCU_NOSTDLIB": "1",
+        "XMCU_ISR_CONTEXT": "0"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "linux-gcc-arm"
+        }
+      }
+    },
+    {
+      "name": "stm32u083rct6 - debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}\\out\\build\\stm32u083rct6 - debug",
+      "toolchainFile": "C:/ng_hal/arm-none-eabi-gcc.cmake",
+      "cacheVariables": {
+        "STM32_MODEL": "STM32U083RCT6U",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}\\out\\install\\stm32u083rct6 - debug XMCU_NOSTDLIB",
+        "XMCU_NOSTDLIB": "0",
+        "XMCU_ISR_CONTEXT": "0"
+
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "linux-gcc-arm"
+        }
+      }
+    }
+  ]
+}
